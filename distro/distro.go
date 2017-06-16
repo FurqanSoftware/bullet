@@ -3,6 +3,7 @@ package distro
 import (
 	"errors"
 
+	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/FurqanSoftware/bullet/ssh"
 )
 
@@ -12,8 +13,16 @@ type Distro interface {
 	InstallDocker() error
 
 	MkdirAll(name string) error
+	Remove(name string) error
+	Symlink(oldname, newname string) error
 
 	ExtractTar(name, dir string) error
+
+	Enable(proc spec.Process) error
+	Disable(proc spec.Process) error
+	Start(proc spec.Process) error
+	Stop(proc spec.Process) error
+	Restart(proc spec.Process) error
 
 	Detect() (bool, error)
 }

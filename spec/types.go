@@ -15,6 +15,7 @@ type Application struct {
 
 type Build struct {
 	Script string
+	Image  string
 }
 
 type Package struct {

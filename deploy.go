@@ -40,7 +40,7 @@ func Deploy(nodes []Node, spec *spec.Spec, options DeployOptions) error {
 			return err
 		}
 
-		log.Printf("Uploading tarball %s", n.Addr())
+		log.Print("Uploading tarball")
 		tarPath := fmt.Sprintf("/tmp/%s.tar", rel.Name)
 		err = uploadTarball(c, tarPath, rel.Tarball)
 		if err != nil {
@@ -51,10 +51,34 @@ func Deploy(nodes []Node, spec *spec.Spec, options DeployOptions) error {
 		if err != nil {
 			return err
 		}
-		err = d.ExtractTar(tarPath, fmt.Sprintf("/opt/bullet/%s/releases/%s", spec.Application.Identifier, rel.Name))
+
+		log.Print("Extracting tarball")
+		relDir := fmt.Sprintf("/opt/%s/releases/%s", spec.Application.Identifier, rel.Name)
+		err = d.ExtractTar(tarPath, relDir)
 		if err != nil {
 			return err
 		}
+		log.Print("Removing tarball")
+		err = d.Remove(tarPath)
+		if err != nil {
+			return err
+		}
+
+		log.Print("Updating current marker")
+		err = d.Symlink(relDir, fmt.Sprintf("/opt/%s/current", spec.Application.Identifier))
+		if err != nil {
+			return err
+		}
+
+		log.Print("Restart services")
+		for _, p := range spec.Processes {
+			err = d.Restart(p)
+			if err != nil {
+				return err
+			}
+		}
+
+		log.Print("Removing stale releases")
 	}
 	return nil
 }

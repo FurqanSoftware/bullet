@@ -29,7 +29,7 @@ func Setup(nodes []Node, spec *spec.Spec) error {
 		}
 
 		log.Print("Creating directories")
-		err = d.MkdirAll(fmt.Sprintf("/opt/bullet/%s/releases", spec.Application.Identifier))
+		err = d.MkdirAll(fmt.Sprintf("/opt/%s/releases", spec.Application.Identifier))
 		if err != nil {
 			return err
 		}

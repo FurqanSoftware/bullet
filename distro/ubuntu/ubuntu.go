@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/FurqanSoftware/bullet/distro"
+	"github.com/FurqanSoftware/bullet/distro/systemd"
+	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/FurqanSoftware/bullet/ssh"
 )
 
@@ -40,6 +42,14 @@ func (u *Ubuntu) MkdirAll(name string) error {
 	return u.Client.Run(fmt.Sprintf("mkdir -p %s", name))
 }
 
+func (u *Ubuntu) Remove(name string) error {
+	return u.Client.Run(fmt.Sprintf("rm %s", name))
+}
+
+func (u *Ubuntu) Symlink(oldname, newname string) error {
+	return u.Client.Run(fmt.Sprintf("ln -sfn %s %s", oldname, newname))
+}
+
 func (u *Ubuntu) ExtractTar(name, dir string) error {
 	cmds := []string{
 		fmt.Sprintf("mkdir %s", dir),
@@ -52,6 +62,30 @@ func (u *Ubuntu) ExtractTar(name, dir string) error {
 		}
 	}
 	return nil
+}
+
+func (u *Ubuntu) Install(app spec.Application, proc spec.Process) error {
+	return systemd.Install(u.Client, app, proc)
+}
+
+func (u *Ubuntu) Enable(proc spec.Process) error {
+	return systemd.Enable(u.Client, proc)
+}
+
+func (u *Ubuntu) Disable(proc spec.Process) error {
+	return systemd.Disable(u.Client, proc)
+}
+
+func (u *Ubuntu) Start(proc spec.Process) error {
+	return systemd.Start(u.Client, proc)
+}
+
+func (u *Ubuntu) Stop(proc spec.Process) error {
+	return systemd.Stop(u.Client, proc)
+}
+
+func (u *Ubuntu) Restart(proc spec.Process) error {
+	return systemd.Restart(u.Client, proc)
 }
 
 func (u *Ubuntu) Detect() (bool, error) {
