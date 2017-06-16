@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/FurqanSoftware/bullet/distro"
+	"github.com/FurqanSoftware/bullet/distro/docker"
 	"github.com/FurqanSoftware/bullet/distro/systemd"
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/FurqanSoftware/bullet/ssh"
@@ -65,6 +66,13 @@ func (u *Ubuntu) ExtractTar(name, dir string) error {
 }
 
 func (u *Ubuntu) Install(app spec.Application, proc spec.Process) error {
+	err := docker.Install(u.Client, app, proc, docker.InstallOptions{
+		DockerPath: "/usr/bin/docker",
+	})
+	if err != nil {
+		return err
+	}
+
 	return systemd.Install(u.Client, app, proc, systemd.InstallOptions{
 		DockerPath: "/usr/bin/docker",
 	})

@@ -3,7 +3,7 @@ package systemd
 import (
 	"bytes"
 	"fmt"
-	"html/template"
+	"text/template"
 
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/FurqanSoftware/bullet/ssh"
@@ -70,10 +70,7 @@ Requires=docker.service
 
 [Service]
 TimeoutStartSec=0
-ExecStartPre=-{{.DockerPath}} stop {{.Application.Identifier}}_{{.Process.Name}}
-ExecStartPre=-{{.DockerPath}} rm {{.Application.Identifier}}_{{.Process.Name}}
-ExecStartPre={{.DockerPath}} pull {{.Process.Image}}
-ExecStart={{.DockerPath}} run --name {{.Application.Identifier}}_{{.Process.Name}} -v /opt/{{.Application.Identifier}}/current:/{{.Application.Identifier}} -w /{{.Application.Identifier}} --env-file /opt/{{.Application.Identifier}}/env {{range $p := .Process.Ports}}-p {{$p}} {{end}} {{.Process.Image}} {{.Process.Command}}
+ExecStart={{.DockerPath}} start {{.Application.Identifier}}_{{.Process.Name}}
 ExecStop={{.DockerPath}} stop -t 2 {{.Application.Identifier}}_{{.Process.Name}}
 Restart=always
 Environment=

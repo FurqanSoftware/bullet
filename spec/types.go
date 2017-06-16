@@ -26,8 +26,9 @@ type Deploy struct {
 }
 
 type Process struct {
-	Name    string
-	Command string
-	Image   string
-	Ports   []string
+	Name      string
+	Command   string
+	Image     string
+	Ports     []string
+	PreScript string
 }
