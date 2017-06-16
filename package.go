@@ -55,6 +55,9 @@ func Package(spec *spec.Spec) (*Release, error) {
 func makeTarball(w *tar.Writer, paths []string) error {
 	for _, p := range paths {
 		parts := strings.SplitN(p, ":", 2)
+		if len(parts[0]) == 1 {
+			parts = append(parts, parts[0])
+		}
 		src := os.ExpandEnv(parts[1])
 		dst := parts[0]
 
@@ -92,5 +95,5 @@ func addToTarball(w *tar.Writer, dst, src string, info os.FileInfo) error {
 	defer f.Close()
 
 	_, err = io.Copy(w, f)
-	return nil
+	return err
 }
