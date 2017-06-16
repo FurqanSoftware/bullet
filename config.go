@@ -3,14 +3,14 @@ package bullet
 import (
 	"fmt"
 	"log"
+	"os"
 
-	"github.com/FurqanSoftware/bullet/distro"
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/FurqanSoftware/bullet/ssh"
 )
 
-func Setup(nodes []Node, spec *spec.Spec) error {
+func ConfigPush(nodes []Node, spec *spec.Spec, name string) error {
 	for _, n := range nodes {
 		log.Printf("Connecting to %s", n.Addr())
 		c, err := ssh.Dial(n.Addr())
@@ -18,18 +18,17 @@ func Setup(nodes []Node, spec *spec.Spec) error {
 			return err
 		}
 
-		d, err := distro.New(c)
+		log.Print("Uploading environment file")
+		f, err := os.Open(name)
 		if err != nil {
 			return err
 		}
-		log.Print("Installing Docker")
-		err = d.InstallDocker()
+		defer f.Close()
+		s, err := f.Stat()
 		if err != nil {
 			return err
 		}
-
-		log.Print("Creating directories")
-		err = d.MkdirAll(fmt.Sprintf("/opt/%s/releases", spec.Application.Identifier))
+		err = c.Push(fmt.Sprintf("/opt/%s/env", spec.Application.Identifier), s.Mode(), s.Size(), f)
 		if err != nil {
 			return err
 		}

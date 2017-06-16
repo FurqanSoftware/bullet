@@ -8,12 +8,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var SetupHosts string
+var InstallHosts string
 
-var SetupCmd = &cobra.Command{
-	Use:   "setup",
-	Short: "Setup server for application",
-	Long:  `This command prepares the server for the application.`,
+var InstallCmd = &cobra.Command{
+	Use:   "install",
+	Short: "Install application in server",
+	Long:  `This command installs the application as a service in the server.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		spec, err := spec.ParseFile("Bulletspec")
 		if err != nil {
@@ -21,13 +21,13 @@ var SetupCmd = &cobra.Command{
 			return
 		}
 
-		nodes, err := bullet.ParseNodeSet(SetupHosts)
+		nodes, err := bullet.ParseNodeSet(InstallHosts)
 		if err != nil {
 			log.Fatal(err)
 			return
 		}
 
-		err = bullet.Setup(nodes, spec)
+		err = bullet.Install(nodes, spec)
 		if err != nil {
 			log.Fatal(err)
 			return
@@ -36,6 +36,6 @@ var SetupCmd = &cobra.Command{
 }
 
 func init() {
-	SetupCmd.Flags().StringVarP(&SetupHosts, "hosts", "H", "", "Hosts to configure")
-	RootCmd.AddCommand(SetupCmd)
+	InstallCmd.Flags().StringVarP(&InstallHosts, "hosts", "H", "", "Hosts to install in")
+	RootCmd.AddCommand(InstallCmd)
 }

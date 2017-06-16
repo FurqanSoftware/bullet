@@ -42,7 +42,7 @@ func (c Client) Run(cmd string) error {
 	return sess.Run(cmd)
 }
 
-func (c Client) Scp(name string, mode os.FileMode, size int64, r io.Reader) error {
+func (c Client) Push(name string, mode os.FileMode, size int64, r io.Reader) error {
 	sess, err := c.Client.NewSession()
 	if err != nil {
 		return err

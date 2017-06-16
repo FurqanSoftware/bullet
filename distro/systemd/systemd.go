@@ -11,20 +11,31 @@ import (
 
 var serviceTpl = template.Must(template.New("").Parse(serviceTplText))
 
-func Install(c *ssh.Client, app spec.Application, proc spec.Process) error {
+type InstallOptions struct {
+	DockerPath string
+}
+
+func Install(c *ssh.Client, app spec.Application, proc spec.Process, options InstallOptions) error {
 	b := bytes.Buffer{}
 	err := serviceTpl.Execute(&b, struct {
 		Application spec.Application
 		Process     spec.Process
+		DockerPath  string
 	}{
 		Application: app,
 		Process:     proc,
+		DockerPath:  options.DockerPath,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = c.Scp(fmt.Sprintf("/etc/systemd/system/%s.service", proc.Name), 0644, int64(b.Len()), &b)
+	err = c.Push(fmt.Sprintf("/etc/systemd/system/%s.service", proc.Name), 0644, int64(b.Len()), &b)
+	if err != nil {
+		return err
+	}
+
+	err = c.Run("systemctl daemon-reload")
 	if err != nil {
 		return err
 	}
@@ -53,11 +64,17 @@ func Restart(c *ssh.Client, proc spec.Process) error {
 }
 
 const serviceTplText = `[Unit]
-Description=
+Description={{.Application.Name}} container for {{.Process.Name}}
+After=docker.service
+Requires=docker.service
 
 [Service]
-ExecStart=docker run -v /opt/bullet/{{.Application.Identifier}}/current:/{{.Application.Identifier}} -w /{{.Application.Identifier}} alpine:3.5 {{.Process.Command}}
-WorkingDirectory=/opt/bullet/{{.Application.Identifier}}/current
+TimeoutStartSec=0
+ExecStartPre=-{{.DockerPath}} stop {{.Application.Identifier}}_{{.Process.Name}}
+ExecStartPre=-{{.DockerPath}} rm {{.Application.Identifier}}_{{.Process.Name}}
+ExecStartPre={{.DockerPath}} pull {{.Process.Image}}
+ExecStart={{.DockerPath}} run --name {{.Application.Identifier}}_{{.Process.Name}} -v /opt/{{.Application.Identifier}}/current:/{{.Application.Identifier}} -w /{{.Application.Identifier}} --env-file /opt/{{.Application.Identifier}}/env {{range $p := .Process.Ports}}-p {{$p}} {{end}} {{.Process.Image}} {{.Process.Command}}
+ExecStop={{.DockerPath}} stop -t 2 {{.Application.Identifier}}_{{.Process.Name}}
 Restart=always
 Environment=
 

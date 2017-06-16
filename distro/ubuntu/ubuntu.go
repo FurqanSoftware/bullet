@@ -65,7 +65,9 @@ func (u *Ubuntu) ExtractTar(name, dir string) error {
 }
 
 func (u *Ubuntu) Install(app spec.Application, proc spec.Process) error {
-	return systemd.Install(u.Client, app, proc)
+	return systemd.Install(u.Client, app, proc, systemd.InstallOptions{
+		DockerPath: "/usr/bin/docker",
+	})
 }
 
 func (u *Ubuntu) Enable(proc spec.Process) error {

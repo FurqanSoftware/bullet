@@ -93,5 +93,5 @@ func uploadTarball(c *ssh.Client, dst string, tar Tarball) error {
 	if err != nil {
 		return err
 	}
-	return c.Scp(dst, s.Mode(), s.Size(), f)
+	return c.Push(dst, s.Mode(), s.Size(), f)
 }

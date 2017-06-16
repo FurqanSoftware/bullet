@@ -18,6 +18,7 @@ type Distro interface {
 
 	ExtractTar(name, dir string) error
 
+	Install(app spec.Application, proc spec.Process) error
 	Enable(proc spec.Process) error
 	Disable(proc spec.Process) error
 	Start(proc spec.Process) error

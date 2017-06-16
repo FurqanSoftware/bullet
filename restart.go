@@ -1,7 +1,6 @@
 package bullet
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/FurqanSoftware/bullet/distro"
@@ -10,7 +9,7 @@ import (
 	"github.com/FurqanSoftware/bullet/ssh"
 )
 
-func Setup(nodes []Node, spec *spec.Spec) error {
+func Restart(nodes []Node, spec *spec.Spec) error {
 	for _, n := range nodes {
 		log.Printf("Connecting to %s", n.Addr())
 		c, err := ssh.Dial(n.Addr())
@@ -22,16 +21,12 @@ func Setup(nodes []Node, spec *spec.Spec) error {
 		if err != nil {
 			return err
 		}
-		log.Print("Installing Docker")
-		err = d.InstallDocker()
-		if err != nil {
-			return err
-		}
-
-		log.Print("Creating directories")
-		err = d.MkdirAll(fmt.Sprintf("/opt/%s/releases", spec.Application.Identifier))
-		if err != nil {
-			return err
+		log.Print("Restarting services")
+		for _, p := range spec.Processes {
+			err = d.Restart(p)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil

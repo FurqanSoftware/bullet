@@ -5,7 +5,7 @@ type Spec struct {
 	Build       Build
 	Package     Package
 	Deploy      Deploy
-	Processes   []Process
+	Processes   []Process `toml:"process"`
 }
 
 type Application struct {
@@ -29,4 +29,5 @@ type Process struct {
 	Name    string
 	Command string
 	Image   string
+	Ports   []string
 }
