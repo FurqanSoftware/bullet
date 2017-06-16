@@ -39,7 +39,7 @@ func Package(spec *spec.Spec) (*Release, error) {
 	}
 
 	w := tar.NewWriter(f)
-	err = makeTarball(w, spec.Package.Contents)
+	err = makeTarball(w, spec.Application.Package.Contents)
 	if err != nil {
 		return nil, err
 	}

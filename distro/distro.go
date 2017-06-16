@@ -18,12 +18,12 @@ type Distro interface {
 
 	ExtractTar(name, dir string) error
 
-	Install(app spec.Application, proc spec.Process) error
-	Enable(proc spec.Process) error
-	Disable(proc spec.Process) error
-	Start(proc spec.Process) error
-	Stop(proc spec.Process) error
-	Restart(proc spec.Process) error
+	Install(app spec.Application, proc spec.Program) error
+	Enable(proc spec.Program) error
+	Disable(proc spec.Program) error
+	Start(proc spec.Program) error
+	Stop(proc spec.Program) error
+	Restart(proc spec.Program) error
 
 	Detect() (bool, error)
 }

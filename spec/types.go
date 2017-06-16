@@ -2,20 +2,20 @@ package spec
 
 type Spec struct {
 	Application Application
-	Build       Build
-	Package     Package
-	Deploy      Deploy
-	Processes   []Process `toml:"process"`
 }
 
 type Application struct {
 	Name       string
 	Identifier string
+	Build      Build
+	Package    Package
+	Deploy     Deploy
+	Programs   map[string]Program
 }
 
 type Build struct {
-	Script string
 	Image  string
+	Script []string
 }
 
 type Package struct {
@@ -25,10 +25,11 @@ type Package struct {
 type Deploy struct {
 }
 
-type Process struct {
+type Program struct {
+	Key       string `yaml:"-"`
 	Name      string
 	Command   string
 	Image     string
 	Ports     []string
-	PreScript string
+	PreScript []string
 }

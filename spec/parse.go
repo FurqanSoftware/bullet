@@ -1,17 +1,21 @@
 package spec
 
 import (
-	"io"
+	"io/ioutil"
 	"os"
 
-	"github.com/BurntSushi/toml"
+	yaml "gopkg.in/yaml.v2"
 )
 
-func Parse(filename string, r io.Reader) (*Spec, error) {
+func Parse(filename string, b []byte) (*Spec, error) {
 	spec := Spec{}
-	_, err := toml.DecodeReader(r, &spec)
+	err := yaml.Unmarshal(b, &spec)
 	if err != nil {
 		return nil, err
+	}
+	for k, v := range spec.Application.Programs {
+		v.Key = k
+		spec.Application.Programs[k] = v
 	}
 	return &spec, nil
 }
@@ -22,5 +26,9 @@ func ParseFile(filename string) (*Spec, error) {
 		return nil, &Error{"ParseFile", err}
 	}
 	defer f.Close()
-	return Parse(filename, f)
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		return nil, &Error{"ParseFile", err}
+	}
+	return Parse(filename, b)
 }

@@ -71,7 +71,7 @@ func Deploy(nodes []Node, spec *spec.Spec, options DeployOptions) error {
 		}
 
 		log.Print("Restart services")
-		for _, p := range spec.Processes {
+		for _, p := range spec.Application.Programs {
 			err = d.Restart(p)
 			if err != nil {
 				return err

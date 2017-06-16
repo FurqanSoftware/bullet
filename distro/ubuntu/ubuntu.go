@@ -65,7 +65,7 @@ func (u *Ubuntu) ExtractTar(name, dir string) error {
 	return nil
 }
 
-func (u *Ubuntu) Install(app spec.Application, proc spec.Process) error {
+func (u *Ubuntu) Install(app spec.Application, proc spec.Program) error {
 	err := docker.Install(u.Client, app, proc, docker.InstallOptions{
 		DockerPath: "/usr/bin/docker",
 	})
@@ -78,23 +78,23 @@ func (u *Ubuntu) Install(app spec.Application, proc spec.Process) error {
 	})
 }
 
-func (u *Ubuntu) Enable(proc spec.Process) error {
+func (u *Ubuntu) Enable(proc spec.Program) error {
 	return systemd.Enable(u.Client, proc)
 }
 
-func (u *Ubuntu) Disable(proc spec.Process) error {
+func (u *Ubuntu) Disable(proc spec.Program) error {
 	return systemd.Disable(u.Client, proc)
 }
 
-func (u *Ubuntu) Start(proc spec.Process) error {
+func (u *Ubuntu) Start(proc spec.Program) error {
 	return systemd.Start(u.Client, proc)
 }
 
-func (u *Ubuntu) Stop(proc spec.Process) error {
+func (u *Ubuntu) Stop(proc spec.Program) error {
 	return systemd.Stop(u.Client, proc)
 }
 
-func (u *Ubuntu) Restart(proc spec.Process) error {
+func (u *Ubuntu) Restart(proc spec.Program) error {
 	return systemd.Restart(u.Client, proc)
 }
 

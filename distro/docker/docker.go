@@ -15,13 +15,13 @@ type InstallOptions struct {
 	DockerPath string
 }
 
-func Install(c *ssh.Client, app spec.Application, proc spec.Process, options InstallOptions) error {
+func Install(c *ssh.Client, app spec.Application, proc spec.Program, options InstallOptions) error {
 	b := bytes.Buffer{}
 	err := dockerfileTpl.Execute(&b, struct {
-		Process    spec.Process
+		Program    spec.Program
 		DockerPath string
 	}{
-		Process:    proc,
+		Program:    proc,
 		DockerPath: options.DockerPath,
 	})
 	if err != nil {
@@ -30,13 +30,13 @@ func Install(c *ssh.Client, app spec.Application, proc spec.Process, options Ins
 
 	appDir := fmt.Sprintf("/opt/%s", app.Identifier)
 
-	err = c.Push(fmt.Sprintf("%s/Dockerfile.%s", appDir, proc.Name), 0644, int64(b.Len()), &b)
+	err = c.Push(fmt.Sprintf("%s/Dockerfile.%s", appDir, proc.Key), 0644, int64(b.Len()), &b)
 	if err != nil {
 		return err
 	}
 
-	imageName := fmt.Sprintf("%s_%s", app.Identifier, proc.Name)
-	err = c.Run(fmt.Sprintf("docker build -t %s -f %s/Dockerfile.%s %s", imageName, appDir, proc.Name, appDir))
+	imageName := fmt.Sprintf("%s_%s", app.Identifier, proc.Key)
+	err = c.Run(fmt.Sprintf("docker build -t %s -f %s/Dockerfile.%s %s", imageName, appDir, proc.Key, appDir))
 	if err != nil {
 		return err
 	}
@@ -50,18 +50,18 @@ type RunOptions struct {
 	DockerPath string
 }
 
-func Run(c *ssh.Client, app spec.Application, proc spec.Process, options RunOptions) error {
-	name := fmt.Sprintf("%s_%s", app.Identifier, proc.Name)
+func Run(c *ssh.Client, app spec.Application, proc spec.Program, options RunOptions) error {
+	name := fmt.Sprintf("%s_%s", app.Identifier, proc.Key)
 	appDir := fmt.Sprintf("/opt/%s", app.Identifier)
 	portArgs := ""
 	for _, p := range proc.Ports {
 		portArgs += fmt.Sprintf(" -p %s", p)
 	}
-	imageName := fmt.Sprintf("%s_%s", app.Identifier, proc.Name)
+	imageName := fmt.Sprintf("%s_%s", app.Identifier, proc.Key)
 
 	cmds := []string{
-		fmt.Sprintf("%s stop -t 2 %s", options.DockerPath, name),
-		fmt.Sprintf("%s rm %s", options.DockerPath, name),
+		fmt.Sprintf("%s stop -t 2 %s > /dev/null 2>&1 || true", options.DockerPath, name),
+		fmt.Sprintf("%s rm %s > /dev/null 2>&1 || true", options.DockerPath, name),
 		fmt.Sprintf("%s run -d --name %s -v %s/current:/%s -w /%s --env-file %s/env %s %s %s", options.DockerPath, name, appDir, app.Identifier, app.Identifier, appDir, portArgs, imageName, proc.Command),
 	}
 	for _, cmd := range cmds {
@@ -73,9 +73,9 @@ func Run(c *ssh.Client, app spec.Application, proc spec.Process, options RunOpti
 	return nil
 }
 
-const dockerfileTplText = `FROM {{.Process.Image}}
+const dockerfileTplText = `FROM {{.Program.Image}}
 
-{{if .Process.PreScript}}
-RUN {{.Process.PreScript}}
+{{range .Program.PreScript}}
+	RUN {{.}}
 {{end}}
 `

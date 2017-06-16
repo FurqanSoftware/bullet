@@ -15,22 +15,22 @@ type InstallOptions struct {
 	DockerPath string
 }
 
-func Install(c *ssh.Client, app spec.Application, proc spec.Process, options InstallOptions) error {
+func Install(c *ssh.Client, app spec.Application, proc spec.Program, options InstallOptions) error {
 	b := bytes.Buffer{}
 	err := serviceTpl.Execute(&b, struct {
 		Application spec.Application
-		Process     spec.Process
+		Program     spec.Program
 		DockerPath  string
 	}{
 		Application: app,
-		Process:     proc,
+		Program:     proc,
 		DockerPath:  options.DockerPath,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = c.Push(fmt.Sprintf("/etc/systemd/system/%s.service", proc.Name), 0644, int64(b.Len()), &b)
+	err = c.Push(fmt.Sprintf("/etc/systemd/system/%s.service", proc.Key), 0644, int64(b.Len()), &b)
 	if err != nil {
 		return err
 	}
@@ -43,37 +43,35 @@ func Install(c *ssh.Client, app spec.Application, proc spec.Process, options Ins
 	return Enable(c, proc)
 }
 
-func Enable(c *ssh.Client, proc spec.Process) error {
-	return c.Run(fmt.Sprintf("systemctl enable %s.service", proc.Name))
+func Enable(c *ssh.Client, proc spec.Program) error {
+	return c.Run(fmt.Sprintf("systemctl enable %s.service", proc.Key))
 }
 
-func Disable(c *ssh.Client, proc spec.Process) error {
-	return c.Run(fmt.Sprintf("systemctl disable %s.service", proc.Name))
+func Disable(c *ssh.Client, proc spec.Program) error {
+	return c.Run(fmt.Sprintf("systemctl disable %s.service", proc.Key))
 }
 
-func Start(c *ssh.Client, proc spec.Process) error {
-	return c.Run(fmt.Sprintf("systemctl start %s.service", proc.Name))
+func Start(c *ssh.Client, proc spec.Program) error {
+	return c.Run(fmt.Sprintf("systemctl start %s.service", proc.Key))
 }
 
-func Stop(c *ssh.Client, proc spec.Process) error {
-	return c.Run(fmt.Sprintf("systemctl stop %s.service", proc.Name))
+func Stop(c *ssh.Client, proc spec.Program) error {
+	return c.Run(fmt.Sprintf("systemctl stop %s.service", proc.Key))
 }
 
-func Restart(c *ssh.Client, proc spec.Process) error {
-	return c.Run(fmt.Sprintf("systemctl restart %s.service", proc.Name))
+func Restart(c *ssh.Client, proc spec.Program) error {
+	return c.Run(fmt.Sprintf("systemctl restart %s.service", proc.Key))
 }
 
 const serviceTplText = `[Unit]
-Description={{.Application.Name}} container for {{.Process.Name}}
+Description={{.Program.Name}}
 After=docker.service
 Requires=docker.service
 
 [Service]
-TimeoutStartSec=0
-ExecStart={{.DockerPath}} start {{.Application.Identifier}}_{{.Process.Name}}
-ExecStop={{.DockerPath}} stop -t 2 {{.Application.Identifier}}_{{.Process.Name}}
+ExecStart={{.DockerPath}} start {{.Application.Identifier}}_{{.Program.Key}}
+ExecStop={{.DockerPath}} stop -t 2 {{.Application.Identifier}}_{{.Program.Key}}
 Restart=always
-Environment=
 
 [Install]
 WantedBy=multi-user.target

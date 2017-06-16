@@ -21,8 +21,10 @@ func Install(nodes []Node, spec *spec.Spec) error {
 		if err != nil {
 			return err
 		}
-		log.Print("Installing services")
-		for _, p := range spec.Processes {
+
+		log.Printf("Installing %d programs(s)", len(spec.Application.Programs))
+		for _, p := range spec.Application.Programs {
+			log.Printf("Installing %s", p.Name)
 			err = d.Install(spec.Application, p)
 			if err != nil {
 				return err

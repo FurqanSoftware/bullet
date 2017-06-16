@@ -8,8 +8,14 @@ import (
 )
 
 func Build(spec *spec.Spec) error {
-	cmd := exec.Command("/bin/bash", "-c", spec.Build.Script)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	for _, l := range spec.Application.Build.Script {
+		cmd := exec.Command("/bin/bash", "-c", l)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err := cmd.Run()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
