@@ -3,6 +3,7 @@ package ssh
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path"
 
@@ -31,6 +32,8 @@ func Dial(addr string) (*Client, error) {
 }
 
 func (c Client) Run(cmd string) error {
+	log.Print(cmd)
+
 	sess, err := c.Client.NewSession()
 	if err != nil {
 		return err
@@ -40,6 +43,18 @@ func (c Client) Run(cmd string) error {
 	sess.Stdout = os.Stdout
 	sess.Stderr = os.Stderr
 	return sess.Run(cmd)
+}
+
+func (c Client) Output(cmd string) ([]byte, error) {
+	log.Print(cmd)
+
+	sess, err := c.Client.NewSession()
+	if err != nil {
+		return nil, err
+	}
+	defer sess.Close()
+
+	return sess.Output(cmd)
 }
 
 func (c Client) Push(name string, mode os.FileMode, size int64, r io.Reader) error {

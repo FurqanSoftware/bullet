@@ -7,8 +7,6 @@ type Spec struct {
 type Application struct {
 	Name       string
 	Identifier string
-	Build      Build
-	Package    Package
 	Deploy     Deploy
 	Programs   map[string]Program
 }

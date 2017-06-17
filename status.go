@@ -9,7 +9,7 @@ import (
 	"github.com/FurqanSoftware/bullet/ssh"
 )
 
-func Install(nodes []Node, spec *spec.Spec) error {
+func Status(nodes []Node, spec *spec.Spec) error {
 	for _, n := range nodes {
 		log.Printf("Connecting to %s", n.Addr())
 		c, err := ssh.Dial(n.Addr())
@@ -22,10 +22,8 @@ func Install(nodes []Node, spec *spec.Spec) error {
 			return err
 		}
 
-		log.Printf("Installing %d programs(s)", len(spec.Application.Programs))
 		for _, p := range spec.Application.Programs {
-			log.Printf("Installing %s", p.Name)
-			err = d.Install(spec.Application, p)
+			err = d.Status(spec.Application, p)
 			if err != nil {
 				return err
 			}

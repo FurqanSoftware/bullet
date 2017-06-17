@@ -21,9 +21,10 @@ func Restart(nodes []Node, spec *spec.Spec) error {
 		if err != nil {
 			return err
 		}
+
 		log.Print("Restarting services")
 		for _, p := range spec.Application.Programs {
-			err = d.Restart(p)
+			err = d.RestartAll(spec.Application, p)
 			if err != nil {
 				return err
 			}

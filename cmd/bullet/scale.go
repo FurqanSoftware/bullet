@@ -8,12 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var InstallHosts string
-
-var InstallCmd = &cobra.Command{
-	Use:   "install",
-	Short: "Install application in server",
-	Long:  `This command installs the application as a service in the server.`,
+var ScaleCmd = &cobra.Command{
+	Use:   "scale",
+	Short: "Scale a specific service on the server",
+	Long:  `This command scales a specific service of the app on the server.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		spec, err := spec.ParseFile("Bulletspec")
 		if err != nil {
@@ -21,13 +19,19 @@ var InstallCmd = &cobra.Command{
 			return
 		}
 
-		nodes, err := bullet.ParseNodeSet(InstallHosts)
+		nodes, err := bullet.ParseNodeSet(Hosts)
 		if err != nil {
 			log.Fatal(err)
 			return
 		}
 
-		err = bullet.Install(nodes, spec)
+		comp, err := bullet.NewComposition(args)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		err = bullet.Scale(nodes, spec, comp)
 		if err != nil {
 			log.Fatal(err)
 			return
@@ -36,6 +40,5 @@ var InstallCmd = &cobra.Command{
 }
 
 func init() {
-	InstallCmd.Flags().StringVarP(&InstallHosts, "hosts", "H", "", "Hosts to install in")
-	RootCmd.AddCommand(InstallCmd)
+	RootCmd.AddCommand(ScaleCmd)
 }

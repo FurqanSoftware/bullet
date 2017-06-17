@@ -22,17 +22,31 @@ func Setup(nodes []Node, spec *spec.Spec) error {
 		if err != nil {
 			return err
 		}
-		log.Print("Installing Docker")
-		err = d.InstallDocker()
-		if err != nil {
-			return err
-		}
 
-		log.Print("Creating directories")
-		err = d.MkdirAll(fmt.Sprintf("/opt/%s/releases", spec.Application.Identifier))
+		err = setupNode(n, c, d, spec)
 		if err != nil {
 			return err
 		}
 	}
+	return nil
+}
+
+func setupNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec) error {
+	log.Print("Installing Docker")
+	err := d.InstallDocker()
+	if err != nil {
+		return err
+	}
+
+	log.Print("Creating application directory")
+	err = d.MkdirAll(fmt.Sprintf("/opt/%s/releases", spec.Application.Identifier))
+	if err != nil {
+		return err
+	}
+	err = d.Touch(fmt.Sprintf("/opt/%s/env", spec.Application.Identifier))
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

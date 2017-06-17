@@ -2,6 +2,8 @@ package main
 
 import "github.com/spf13/cobra"
 
+var Hosts string
+
 var RootCmd = &cobra.Command{
 	Use:   "bullet",
 	Short: "Bullet is a fast application deploy tool",
@@ -9,4 +11,8 @@ var RootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do Stuff Here
 	},
+}
+
+func init() {
+	RootCmd.PersistentFlags().StringVarP(&Hosts, "hosts", "H", "", "List of target hosts (comma separated)")
 }

@@ -8,8 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var SetupHosts string
-
 var SetupCmd = &cobra.Command{
 	Use:   "setup",
 	Short: "Setup server for application",
@@ -21,7 +19,7 @@ var SetupCmd = &cobra.Command{
 			return
 		}
 
-		nodes, err := bullet.ParseNodeSet(SetupHosts)
+		nodes, err := bullet.ParseNodeSet(Hosts)
 		if err != nil {
 			log.Fatal(err)
 			return
@@ -36,6 +34,5 @@ var SetupCmd = &cobra.Command{
 }
 
 func init() {
-	SetupCmd.Flags().StringVarP(&SetupHosts, "hosts", "H", "", "Hosts to configure")
 	RootCmd.AddCommand(SetupCmd)
 }

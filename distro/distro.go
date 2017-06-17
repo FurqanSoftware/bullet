@@ -15,15 +15,15 @@ type Distro interface {
 	MkdirAll(name string) error
 	Remove(name string) error
 	Symlink(oldname, newname string) error
+	Touch(name string) error
 
 	ExtractTar(name, dir string) error
 
-	Install(app spec.Application, proc spec.Program) error
-	Enable(proc spec.Program) error
-	Disable(proc spec.Program) error
-	Start(proc spec.Program) error
-	Stop(proc spec.Program) error
-	Restart(proc spec.Program) error
+	Build(app spec.Application, prog spec.Program) error
+	Restart(app spec.Application, prog spec.Program, no int) error
+	RestartAll(app spec.Application, prog spec.Program) error
+	Status(app spec.Application, prog spec.Program) error
+	Scale(app spec.Application, prog spec.Program, n int) error
 
 	Detect() (bool, error)
 }

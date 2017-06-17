@@ -8,8 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ConfigHosts string
-
 var ConfigPushCmd = &cobra.Command{
 	Use:   "config:push",
 	Short: "Push application configuration from file to server",
@@ -21,7 +19,7 @@ var ConfigPushCmd = &cobra.Command{
 			return
 		}
 
-		nodes, err := bullet.ParseNodeSet(ConfigHosts)
+		nodes, err := bullet.ParseNodeSet(Hosts)
 		if err != nil {
 			log.Fatal(err)
 			return
@@ -36,6 +34,5 @@ var ConfigPushCmd = &cobra.Command{
 }
 
 func init() {
-	ConfigPushCmd.Flags().StringVarP(&ConfigHosts, "hosts", "H", "", "Hosts to configure")
 	RootCmd.AddCommand(ConfigPushCmd)
 }

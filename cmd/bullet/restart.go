@@ -8,8 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var RestartHosts string
-
 var RestartCmd = &cobra.Command{
 	Use:   "restart",
 	Short: "Restart application in server",
@@ -21,7 +19,7 @@ var RestartCmd = &cobra.Command{
 			return
 		}
 
-		nodes, err := bullet.ParseNodeSet(RestartHosts)
+		nodes, err := bullet.ParseNodeSet(Hosts)
 		if err != nil {
 			log.Fatal(err)
 			return
@@ -36,6 +34,5 @@ var RestartCmd = &cobra.Command{
 }
 
 func init() {
-	RestartCmd.Flags().StringVarP(&RestartHosts, "hosts", "H", "", "Hosts to restart in")
 	RootCmd.AddCommand(RestartCmd)
 }

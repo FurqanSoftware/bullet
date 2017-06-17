@@ -8,10 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var DeployCmd = &cobra.Command{
-	Use:   "deploy",
-	Short: "Deploy app to server",
-	Long:  `This command packages and deploys the app to specific servers.`,
+var StatusCmd = &cobra.Command{
+	Use:   "status",
+	Short: "Print application status",
+	Long:  `This command prints the application status.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		spec, err := spec.ParseFile("Bulletspec")
 		if err != nil {
@@ -25,13 +25,7 @@ var DeployCmd = &cobra.Command{
 			return
 		}
 
-		rel, err := bullet.NewRelease(args[0])
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-
-		err = bullet.Deploy(nodes, spec, rel)
+		err = bullet.Status(nodes, spec)
 		if err != nil {
 			log.Fatal(err)
 			return
@@ -40,5 +34,5 @@ var DeployCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(DeployCmd)
+	RootCmd.AddCommand(StatusCmd)
 }
