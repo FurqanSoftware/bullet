@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/FurqanSoftware/bullet"
+	"github.com/FurqanSoftware/bullet/core"
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/spf13/cobra"
 )
@@ -19,13 +19,13 @@ var StatusCmd = &cobra.Command{
 			return
 		}
 
-		nodes, err := bullet.ParseNodeSet(Hosts)
+		nodes, err := core.ParseNodeSet(Hosts)
 		if err != nil {
 			log.Fatal(err)
 			return
 		}
 
-		err = bullet.Status(nodes, spec)
+		err = core.Status(nodes, spec)
 		if err != nil {
 			log.Fatal(err)
 			return

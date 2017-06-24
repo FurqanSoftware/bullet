@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/FurqanSoftware/bullet"
+	"github.com/FurqanSoftware/bullet/core"
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/spf13/cobra"
 )
@@ -19,19 +19,19 @@ var DeployCmd = &cobra.Command{
 			return
 		}
 
-		nodes, err := bullet.ParseNodeSet(Hosts)
+		nodes, err := core.ParseNodeSet(Hosts)
 		if err != nil {
 			log.Fatal(err)
 			return
 		}
 
-		rel, err := bullet.NewRelease(args[0])
+		rel, err := core.NewRelease(args[0])
 		if err != nil {
 			log.Fatal(err)
 			return
 		}
 
-		err = bullet.Deploy(nodes, spec, rel)
+		err = core.Deploy(nodes, spec, rel)
 		if err != nil {
 			log.Fatal(err)
 			return

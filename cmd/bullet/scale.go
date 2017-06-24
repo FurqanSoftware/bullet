@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/FurqanSoftware/bullet"
+	"github.com/FurqanSoftware/bullet/core"
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/spf13/cobra"
 )
@@ -19,19 +19,19 @@ var ScaleCmd = &cobra.Command{
 			return
 		}
 
-		nodes, err := bullet.ParseNodeSet(Hosts)
+		nodes, err := core.ParseNodeSet(Hosts)
 		if err != nil {
 			log.Fatal(err)
 			return
 		}
 
-		comp, err := bullet.NewComposition(args)
+		comp, err := core.NewComposition(args)
 		if err != nil {
 			log.Fatal(err)
 			return
 		}
 
-		err = bullet.Scale(nodes, spec, comp)
+		err = core.Scale(nodes, spec, comp)
 		if err != nil {
 			log.Fatal(err)
 			return

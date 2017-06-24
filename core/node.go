@@ -1,4 +1,4 @@
-package bullet
+package core
 
 import (
 	"strconv"
