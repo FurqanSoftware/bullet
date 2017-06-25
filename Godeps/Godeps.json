@@ -1,0 +1,42 @@
+{
+	"ImportPath": "github.com/FurqanSoftware/bullet",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v79",
+	"Packages": [
+		"./cmd/bullet"
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/inconshreveable/mousetrap",
+			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+		},
+		{
+			"ImportPath": "github.com/spf13/cobra",
+			"Rev": "b4dbd37a01839e0653eec12aa4bbb2a2ce7b2a37"
+		},
+		{
+			"ImportPath": "github.com/spf13/pflag",
+			"Rev": "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/curve25519",
+			"Rev": "850760c427c516be930bc91280636328f1a62286"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ed25519",
+			"Rev": "850760c427c516be930bc91280636328f1a62286"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ed25519/internal/edwards25519",
+			"Rev": "850760c427c516be930bc91280636328f1a62286"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh",
+			"Rev": "850760c427c516be930bc91280636328f1a62286"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v2",
+			"Rev": "cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b"
+		}
+	]
+}
