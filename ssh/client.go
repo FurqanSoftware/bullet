@@ -3,6 +3,7 @@ package ssh
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -18,7 +19,7 @@ func Dial(addr string) (*Client, error) {
 	c, err := ssh.Dial("tcp", addr, &ssh.ClientConfig{
 		User: "root",
 		Auth: []ssh.AuthMethod{
-			ssh.Password("x6qTSLjRMcTcUXKB"),
+			ssh.PublicKeysCallback(publicKeys),
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	})
@@ -78,4 +79,18 @@ func (c Client) Push(name string, mode os.FileMode, size int64, r io.Reader) err
 	sess.Stdout = os.Stdout
 	sess.Stderr = os.Stderr
 	return sess.Run(fmt.Sprintf("scp -t %s", name))
+}
+
+func publicKeys() ([]ssh.Signer, error) {
+	key, err := ioutil.ReadFile(os.ExpandEnv("$HOME/.ssh/id_rsa"))
+	if err != nil {
+		return nil, err
+	}
+
+	signer, err := ssh.ParsePrivateKey(key)
+	if err != nil {
+		return nil, err
+	}
+
+	return []ssh.Signer{signer}, nil
 }
