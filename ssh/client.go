@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 
@@ -33,8 +32,6 @@ func Dial(addr string) (*Client, error) {
 }
 
 func (c Client) Run(cmd string) error {
-	log.Print(cmd)
-
 	sess, err := c.Client.NewSession()
 	if err != nil {
 		return err
@@ -47,8 +44,6 @@ func (c Client) Run(cmd string) error {
 }
 
 func (c Client) Output(cmd string) ([]byte, error) {
-	log.Print(cmd)
-
 	sess, err := c.Client.NewSession()
 	if err != nil {
 		return nil, err
