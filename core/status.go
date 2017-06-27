@@ -22,7 +22,8 @@ func Status(nodes []Node, spec *spec.Spec) error {
 			return err
 		}
 
-		for _, p := range spec.Application.Programs {
+		for _, k := range spec.Application.ProgramKeys {
+			p := spec.Application.Programs[k]
 			err = d.Status(spec.Application, p)
 			if err != nil {
 				return err

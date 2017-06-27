@@ -64,7 +64,8 @@ func deployNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, rel *Re
 	}
 
 	log.Print("Restarting containers")
-	for _, p := range spec.Application.Programs {
+	for _, k := range spec.Application.ProgramKeys {
+		p := spec.Application.Programs[k]
 		err = d.RestartAll(spec.Application, p)
 		if err != nil {
 			return err

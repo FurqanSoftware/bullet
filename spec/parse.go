@@ -3,6 +3,7 @@ package spec
 import (
 	"io/ioutil"
 	"os"
+	"sort"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -13,10 +14,14 @@ func Parse(filename string, b []byte) (*Spec, error) {
 	if err != nil {
 		return nil, err
 	}
+	keys := []string{}
 	for k, v := range spec.Application.Programs {
 		v.Key = k
 		spec.Application.Programs[k] = v
+		keys = append(keys, k)
 	}
+	sort.Strings(keys)
+	spec.Application.ProgramKeys = keys
 	return &spec, nil
 }
 

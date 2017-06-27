@@ -8,7 +8,9 @@ type Application struct {
 	Name       string
 	Identifier string
 	Deploy     Deploy
-	Programs   map[string]Program
+
+	Programs    map[string]Program
+	ProgramKeys []string
 }
 
 type Build struct {
