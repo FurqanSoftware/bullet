@@ -106,9 +106,11 @@ func (u *Ubuntu) Status(app spec.Application, prog spec.Program) error {
 		return err
 	}
 
+	fmt.Println(prog.Name)
 	for _, cont := range conts {
-		fmt.Printf("%s %d: %s\n", cont.Program.Name, cont.No, cont.Status)
+		fmt.Printf("%s: %s\n", cont.ID, cont.Status)
 	}
+	fmt.Println()
 	return nil
 }
 
