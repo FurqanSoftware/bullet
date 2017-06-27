@@ -2,6 +2,7 @@ package ubuntu
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/FurqanSoftware/bullet/distro"
 	"github.com/FurqanSoftware/bullet/docker"
@@ -108,7 +109,7 @@ func (u *Ubuntu) Status(app spec.Application, prog spec.Program) error {
 
 	fmt.Println(prog.Name)
 	for _, cont := range conts {
-		fmt.Printf("%s: %s\n", cont.ID, cont.Status)
+		fmt.Printf("%s: %s\n", cont.ID, strings.ToLower(cont.Status))
 	}
 	fmt.Println()
 	return nil
