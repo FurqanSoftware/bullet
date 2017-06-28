@@ -6,14 +6,14 @@ IMAGE_NAME = git.furqan.io:5005/hjr265/bullet
 IMAGE_TAG = $(VERSION)
 
 build:
-	go build -o bullet ./cmd/bullet
+	go build -o bullet github.com/FurqanSoftware/bullet
 
 build-alpine:
 	docker run \
 		-v `pwd`:/go/src/github.com/FurqanSoftware/bullet \
 		-w /go/src/github.com/FurqanSoftware/bullet \
 		golang:1.8-alpine \
-		go build -o bullet ./cmd/bullet
+		go build -o bullet github.com/FurqanSoftware/bullet
 
 test:
 	go test -v `go list ./... | grep -v /vendor/`
