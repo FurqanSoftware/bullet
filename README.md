@@ -1,6 +1,6 @@
 # Bullet
 
-<img src="assets/bullet.svg" height="128">
+![](assets/bullet_128.png)
 
 Bullet is a fast and flexible application deploy tool built by Furqan Software.
 
