@@ -10,10 +10,35 @@ At [Furqan Software](https://furqansoftware.com/), Bullet helps us setup and dep
 
 ## Getting Started
 
-### Installing From Source
+### Install from Source
 
-``` go
+``` sh
 go get github.com/FurqanSoftware/bullet
+```
+
+### Copy an Example App
+
+``` sh
+cp -r $GOPATH/src/github.com/FurqanSoftware/examples/hello .
+```
+
+### Set up a Server
+
+``` sh
+bullet -H {host} setup
+```
+
+### Deploy App to Server
+
+``` sh
+make release
+bullet -H {host} deploy hello.tar.gz
+```
+
+### Scale Programs on Server
+
+``` sh
+bullet -H {host} scale web=1
 ```
 
 ## Acknowledgements
