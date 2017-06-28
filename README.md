@@ -2,7 +2,7 @@
 
 <img src="assets/bullet.svg" height="128">
 
-Bullet is a fast and flexible application deploy tool built by Furqan Software and friends.
+Bullet is a fast and flexible application deploy tool built by Furqan Software.
 
 Complete documentation is available at https://bullettool.com/.
 
