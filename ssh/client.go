@@ -14,11 +14,17 @@ type Client struct {
 	Client *ssh.Client
 }
 
-func Dial(addr string) (*Client, error) {
+func Dial(addr, identity string) (*Client, error) {
+	keyPaths := []string{}
+	if identity != "" {
+		keyPaths = append(keyPaths, identity)
+	}
+	keyPaths = append(keyPaths, os.ExpandEnv("$HOME/.ssh/id_rsa"))
+
 	c, err := ssh.Dial("tcp", addr, &ssh.ClientConfig{
 		User: "root",
 		Auth: []ssh.AuthMethod{
-			ssh.PublicKeysCallback(publicKeys),
+			ssh.PublicKeysCallback(publicKeys(keyPaths)),
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	})
@@ -76,16 +82,21 @@ func (c Client) Push(name string, mode os.FileMode, size int64, r io.Reader) err
 	return sess.Run(fmt.Sprintf("scp -t %s", name))
 }
 
-func publicKeys() ([]ssh.Signer, error) {
-	key, err := ioutil.ReadFile(os.ExpandEnv("$HOME/.ssh/id_rsa"))
-	if err != nil {
-		return nil, err
-	}
+func publicKeys(paths []string) func() ([]ssh.Signer, error) {
+	return func() ([]ssh.Signer, error) {
+		signers := []ssh.Signer{}
+		for _, path := range paths {
+			key, err := ioutil.ReadFile(path)
+			if err != nil {
+				return nil, err
+			}
 
-	signer, err := ssh.ParsePrivateKey(key)
-	if err != nil {
-		return nil, err
+			signer, err := ssh.ParsePrivateKey(key)
+			if err != nil {
+				return nil, err
+			}
+			signers = append(signers, signer)
+		}
+		return signers, nil
 	}
-
-	return []ssh.Signer{signer}, nil
 }

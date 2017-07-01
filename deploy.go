@@ -19,7 +19,7 @@ var DeployCmd = &cobra.Command{
 			return
 		}
 
-		nodes, err := core.ParseNodeSet(Hosts)
+		nodes, err := core.ParseNodeSet(Hosts, Identity)
 		if err != nil {
 			log.Fatal(err)
 			return

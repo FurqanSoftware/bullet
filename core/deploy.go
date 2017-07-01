@@ -14,7 +14,7 @@ import (
 func Deploy(nodes []Node, spec *spec.Spec, rel *Release) error {
 	for _, n := range nodes {
 		log.Printf("Connecting to %s", n.Addr())
-		c, err := ssh.Dial(n.Addr())
+		c, err := ssh.Dial(n.Addr(), n.Identity)
 		if err != nil {
 			return err
 		}
