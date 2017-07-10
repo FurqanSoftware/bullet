@@ -25,6 +25,8 @@ type Distro interface {
 	Status(app spec.Application, prog spec.Program) error
 	Scale(app spec.Application, prog spec.Program, n int) error
 
+	Run(app spec.Application, prog spec.Program) error
+
 	Detect() (bool, error)
 }
 

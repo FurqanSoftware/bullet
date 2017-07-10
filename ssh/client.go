@@ -49,6 +49,30 @@ func (c Client) Run(cmd string) error {
 	return sess.Run(cmd)
 }
 
+func (c Client) RunPTY(cmd string) error {
+	sess, err := c.Client.NewSession()
+	if err != nil {
+		return err
+	}
+	defer sess.Close()
+
+	modes := ssh.TerminalModes{
+		ssh.ECHO:          0,
+		ssh.TTY_OP_ISPEED: 14400,
+		ssh.TTY_OP_OSPEED: 14400,
+	}
+
+	err = sess.RequestPty("xterm", 40, 80, modes)
+	if err != nil {
+		return err
+	}
+
+	sess.Stdin = os.Stdin
+	sess.Stdout = os.Stdout
+	sess.Stderr = os.Stderr
+	return sess.Run(cmd)
+}
+
 func (c Client) Output(cmd string) ([]byte, error) {
 	sess, err := c.Client.NewSession()
 	if err != nil {

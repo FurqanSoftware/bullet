@@ -121,6 +121,13 @@ func (u *Ubuntu) Scale(app spec.Application, prog spec.Program, n int) error {
 	})
 }
 
+func (u *Ubuntu) Run(app spec.Application, prog spec.Program) error {
+	return docker.RunContainer(u.Client, app, prog, docker.RunContainerOptions{
+		DockerPath: "/usr/bin/docker",
+	})
+	return nil
+}
+
 func (u *Ubuntu) Detect() (bool, error) {
 	return true, nil
 }

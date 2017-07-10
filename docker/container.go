@@ -117,6 +117,34 @@ func ScaleContainer(c *ssh.Client, app spec.Application, prog spec.Program, n in
 	return nil
 }
 
+type RunContainerOptions struct {
+	DockerPath string
+}
+
+func RunContainer(c *ssh.Client, app spec.Application, prog spec.Program, options RunContainerOptions) error {
+	name := fmt.Sprintf("%s_%s_0", app.Identifier, prog.Key)
+	image := fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
+
+	conts, err := ListContainers(c, app, prog, ListContainersOptions{
+		DockerPath: options.DockerPath,
+	})
+	if err != nil {
+		return nil
+	}
+	if len(conts) > 0 {
+		err := deleteContainer(c, app, prog, options.DockerPath, name)
+		if err != nil {
+			return nil
+		}
+	}
+
+	err = createAttachContainer(c, app, prog, options.DockerPath, image, name)
+	if err != nil {
+		return nil
+	}
+	return nil
+}
+
 func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, image, name string) error {
 	appDir := fmt.Sprintf("/opt/%s", app.Identifier)
 	portArgs := ""
@@ -129,6 +157,21 @@ func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 	}
 	for _, cmd := range cmds {
 		err := c.Run(cmd)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func createAttachContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, image, name string) error {
+	appDir := fmt.Sprintf("/opt/%s", app.Identifier)
+
+	cmds := []string{
+		fmt.Sprintf("%s run -ti --env-file %s/env --name %s -v %s/current:/%s -w /%s %s %s", dockerPath, appDir, name, appDir, app.Identifier, app.Identifier, image, prog.Command),
+	}
+	for _, cmd := range cmds {
+		err := c.RunPTY(cmd)
 		if err != nil {
 			return err
 		}
