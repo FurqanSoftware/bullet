@@ -69,7 +69,12 @@ type RestartContainerOptions struct {
 
 func RestartContainer(c *ssh.Client, app spec.Application, prog spec.Program, no int, options RestartContainerOptions) error {
 	name := fmt.Sprintf("%s_%s_%d", app.Identifier, prog.Key, no)
-	image := fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
+	image := ""
+	if prog.Container.Dockerfile != "" {
+		image = fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
+	} else {
+		image = prog.Container.Image
+	}
 
 	err := deleteContainer(c, app, prog, options.DockerPath, name)
 	if err != nil {

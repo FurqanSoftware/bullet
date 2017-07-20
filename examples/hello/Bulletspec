@@ -6,6 +6,7 @@ application:
     web:
       name: Hello World Web Server
       command: node index.js
-      image: node:8.1-alpine
+      container:
+        image: node:8.1-alpine
       ports:
         - 80:5000

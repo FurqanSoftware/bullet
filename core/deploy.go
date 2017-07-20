@@ -57,6 +57,10 @@ func deployNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, rel *Re
 
 	log.Print("Building images")
 	for _, p := range spec.Application.Programs {
+		if p.Container.Dockerfile == "" {
+			continue
+		}
+
 		err = d.Build(spec.Application, p)
 		if err != nil {
 			return err

@@ -29,7 +29,11 @@ type Program struct {
 	Key       string `yaml:"-"`
 	Name      string
 	Command   string
-	Image     string
+	Container Container
 	Ports     []string
-	PreScript []string
+}
+
+type Container struct {
+	Dockerfile string
+	Image      string
 }
