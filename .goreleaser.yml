@@ -10,3 +10,8 @@ builds:
 archive:
   files:
     - LICENSE.md
+
+release:
+  github:
+    owner: FurqanSoftware
+    name: bullet
