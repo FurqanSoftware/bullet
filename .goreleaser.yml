@@ -1,0 +1,12 @@
+builds:
+  - binary: bullet
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
+
+archive:
+  files:
+    - LICENSE.md
