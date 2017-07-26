@@ -1,7 +1,9 @@
 package docker
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"os"
 	"strings"
 
@@ -52,6 +54,14 @@ type BuildImageOptions struct {
 }
 
 func BuildImage(c *ssh.Client, app spec.Application, prog spec.Program, options BuildImageOptions) error {
+	if prog.Container.Dockerfile != "" {
+		return buildImageDockerfile(c, app, prog, options)
+	} else {
+		return buildImageDockerHub(c, app, prog, options)
+	}
+}
+
+func buildImageDockerfile(c *ssh.Client, app spec.Application, prog spec.Program, options BuildImageOptions) error {
 	f, err := os.Open(prog.Container.Dockerfile)
 	if err != nil {
 		return err
@@ -73,3 +83,29 @@ func BuildImage(c *ssh.Client, app spec.Application, prog spec.Program, options 
 	name := fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
 	return c.Run(fmt.Sprintf("docker build -t %s -f %s/Dockerfile.%s %s", name, appDir, prog.Key, appDir))
 }
+
+func buildImageDockerHub(c *ssh.Client, app spec.Application, prog spec.Program, options BuildImageOptions) error {
+	b := bytes.Buffer{}
+	err := dockerfileTpl.Execute(&b, struct {
+		Program spec.Program
+	}{
+		Program: prog,
+	})
+	if err != nil {
+		return err
+	}
+
+	appDir := fmt.Sprintf("/opt/%s", app.Identifier)
+
+	err = c.Push(fmt.Sprintf("%s/Dockerfile.%s", appDir, prog.Key), 0644, int64(b.Len()), &b)
+	if err != nil {
+		return err
+	}
+
+	name := fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
+	return c.Run(fmt.Sprintf("docker build -t %s -f %s/Dockerfile.%s %s", name, appDir, prog.Key, appDir))
+}
+
+var dockerfileTpl = template.Must(template.New("").Parse(dockerfileTplText))
+
+const dockerfileTplText = `FROM {{.Program.Container.Image}}`
