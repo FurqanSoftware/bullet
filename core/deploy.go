@@ -24,7 +24,10 @@ func Deploy(nodes []Node, spec *spec.Spec, rel *Release) error {
 			return err
 		}
 
-		deployNode(n, c, d, spec, rel)
+		err = deployNode(n, c, d, spec, rel)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
