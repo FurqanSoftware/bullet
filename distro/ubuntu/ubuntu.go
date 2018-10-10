@@ -55,7 +55,7 @@ func (u *Ubuntu) Touch(name string) error {
 }
 
 func (u *Ubuntu) Prune(name string, n int) error {
-	return u.Client.Run(fmt.Sprintf("cd %s; ls -F . | head -n -%d | xargs rm -r", name, n))
+	return u.Client.Run(fmt.Sprintf("cd %s; ls -F . | head -n -%d | xargs -r rm -r", name, n))
 }
 
 func (u *Ubuntu) ExtractTar(name, dir string) error {
