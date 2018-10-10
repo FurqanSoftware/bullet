@@ -74,6 +74,7 @@ func buildImageDockerfile(c *ssh.Client, app spec.Application, prog spec.Program
 	}
 
 	appDir := fmt.Sprintf("/opt/%s", app.Identifier)
+	curDir := fmt.Sprintf("%s/current", appDir)
 
 	err = c.Push(fmt.Sprintf("%s/Dockerfile.%s", appDir, prog.Key), 0644, fi.Size(), f)
 	if err != nil {
@@ -81,7 +82,7 @@ func buildImageDockerfile(c *ssh.Client, app spec.Application, prog spec.Program
 	}
 
 	name := fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
-	return c.Run(fmt.Sprintf("docker build -t %s -f %s/Dockerfile.%s %s", name, appDir, prog.Key, appDir))
+	return c.Run(fmt.Sprintf("docker build -t %s -f %s/Dockerfile.%s %s", name, appDir, prog.Key, curDir))
 }
 
 func buildImageDockerHub(c *ssh.Client, app spec.Application, prog spec.Program, options BuildImageOptions) error {

@@ -75,6 +75,12 @@ func deployNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, rel *Re
 		}
 	}
 
+	log.Print("Removing stale releases")
+	err = d.Prune(fmt.Sprintf("/opt/%s/releases", spec.Application.Identifier), 5)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

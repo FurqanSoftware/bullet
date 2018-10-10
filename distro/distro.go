@@ -16,6 +16,7 @@ type Distro interface {
 	Remove(name string) error
 	Symlink(oldname, newname string) error
 	Touch(name string) error
+	Prune(name string, n int) error
 
 	ExtractTar(name, dir string) error
 
