@@ -2,7 +2,7 @@
 
 VERSION = $(shell cat VERSION)
 
-IMAGE_NAME = registry.furqansoftware.net:5005/hjr265/bullet
+IMAGE_NAME = registry.furqansoftware.net/hjr265/bullet
 IMAGE_TAG = $(VERSION)
 
 build:
