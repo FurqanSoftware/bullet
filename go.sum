@@ -1,0 +1,9 @@
+github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
+github.com/spf13/cobra v0.0.0-20170612063610-b4dbd37a0183 h1:qAc5t1xapFcpl+BwFBhOcejvRP01XW2E+7lXLCAr1Yc=
+github.com/spf13/cobra v0.0.0-20170612063610-b4dbd37a0183/go.mod h1:1l0Ry5zgKvJasoi3XT1TypsSe7PqH0Sj9dhYf7v3XqQ=
+github.com/spf13/pflag v1.0.0 h1:oaPbdDe/x0UncahuwiPxW1GYJyilRAdsPnq3e1yaPcI=
+github.com/spf13/pflag v1.0.0/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
+golang.org/x/crypto v0.0.0-20170613210332-850760c427c5 h1:LtqPZJBT4TN+oR4PYeP4NsEXw48n76ZGyUh3RzL4VH8=
+golang.org/x/crypto v0.0.0-20170613210332-850760c427c5/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
+gopkg.in/yaml.v2 v2.0.0-20170407172122-cd8b52f8269e h1:o/mfNjxpTLivuKEfxzzwrJ8PmulH2wEp7t713uMwKAA=
+gopkg.in/yaml.v2 v2.0.0-20170407172122-cd8b52f8269e/go.mod h1:JAlM8MvJe8wmxCU4Bli9HhUf9+ttbYbLASfIpnQbh74=
