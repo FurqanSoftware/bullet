@@ -12,12 +12,12 @@ type Node struct {
 	Identity string
 }
 
-func ParseNodeSet(hosts string, identity string) ([]Node, error) {
+func ParseNodeSet(hosts string, port int, identity string) ([]Node, error) {
 	nodes := []Node{}
 	for _, h := range strings.Split(hosts, ",") {
 		nodes = append(nodes, Node{
 			Host:     h,
-			Port:     22,
+			Port:     port,
 			Identity: identity,
 		})
 	}

@@ -4,6 +4,7 @@ import "github.com/spf13/cobra"
 
 var (
 	Hosts    string
+	Port     int
 	Identity string
 )
 
@@ -18,5 +19,6 @@ var RootCmd = &cobra.Command{
 
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&Hosts, "hosts", "H", "", "List of target hosts (comma separated)")
+	RootCmd.PersistentFlags().IntVarP(&Port, "port", "p", 22, "Port to connect to")
 	RootCmd.PersistentFlags().StringVarP(&Identity, "identitiy", "i", "", "Path to an SSH identity file (usually a private key)")
 }

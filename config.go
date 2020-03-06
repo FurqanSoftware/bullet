@@ -19,7 +19,7 @@ var ConfigPushCmd = &cobra.Command{
 			return
 		}
 
-		nodes, err := core.ParseNodeSet(Hosts, Identity)
+		nodes, err := core.ParseNodeSet(Hosts, Port, Identity)
 		if err != nil {
 			log.Fatal(err)
 			return

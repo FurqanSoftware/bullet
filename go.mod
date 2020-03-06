@@ -7,3 +7,5 @@ require (
 	golang.org/x/crypto v0.0.0-20170613210332-850760c427c5
 	gopkg.in/yaml.v2 v2.0.0-20170407172122-cd8b52f8269e
 )
+
+go 1.13
