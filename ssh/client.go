@@ -5,8 +5,10 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/signal"
 	"path"
 
+	"github.com/mattn/go-tty"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -56,20 +58,43 @@ func (c Client) RunPTY(cmd string) error {
 	}
 	defer sess.Close()
 
+	tty, err := tty.Open()
+	if err != nil {
+		return err
+	}
+	defer tty.Close()
+
 	modes := ssh.TerminalModes{
 		ssh.ECHO:          0,
 		ssh.TTY_OP_ISPEED: 14400,
 		ssh.TTY_OP_OSPEED: 14400,
 	}
 
-	err = sess.RequestPty("xterm", 40, 80, modes)
+	w, h, err := tty.Size()
 	if err != nil {
 		return err
 	}
 
-	sess.Stdin = os.Stdin
-	sess.Stdout = os.Stdout
-	sess.Stderr = os.Stderr
+	err = sess.RequestPty("xterm", h, w, modes)
+	if err != nil {
+		return err
+	}
+
+	sigch := make(chan os.Signal)
+	signal.Notify(sigch, os.Interrupt)
+	defer close(sigch)
+	go func() {
+		for sig := range sigch {
+			switch sig {
+			case os.Interrupt:
+				sess.Signal(ssh.SIGINT)
+			}
+		}
+	}()
+
+	sess.Stdin = tty.Input()
+	sess.Stdout = tty.Output()
+	sess.Stderr = tty.Output()
 	return sess.Run(cmd)
 }
 

@@ -147,6 +147,19 @@ func RunContainer(c *ssh.Client, app spec.Application, prog spec.Program, option
 	if err != nil {
 		return nil
 	}
+
+	conts, err = ListContainers(c, app, prog, ListContainersOptions{
+		DockerPath: options.DockerPath,
+	})
+	if err != nil {
+		return nil
+	}
+	if len(conts) > 0 {
+		err := deleteContainer(c, app, prog, options.DockerPath, name)
+		if err != nil {
+			return nil
+		}
+	}
 	return nil
 }
 
