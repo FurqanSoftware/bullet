@@ -10,7 +10,7 @@ import (
 	"github.com/FurqanSoftware/bullet/ssh"
 )
 
-func ConfigPush(nodes []Node, spec *spec.Spec, name string) error {
+func ConfigPush(nodes []Node, spec *spec.Spec, filename string) error {
 	for _, n := range nodes {
 		log.Printf("Connecting to %s", n.Addr())
 		c, err := ssh.Dial(n.Addr(), n.Identity)
@@ -19,7 +19,7 @@ func ConfigPush(nodes []Node, spec *spec.Spec, name string) error {
 		}
 
 		log.Print("Uploading environment file")
-		f, err := os.Open(name)
+		f, err := os.Open(filename)
 		if err != nil {
 			return err
 		}

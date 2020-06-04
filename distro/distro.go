@@ -2,6 +2,7 @@ package distro
 
 import (
 	"errors"
+	"text/tabwriter"
 
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/FurqanSoftware/bullet/ssh"
@@ -23,8 +24,12 @@ type Distro interface {
 	Build(app spec.Application, prog spec.Program) error
 	Restart(app spec.Application, prog spec.Program, no int) error
 	RestartAll(app spec.Application, prog spec.Program) error
-	Status(app spec.Application, prog spec.Program) error
+	Status(app spec.Application, prog spec.Program, tw *tabwriter.Writer) error
 	Scale(app spec.Application, prog spec.Program, n int) error
+
+	CronEnable(app spec.Application, job spec.Job) error
+	CronDisable(app spec.Application, job spec.Job) error
+	CronStatus(app spec.Application, job spec.Job, tw *tabwriter.Writer) error
 
 	Run(app spec.Application, prog spec.Program) error
 

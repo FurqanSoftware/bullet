@@ -11,6 +11,8 @@ type Application struct {
 
 	Programs    map[string]Program
 	ProgramKeys []string
+
+	Cron Cron
 }
 
 type Build struct {
@@ -36,4 +38,23 @@ type Program struct {
 type Container struct {
 	Dockerfile string
 	Image      string
+}
+
+type Cron struct {
+	Jobs []Job
+}
+
+func (c Cron) Job(k string) Job {
+	for _, j := range c.Jobs {
+		if j.Key == k {
+			return j
+		}
+	}
+	return Job{}
+}
+
+type Job struct {
+	Key      string
+	Command  string
+	Schedule string
 }
