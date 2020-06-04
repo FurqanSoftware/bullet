@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 	"text/tabwriter"
+	"time"
 
 	"github.com/FurqanSoftware/bullet/distro"
 	"github.com/FurqanSoftware/bullet/docker"
@@ -119,6 +120,8 @@ func (u *Ubuntu) Status(app spec.Application, prog spec.Program, tw *tabwriter.W
 		for _, cont := range conts {
 			fmt.Fprintf(tw, "%s:\t%s\t(%s)\n", prog.Key, strings.ToLower(cont.Status), cont.ID)
 		}
+	} else {
+		fmt.Fprintf(tw, "%s:\tdisabled\n", prog.Key)
 	}
 	return nil
 }
@@ -150,7 +153,7 @@ func (u *Ubuntu) CronEnable(app spec.Application, job spec.Job) error {
 	}
 	appdir := fmt.Sprintf("/opt/%s", app.Identifier)
 	name := app.Identifier + "_cron_" + job.Key
-	lines = append(lines, job.Schedule+" "+fmt.Sprintf("%s run --rm --env-file %s/env --name %s -v %s/current:/%s -w /%s %s %s", dockerPath, appdir, name, appdir, app.Identifier, app.Identifier, app.Identifier+"_shell", job.Command)+" && (mkdir -p "+appdir+"/logs && touch "+appdir+"/logs/cron.log && echo `date +\\%Y-\\%m-\\%d \\%H:\\%M:\\%S` 'Job "+job.Key+" succeeded' >> "+appdir+"/logs/cron.log) || (mkdir -p "+appdir+"/logs && touch "+appdir+"/logs/cron.log && echo `date +\\%Y-\\%m-\\%d \\%H:\\%M:\\%S` 'Job "+job.Key+" failed' >> "+appdir+"/logs/cron.log) # Bullet "+app.Identifier+"_"+job.Key)
+	lines = append(lines, job.Schedule+" "+fmt.Sprintf("%s run --rm --env-file %s/env --name %s -v %s/current:/%s -w /%s %s %s", dockerPath, appdir, name, appdir, app.Identifier, app.Identifier, app.Identifier+"_shell", job.Command)+" && (mkdir -p "+appdir+"/logs && touch "+appdir+"/logs/cron.log && echo `date -u +\\%Y-\\%m-\\%dT\\%H:\\%M:\\%SZ` 'Job "+job.Key+" succeeded' >> "+appdir+"/logs/cron.log) || (mkdir -p "+appdir+"/logs && touch "+appdir+"/logs/cron.log && echo `date -u +\\%Y-\\%m-\\%dT\\%H:\\%M:\\%SZ` 'Job "+job.Key+" failed' >> "+appdir+"/logs/cron.log) # Bullet "+app.Identifier+"_"+job.Key)
 	crontab = []byte(strings.Join(lines, "\n") + "\n")
 
 	err = u.Client.Push("/tmp/crontab", 0600, int64(len(crontab)), bytes.NewReader(crontab))
@@ -210,12 +213,25 @@ func (u *Ubuntu) CronStatus(app spec.Application, job spec.Job, tw *tabwriter.Wr
 		}
 	}
 
+	appdir := fmt.Sprintf("/opt/%s", app.Identifier)
+	lastrun, err := u.Client.Output(fmt.Sprintf("grep " + job.Key + " " + appdir + "/logs/cron.log | tail -1"))
+
 	fmt.Fprintf(tw, "%s:\t", job.Key)
 	if match {
-		fmt.Fprintln(tw, "enabled")
+		fmt.Fprint(tw, "enabled")
 	} else {
-		fmt.Fprintln(tw, "disabled")
+		fmt.Fprint(tw, "disabled")
 	}
+	fields := bytes.Fields(lastrun)
+	if len(fields) > 0 {
+		ts, err := time.Parse(time.RFC3339, string(fields[0]))
+		if err != nil {
+			return err
+		}
+		since := time.Now().Sub(ts).Truncate(time.Second)
+		fmt.Fprintf(tw, "\t(last run %s %s ago)", fields[3], since)
+	}
+	fmt.Fprintln(tw)
 	return nil
 }
 
