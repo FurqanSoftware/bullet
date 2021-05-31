@@ -39,6 +39,10 @@ bullet -H {host} deploy hello.tar.gz
 bullet -H {host} scale web=1
 ```
 
+## But, Kubernetes?
+
+https://k8s.af/
+
 ## Acknowledgements
 
 - [Nikita Golubev](http://www.flaticon.com/authors/nikita-golubev) - For the bullet icon
