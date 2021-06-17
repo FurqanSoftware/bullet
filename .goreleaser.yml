@@ -27,3 +27,7 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+release:
+  github:
+    owner: FurqanSoftware
+    name: bullet
