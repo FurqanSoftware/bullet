@@ -1,17 +1,29 @@
+before:
+  hooks:
+    - go mod tidy
 builds:
-  - binary: bullet
+  - env:
+      - CGO_ENABLED=0
     goos:
-      - windows
-      - darwin
       - linux
-    goarch:
-      - amd64
-
-archive:
-  files:
-    - LICENSE.md
-
-release:
-  github:
-    owner: FurqanSoftware
-    name: bullet
+      - darwin
+      - windows
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+    files:
+      - LICENSE
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
