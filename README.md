@@ -11,7 +11,7 @@ At [Furqan Software](https://furqansoftware.com/), Bullet helps us setup and dep
 ### Install from Source
 
 ``` sh
-go get github.com/FurqanSoftware/bullet
+go install github.com/FurqanSoftware/bullet@latest
 ```
 
 ### Copy an Example App
