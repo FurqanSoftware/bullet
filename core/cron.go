@@ -50,7 +50,7 @@ func CronDisable(nodes []Node, spec *spec.Spec, keys []string) error {
 			return err
 		}
 
-		log.Print("Enabling cron job(s)")
+		log.Print("Disabling cron job(s)")
 		for _, k := range keys {
 			j := spec.Application.Cron.Job(k)
 			if j.Command == "" {
