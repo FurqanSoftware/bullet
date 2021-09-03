@@ -1,5 +1,7 @@
 package spec
 
+import "time"
+
 type Spec struct {
 	Application Application
 }
@@ -28,16 +30,25 @@ type Deploy struct {
 }
 
 type Program struct {
-	Key       string `yaml:"-"`
-	Name      string
-	Command   string
-	Container Container
-	Ports     []string
+	Key         string `yaml:"-"`
+	Name        string
+	Command     string
+	Container   Container
+	Ports       []string
+	Healthcheck *Healthcheck
 }
 
 type Container struct {
 	Dockerfile string
 	Image      string
+}
+
+type Healthcheck struct {
+	Command     string
+	Interval    time.Duration
+	Timeout     time.Duration
+	Retries     int
+	StartPeriod time.Duration
 }
 
 type Cron struct {

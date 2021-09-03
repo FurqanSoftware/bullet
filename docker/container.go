@@ -165,21 +165,38 @@ func RunContainer(c *ssh.Client, app spec.Application, prog spec.Program, option
 
 func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, image, name string) error {
 	appDir := fmt.Sprintf("/opt/%s", app.Identifier)
-	portArgs := ""
+
+	cmd := []string{
+		dockerPath,
+		"run",
+		"-d",
+		"--env-file", appDir + "/env",
+		"--name", name,
+	}
 	for _, p := range prog.Ports {
-		portArgs += fmt.Sprintf(" -p %s", p)
+		cmd = append(cmd, "-p", p)
+	}
+	if prog.Healthcheck != nil {
+		cmd = append(
+			cmd,
+			"--health-cmd", prog.Healthcheck.Command,
+			"--health-interval", prog.Healthcheck.Interval.String(),
+			"--health-timeout", prog.Healthcheck.Timeout.String(),
+			"--health-retries", strconv.Itoa(prog.Healthcheck.Retries),
+			"--health-start-period", prog.Healthcheck.StartPeriod.String(),
+		)
 	}
 
-	cmds := []string{
-		fmt.Sprintf("%s run -d --env-file %s/env --name %s %s --restart always -v %s/current:/%s -w /%s %s %s", dockerPath, appDir, name, portArgs, appDir, app.Identifier, app.Identifier, image, prog.Command),
-	}
-	for _, cmd := range cmds {
-		err := c.Run(cmd)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	cmd = append(
+		cmd,
+		"--restart", "always",
+		"-v", appDir+"/current:/"+app.Identifier,
+		"-w", "/"+app.Identifier,
+		image,
+		prog.Command,
+	)
+
+	return c.Run(strings.Join(cmd, " "))
 }
 
 func createAttachContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, image, name string) error {
