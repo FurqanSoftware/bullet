@@ -81,7 +81,7 @@ func RestartContainer(c *ssh.Client, app spec.Application, prog spec.Program, no
 		return err
 	}
 
-	return createContainer(c, app, prog, options.DockerPath, image, name)
+	return createContainer(c, app, prog, options.DockerPath, image, name, no)
 }
 
 type ScaleContainerOptions struct {
@@ -114,7 +114,7 @@ func ScaleContainer(c *ssh.Client, app spec.Application, prog spec.Program, n in
 	for ; d < 0; d++ {
 		name := fmt.Sprintf("%s_%s_%d", app.Identifier, prog.Key, lastNo-d)
 		image := fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
-		err = createContainer(c, app, prog, options.DockerPath, image, name)
+		err = createContainer(c, app, prog, options.DockerPath, image, name, lastNo-d)
 		if err != nil {
 			return nil
 		}
@@ -163,7 +163,7 @@ func RunContainer(c *ssh.Client, app spec.Application, prog spec.Program, option
 	return nil
 }
 
-func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, image, name string) error {
+func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, image, name string, no int) error {
 	appDir := fmt.Sprintf("/opt/%s", app.Identifier)
 
 	cmd := []string{
@@ -174,7 +174,15 @@ func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 		"--name", name,
 	}
 	for _, p := range prog.Ports {
-		cmd = append(cmd, "-p", p)
+		m := strings.SplitN(p, ":", 2)
+		if len(m) == 1 {
+			m = append(m, m[0])
+		}
+		h, err := strconv.Atoi(m[0])
+		if err != nil {
+			return err
+		}
+		cmd = append(cmd, "-p", fmt.Sprintf("%d:%s", h+no-1, m[1]))
 	}
 	if prog.Healthcheck != nil {
 		cmd = append(
