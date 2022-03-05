@@ -12,7 +12,7 @@ build-alpine:
 	docker run \
 		-v `pwd`:/go/src/github.com/FurqanSoftware/bullet \
 		-w /go/src/github.com/FurqanSoftware/bullet \
-		golang:1.8-alpine \
+		golang:1.17.0-alpine \
 		go build -o bullet github.com/FurqanSoftware/bullet
 
 test:
