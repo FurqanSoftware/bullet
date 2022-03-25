@@ -1,7 +1,5 @@
 .PHONY: build build-alpine
 
-VERSION = $(shell cat VERSION)
-
 IMAGE_NAME = registry.furqansoftware.net/tools/bullet
 IMAGE_TAG = $(VERSION)
 
