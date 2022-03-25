@@ -35,7 +35,7 @@ type Program struct {
 	Command     string
 	Container   Container
 	Ports       []string
-	Healthcheck *Healthcheck
+	Healthcheck *ProgramHealthcheck
 }
 
 type Container struct {
@@ -43,7 +43,7 @@ type Container struct {
 	Image      string
 }
 
-type Healthcheck struct {
+type ProgramHealthcheck struct {
 	Command     string
 	Interval    time.Duration
 	Timeout     time.Duration
@@ -65,7 +65,12 @@ func (c Cron) Job(k string) Job {
 }
 
 type Job struct {
-	Key      string
-	Command  string
-	Schedule string
+	Key         string
+	Command     string
+	Schedule    string
+	Healthcheck JobHealthcheck
+}
+
+type JobHealthcheck struct {
+	URL string
 }
