@@ -3,16 +3,13 @@ package ubuntu
 import (
 	"bytes"
 	"fmt"
-	"regexp"
 	"strings"
 	"text/tabwriter"
-	"time"
 
 	"github.com/FurqanSoftware/bullet/distro"
 	"github.com/FurqanSoftware/bullet/docker"
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/FurqanSoftware/bullet/ssh"
-	cryptossh "golang.org/x/crypto/ssh"
 )
 
 type Ubuntu struct {
@@ -133,105 +130,69 @@ func (u *Ubuntu) Scale(app spec.Application, prog spec.Program, n int) error {
 }
 
 func (u *Ubuntu) CronEnable(app spec.Application, job spec.Job) error {
-	crontab, err := u.Client.Output("crontab -l")
-	_, ok := err.(*cryptossh.ExitError)
-	if ok {
-		err = nil
-	}
-	if err != nil {
-		return err
-	}
-	lines := []string{}
-	re := regexp.MustCompile("# Bullet " + regexp.QuoteMeta(app.Identifier) + "_" + regexp.QuoteMeta(job.Key))
-	for _, l := range bytes.Split(bytes.TrimSpace(crontab), []byte("\n")) {
-		if !re.Match(l) {
-			lines = append(lines, string(l))
-		}
-	}
-	if len(lines) == 1 && lines[0] == "" {
-		lines = lines[:0]
-	}
 	appdir := fmt.Sprintf("/opt/%s", app.Identifier)
 	name := app.Identifier + "_cron_" + job.Key
-	lines = append(lines, job.Schedule+" "+fmt.Sprintf("%s run --rm --env-file %s/env --name %s -v %s/current:/%s -w /%s %s %s", dockerPath, appdir, name, appdir, app.Identifier, app.Identifier, app.Identifier+"_shell", job.Command)+" && (mkdir -p "+appdir+"/logs && touch "+appdir+"/logs/cron.log && echo `date -u +\\%Y-\\%m-\\%dT\\%H:\\%M:\\%SZ` 'Job "+job.Key+" succeeded' >> "+appdir+"/logs/cron.log) || (mkdir -p "+appdir+"/logs && touch "+appdir+"/logs/cron.log && echo `date -u +\\%Y-\\%m-\\%dT\\%H:\\%M:\\%SZ` 'Job "+job.Key+" failed' >> "+appdir+"/logs/cron.log) # Bullet "+app.Identifier+"_"+job.Key)
-	crontab = []byte(strings.Join(lines, "\n") + "\n")
 
-	err = u.Client.Push("/tmp/crontab", 0600, int64(len(crontab)), bytes.NewReader(crontab))
+	servicename := "bullet_" + app.Identifier + "_" + job.Key + ".service"
+	timername := "bullet_" + app.Identifier + "_" + job.Key + ".timer"
+
+	service := `[Unit]
+Description=Bullet task ` + app.Identifier + `_` + job.Key + `
+Wants=` + timername + `
+
+[Service]
+Type=oneshot
+ExecStart=` + fmt.Sprintf("%s run --rm --env-file %s/env --name %s -v %s/current:/%s -w /%s %s %s", dockerPath, appdir, name, appdir, app.Identifier, app.Identifier, app.Identifier+"_shell", job.Command) + `
+
+[Install]
+WantedBy=multi-user.target`
+	err := u.Client.Push(fmt.Sprintf("/etc/systemd/system/%s", servicename), 0644, int64(len(service)), strings.NewReader(service))
 	if err != nil {
 		return err
 	}
 
-	return u.Client.Run("crontab /tmp/crontab")
+	timer := `[Unit]
+Description=Bullet task ` + app.Identifier + `_` + job.Key + `
+Requires=` + servicename + `
+
+[Timer]
+Unit=` + servicename + `
+OnCalendar=` + job.Schedule + `
+
+[Install]
+WantedBy=timers.target`
+	err = u.Client.Push(fmt.Sprintf("/etc/systemd/system/%s", timername), 0644, int64(len(timer)), strings.NewReader(timer))
+	if err != nil {
+		return err
+	}
+
+	return u.Client.Run(fmt.Sprintf("systemctl enable --now %s", timername))
 }
 
 func (u *Ubuntu) CronDisable(app spec.Application, job spec.Job) error {
-	crontab, err := u.Client.Output("crontab -l")
-	_, ok := err.(*cryptossh.ExitError)
-	if ok {
-		err = nil
-	}
-	if err != nil {
-		return err
-	}
-	lines := []string{}
-	match := false
-	re := regexp.MustCompile("# Bullet " + regexp.QuoteMeta(app.Identifier) + "_" + regexp.QuoteMeta(job.Key))
-	for _, l := range bytes.Split(bytes.TrimSpace(crontab), []byte("\n")) {
-		if !re.Match(l) {
-			lines = append(lines, string(l))
-		} else {
-			match = true
-		}
-	}
-	if !match {
-		return nil
-	}
-	crontab = []byte(strings.Join(lines, "\n") + "\n")
-
-	err = u.Client.Push("/tmp/crontab", 0600, int64(len(crontab)), bytes.NewReader(crontab))
-	if err != nil {
-		return err
-	}
-
-	return u.Client.Run("crontab /tmp/crontab")
+	timername := "bullet_" + app.Identifier + "_" + job.Key + ".timer"
+	return u.Client.Run(fmt.Sprintf("systemctl disable --now %s", timername))
 }
 
 func (u *Ubuntu) CronStatus(app spec.Application, job spec.Job, tw *tabwriter.Writer) error {
-	crontab, err := u.Client.Output("crontab -l")
-	_, ok := err.(*cryptossh.ExitError)
-	if ok {
-		err = nil
-	}
+	timername := "bullet_" + app.Identifier + "_" + job.Key + ".timer"
+	status, err := u.Client.Output(fmt.Sprintf("systemctl status %s", timername))
 	if err != nil {
 		return err
 	}
-	match := false
-	re := regexp.MustCompile("# Bullet " + regexp.QuoteMeta(app.Identifier) + "_" + regexp.QuoteMeta(job.Key))
-	for _, l := range bytes.Split(bytes.TrimSpace(crontab), []byte("\n")) {
-		if re.Match(l) {
-			match = true
-		}
-	}
-
-	appdir := fmt.Sprintf("/opt/%s", app.Identifier)
-	lastrun, err := u.Client.Output(fmt.Sprintf("grep " + job.Key + " " + appdir + "/logs/cron.log | tail -1"))
 
 	fmt.Fprintf(tw, "%s:\t", job.Key)
-	if match {
-		fmt.Fprint(tw, "enabled")
-	} else {
-		fmt.Fprint(tw, "disabled")
-	}
-	fields := bytes.Fields(lastrun)
-	if len(fields) > 0 {
-		ts, err := time.Parse(time.RFC3339, string(fields[0]))
-		if err != nil {
-			return err
+	for _, l := range bytes.Split(status, []byte("\n")) {
+		l = bytes.TrimSpace(l)
+		if bytes.HasPrefix(l, []byte("Active:")) {
+			fmt.Fprintf(tw, "%s", bytes.TrimPrefix(l, []byte("Active: ")))
 		}
-		since := time.Now().Sub(ts).Truncate(time.Second)
-		fmt.Fprintf(tw, "\t(last run %s %s ago)", fields[3], since)
+		if bytes.HasPrefix(l, []byte("Trigger:")) {
+			fmt.Fprintf(tw, " (trigger: %s)", bytes.TrimPrefix(l, []byte("Trigger: ")))
+		}
 	}
-	fmt.Fprintln(tw)
+	fmt.Fprint(tw, "\n")
+
 	return nil
 }
 
