@@ -166,7 +166,7 @@ WantedBy=timers.target`
 		return err
 	}
 
-	return u.Client.Run(fmt.Sprintf("systemctl enable --now %s", timername))
+	return u.Client.Run(fmt.Sprintf("systemctl daemon-reload && systemctl enable --now %s", timername))
 }
 
 func (u *Ubuntu) CronDisable(app spec.Application, job spec.Job) error {
