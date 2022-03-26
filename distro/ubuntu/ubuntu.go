@@ -180,8 +180,25 @@ WantedBy=timers.target`
 }
 
 func (u *Ubuntu) CronDisable(app spec.Application, job spec.Job) error {
+	servicename := "bullet_" + app.Identifier + "_" + job.Key + ".service"
 	timername := "bullet_" + app.Identifier + "_" + job.Key + ".timer"
-	return u.Client.Run(fmt.Sprintf("systemctl disable --now %s", timername))
+
+	err := u.Client.Run(fmt.Sprintf("[ ! -e %s ] || systemctl disable --now %s", timername, timername))
+	if err != nil {
+		return err
+	}
+
+	for _, name := range []string{
+		fmt.Sprintf("/etc/systemd/system/%s", servicename),
+		fmt.Sprintf("/etc/systemd/system/%s", timername),
+	} {
+		err = u.Client.Run(fmt.Sprintf("[ ! -e %s ] || rm %s", name, name))
+		if err != nil {
+			return err
+		}
+	}
+
+	return u.Client.Run(fmt.Sprint("systemctl daemon-reload"))
 }
 
 func (u *Ubuntu) CronStatus(app spec.Application, job spec.Job, tw *tabwriter.Writer) error {
