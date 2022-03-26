@@ -136,9 +136,11 @@ func (u *Ubuntu) CronEnable(app spec.Application, job spec.Job) error {
 	servicename := "bullet_" + app.Identifier + "_" + job.Key + ".service"
 	timername := "bullet_" + app.Identifier + "_" + job.Key + ".timer"
 
+	servicepreamble := []string{}
 	servicepostamble := []string{}
 	if job.Healthcheck.URL != "" {
-		servicepostamble = append(servicepostamble, "ExecStopPost=curl -sS -m 10 --retry 5 "+job.Healthcheck.URL)
+		servicepreamble = append(servicepreamble, "ExecStartPre=-curl -sS -m 10 --retry 5 "+job.Healthcheck.URL+"/start")
+		servicepostamble = append(servicepostamble, "ExecStopPost=-curl -sS -m 10 --retry 5 "+job.Healthcheck.URL+"/${EXIT_STATUS}")
 	}
 
 	service := `[Unit]
@@ -148,6 +150,7 @@ Wants=` + timername + `
 [Service]
 Type=oneshot
 EnvironmentFile=` + fmt.Sprintf("%s/env", appdir) + `
+` + strings.Join(servicepreamble, "\n") + `
 ExecStart=` + fmt.Sprintf("%s run --rm --env-file %s/env --name %s -v %s/current:/%s -w /%s %s %s", dockerPath, appdir, name, appdir, app.Identifier, app.Identifier, app.Identifier+"_shell", job.Command) + `
 ` + strings.Join(servicepostamble, "\n") + `
 
