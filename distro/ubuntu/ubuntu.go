@@ -186,20 +186,25 @@ func (u *Ubuntu) CronDisable(app spec.Application, job spec.Job) error {
 
 func (u *Ubuntu) CronStatus(app spec.Application, job spec.Job, tw *tabwriter.Writer) error {
 	timername := "bullet_" + app.Identifier + "_" + job.Key + ".timer"
-	status, err := u.Client.Output(fmt.Sprintf("systemctl status %s", timername))
+	status, err := u.Client.Output(fmt.Sprintf("systemctl status %s || true", timername))
 	if err != nil {
 		return err
 	}
 
 	fmt.Fprintf(tw, "%s:\t", job.Key)
+	active := false
 	for _, l := range bytes.Split(status, []byte("\n")) {
 		l = bytes.TrimSpace(l)
 		if bytes.HasPrefix(l, []byte("Active:")) {
 			fmt.Fprintf(tw, "%s", bytes.TrimPrefix(l, []byte("Active: ")))
+			active = true
 		}
 		if bytes.HasPrefix(l, []byte("Trigger:")) {
 			fmt.Fprintf(tw, " (trigger: %s)", bytes.TrimPrefix(l, []byte("Trigger: ")))
 		}
+	}
+	if !active {
+		fmt.Fprintf(tw, "disabled")
 	}
 	fmt.Fprint(tw, "\n")
 
