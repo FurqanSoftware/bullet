@@ -68,6 +68,7 @@ type Job struct {
 	Key         string
 	Command     string
 	Schedule    string
+	Jitter      string
 	Healthcheck JobHealthcheck
 }
 

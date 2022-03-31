@@ -161,13 +161,22 @@ WantedBy=multi-user.target`
 		return err
 	}
 
+	timerpreamble := []string{}
+	timerpostamble := []string{}
+	if job.Jitter != "" {
+		timerpostamble = append(timerpostamble, "RandomizedDelaySec="+job.Jitter)
+		timerpostamble = append(timerpostamble, "FixedRandomDelay=true")
+	}
+
 	timer := `[Unit]
 Description=Bullet task ` + app.Identifier + `_` + job.Key + `
 Requires=` + servicename + `
 
 [Timer]
+` + strings.Join(timerpreamble, "\n") + `
 Unit=` + servicename + `
 OnCalendar=` + job.Schedule + `
+` + strings.Join(timerpostamble, "\n") + `
 
 [Install]
 WantedBy=timers.target`
