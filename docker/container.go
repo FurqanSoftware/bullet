@@ -170,6 +170,11 @@ func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 		dockerPath,
 		"run",
 		"-d",
+		"-e", strconv.Quote("BULLET_APPLICATION_NAME=" + app.Name),
+		"-e", strconv.Quote("BULLET_APPLICATION_ID=" + app.Identifier),
+		"-e", strconv.Quote("BULLET_PROGRAM_KEY=" + prog.Key),
+		"-e", strconv.Quote("BULLET_PROGRAM_NAME=" + prog.Name),
+		"-e", strconv.Quote("BULLET_INSTANCE_ID=" + name),
 		"--env-file", appDir + "/env",
 		"--name", name,
 	}
@@ -210,16 +215,24 @@ func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 func createAttachContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, image, name string) error {
 	appDir := fmt.Sprintf("/opt/%s", app.Identifier)
 
-	cmds := []string{
-		fmt.Sprintf("%s run -ti --env-file %s/env --name %s -v %s/current:/%s -w /%s %s %s", dockerPath, appDir, name, appDir, app.Identifier, app.Identifier, image, prog.Command),
+	cmd := []string{
+		dockerPath,
+		"run",
+		"-ti",
+		"-e", strconv.Quote("BULLET_APPLICATION_NAME=" + app.Name),
+		"-e", strconv.Quote("BULLET_APPLICATION_ID=" + app.Identifier),
+		"-e", strconv.Quote("BULLET_PROGRAM_KEY=" + prog.Key),
+		"-e", strconv.Quote("BULLET_PROGRAM_NAME=" + prog.Name),
+		"-e", strconv.Quote("BULLET_INSTANCE_ID=" + name),
+		"--env-file", appDir + "/env",
+		"--name", name,
+		"-v", appDir + "/current:/" + app.Identifier,
+		"-w", "/" + app.Identifier,
+		image,
+		prog.Command,
 	}
-	for _, cmd := range cmds {
-		err := c.RunPTY(cmd)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+
+	return c.RunPTY(strings.Join(cmd, " "))
 }
 
 func deleteContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, name string) error {
