@@ -36,6 +36,8 @@ type Program struct {
 	Container   Container
 	Ports       []string
 	Healthcheck *ProgramHealthcheck
+
+	Unsafe Unsafe
 }
 
 type Container struct {
@@ -49,6 +51,10 @@ type ProgramHealthcheck struct {
 	Timeout     time.Duration
 	Retries     int
 	StartPeriod time.Duration
+}
+
+type Unsafe struct {
+	NetworkHost bool
 }
 
 type Cron struct {

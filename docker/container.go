@@ -199,12 +199,16 @@ func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 			"--health-start-period", prog.Healthcheck.StartPeriod.String(),
 		)
 	}
+	if prog.Unsafe.NetworkHost {
+		cmd = append(cmd, "--network=host")
+	}
 
 	cmd = append(
 		cmd,
 		"--restart", "always",
 		"-v", appDir+"/current:/"+app.Identifier,
 		"-w", "/"+app.Identifier,
+		`--entrypoint=""`,
 		image,
 		prog.Command,
 	)
@@ -226,11 +230,19 @@ func createAttachContainer(c *ssh.Client, app spec.Application, prog spec.Progra
 		"-e", strconv.Quote("BULLET_INSTANCE_ID=" + name),
 		"--env-file", appDir + "/env",
 		"--name", name,
-		"-v", appDir + "/current:/" + app.Identifier,
-		"-w", "/" + app.Identifier,
+	}
+	if prog.Unsafe.NetworkHost {
+		cmd = append(cmd, "--network=host")
+	}
+
+	cmd = append(
+		cmd,
+		"-v", appDir+"/current:/"+app.Identifier,
+		"-w", "/"+app.Identifier,
+		`--entrypoint=""`,
 		image,
 		prog.Command,
-	}
+	)
 
 	return c.RunPTY(strings.Join(cmd, " "))
 }
