@@ -35,6 +35,7 @@ type Program struct {
 	Command     string
 	Container   Container
 	Ports       []string
+	Volumes     []string
 	Healthcheck *ProgramHealthcheck
 
 	Unsafe Unsafe

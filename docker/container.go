@@ -189,6 +189,9 @@ func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 		}
 		cmd = append(cmd, "-p", fmt.Sprintf("%d:%s", h+no-1, m[1]))
 	}
+	for _, v := range prog.Volumes {
+		cmd = append(cmd, "-v", v)
+	}
 	if prog.Healthcheck != nil {
 		cmd = append(
 			cmd,
@@ -230,6 +233,9 @@ func createAttachContainer(c *ssh.Client, app spec.Application, prog spec.Progra
 		"-e", strconv.Quote("BULLET_INSTANCE_ID=" + name),
 		"--env-file", appDir + "/env",
 		"--name", name,
+	}
+	for _, v := range prog.Volumes {
+		cmd = append(cmd, "-v", v)
 	}
 	if prog.Unsafe.NetworkHost {
 		cmd = append(cmd, "--network=host")
