@@ -212,7 +212,7 @@ func (u *Ubuntu) CronDisable(app spec.Application, job spec.Job) error {
 
 func (u *Ubuntu) CronStatus(app spec.Application, job spec.Job, tw *tabwriter.Writer) error {
 	timername := "bullet_" + app.Identifier + "_" + job.Key + ".timer"
-	status, err := u.Client.Output(fmt.Sprintf("[ ! -e %s ] || systemctl status %s", timername, timername))
+	status, err := u.Client.Output(fmt.Sprintf("[ ! -e /etc/systemd/system/%s ] || systemctl status %s", timername, timername))
 	if err != nil {
 		return err
 	}
