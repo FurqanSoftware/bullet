@@ -1,4 +1,4 @@
-FROM alpine:3.5
+FROM alpine:3.15
 
 MAINTAINER bullet@furqansoftware.com
 
