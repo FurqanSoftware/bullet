@@ -189,6 +189,9 @@ func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 		}
 		cmd = append(cmd, "-p", fmt.Sprintf("%d:%s", h+no-1, m[1]))
 	}
+	if prog.User != "" {
+		cmd = append(cmd, "--user", prog.User)
+	}
 	for _, v := range prog.Volumes {
 		cmd = append(cmd, "-v", v)
 	}
@@ -233,6 +236,9 @@ func createAttachContainer(c *ssh.Client, app spec.Application, prog spec.Progra
 		"-e", strconv.Quote("BULLET_INSTANCE_ID=" + name),
 		"--env-file", appDir + "/env",
 		"--name", name,
+	}
+	if prog.User != "" {
+		cmd = append(cmd, "--user", prog.User)
 	}
 	for _, v := range prog.Volumes {
 		cmd = append(cmd, "-v", v)
