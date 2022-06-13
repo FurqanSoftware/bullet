@@ -45,6 +45,7 @@ type Program struct {
 type Container struct {
 	Dockerfile string
 	Image      string
+	Entrypoint *string
 }
 
 type ProgramHealthcheck struct {

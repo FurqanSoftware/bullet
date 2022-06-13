@@ -211,10 +211,24 @@ func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 
 	cmd = append(
 		cmd,
+		"--log-driver",
+		"json-file",
+		"--log-opt",
+		`tag="{{.Name}}"`,
 		"--restart", "always",
 		"-v", appDir+"/current:/"+app.Identifier,
 		"-w", "/"+app.Identifier,
-		`--entrypoint=""`,
+	)
+
+	if prog.Container.Entrypoint != nil {
+		cmd = append(
+			cmd,
+			"--entrypoint", strconv.Quote(*prog.Container.Entrypoint),
+		)
+	}
+
+	cmd = append(
+		cmd,
 		image,
 		prog.Command,
 	)
