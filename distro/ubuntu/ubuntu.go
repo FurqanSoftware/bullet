@@ -95,6 +95,10 @@ func (u *Ubuntu) RestartAll(app spec.Application, prog spec.Program) error {
 	}
 
 	for _, cont := range conts {
+		if cont.No == 0 {
+			// Skip runs
+			continue
+		}
 		err = docker.RestartContainer(u.Client, app, prog, cont.No, docker.RestartContainerOptions{
 			DockerPath: dockerPath,
 		})
