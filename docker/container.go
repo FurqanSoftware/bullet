@@ -103,6 +103,16 @@ func ScaleContainer(c *ssh.Client, app spec.Application, prog spec.Program, n in
 		}
 	}
 
+	printf := func(format string, v ...interface{}) {
+		fmt.Printf("\033[G\033[K"+format, v...)
+	}
+
+	var up, down int
+
+	printCounts := func() {
+		printf("%s: %d up, %d down, %d desired, %d ready", prog.Key, up, down, n, len(conts)-down+up)
+	}
+
 	d := len(conts) - n
 	for ; d > 0; d-- {
 		name := fmt.Sprintf("%s_%s_%d", app.Identifier, prog.Key, lastNo-d+1)
@@ -110,6 +120,8 @@ func ScaleContainer(c *ssh.Client, app spec.Application, prog spec.Program, n in
 		if err != nil {
 			return nil
 		}
+		down++
+		printCounts()
 	}
 	for ; d < 0; d++ {
 		name := fmt.Sprintf("%s_%s_%d", app.Identifier, prog.Key, lastNo-d)
@@ -118,7 +130,12 @@ func ScaleContainer(c *ssh.Client, app spec.Application, prog spec.Program, n in
 		if err != nil {
 			return nil
 		}
+		up++
+		printCounts()
 	}
+
+	fmt.Println()
+
 	return nil
 }
 
