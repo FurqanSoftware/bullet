@@ -233,7 +233,7 @@ func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 		prog.Command,
 	)
 
-	return c.Run(strings.Join(cmd, " "))
+	return c.Run(strings.Join(cmd, " "), false)
 }
 
 func createAttachContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, image, name string) error {
@@ -279,7 +279,7 @@ func deleteContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 		fmt.Sprintf("%s rm %s > /dev/null 2>&1 || true", dockerPath, name),
 	}
 	for _, cmd := range cmds {
-		err := c.Run(cmd)
+		err := c.Run(cmd, false)
 		if err != nil {
 			return err
 		}

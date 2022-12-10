@@ -39,15 +39,17 @@ func Dial(addr, identity string) (*Client, error) {
 	}, nil
 }
 
-func (c Client) Run(cmd string) error {
+func (c Client) Run(cmd string, echo bool) error {
 	sess, err := c.Client.NewSession()
 	if err != nil {
 		return err
 	}
 	defer sess.Close()
 
-	sess.Stdout = os.Stdout
-	sess.Stderr = os.Stderr
+	if echo {
+		sess.Stdout = os.Stdout
+		sess.Stderr = os.Stderr
+	}
 	return sess.Run(cmd)
 }
 

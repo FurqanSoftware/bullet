@@ -82,7 +82,7 @@ func buildImageDockerfile(c *ssh.Client, app spec.Application, prog spec.Program
 	}
 
 	name := fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
-	return c.Run(fmt.Sprintf("docker build -t %s -f %s/Dockerfile.%s %s", name, appDir, prog.Key, curDir))
+	return c.Run(fmt.Sprintf("docker build -t %s -f %s/Dockerfile.%s %s", name, appDir, prog.Key, curDir), true)
 }
 
 func buildImageDockerHub(c *ssh.Client, app spec.Application, prog spec.Program, options BuildImageOptions) error {
@@ -104,7 +104,7 @@ func buildImageDockerHub(c *ssh.Client, app spec.Application, prog spec.Program,
 	}
 
 	name := fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
-	return c.Run(fmt.Sprintf("docker build -t %s -f %s/Dockerfile.%s %s", name, appDir, prog.Key, appDir))
+	return c.Run(fmt.Sprintf("docker build -t %s -f %s/Dockerfile.%s %s", name, appDir, prog.Key, appDir), true)
 }
 
 var dockerfileTpl = template.Must(template.New("").Parse(dockerfileTplText))

@@ -32,7 +32,7 @@ func (u *Ubuntu) InstallDocker() error {
 		"apt-get install -y docker-ce",
 	}
 	for _, cmd := range cmds {
-		err := u.Client.Run(cmd)
+		err := u.Client.Run(cmd, true)
 		if err != nil {
 			return err
 		}
@@ -41,23 +41,23 @@ func (u *Ubuntu) InstallDocker() error {
 }
 
 func (u *Ubuntu) MkdirAll(name string) error {
-	return u.Client.Run(fmt.Sprintf("mkdir -p %s", name))
+	return u.Client.Run(fmt.Sprintf("mkdir -p %s", name), false)
 }
 
 func (u *Ubuntu) Remove(name string) error {
-	return u.Client.Run(fmt.Sprintf("rm %s", name))
+	return u.Client.Run(fmt.Sprintf("rm %s", name), false)
 }
 
 func (u *Ubuntu) Symlink(oldname, newname string) error {
-	return u.Client.Run(fmt.Sprintf("ln -sfn %s %s", oldname, newname))
+	return u.Client.Run(fmt.Sprintf("ln -sfn %s %s", oldname, newname), false)
 }
 
 func (u *Ubuntu) Touch(name string) error {
-	return u.Client.Run(fmt.Sprintf("touch %s", name))
+	return u.Client.Run(fmt.Sprintf("touch %s", name), false)
 }
 
 func (u *Ubuntu) Prune(name string, n int) error {
-	return u.Client.Run(fmt.Sprintf("cd %s; ls -F . | head -n -%d | xargs -r rm -r", name, n))
+	return u.Client.Run(fmt.Sprintf("cd %s; ls -F . | head -n -%d | xargs -r rm -r", name, n), false)
 }
 
 func (u *Ubuntu) ExtractTar(name, dir string) error {
@@ -66,7 +66,7 @@ func (u *Ubuntu) ExtractTar(name, dir string) error {
 		fmt.Sprintf("tar -xf %s -C %s", name, dir),
 	}
 	for _, cmd := range cmds {
-		err := u.Client.Run(cmd)
+		err := u.Client.Run(cmd, false)
 		if err != nil {
 			return err
 		}
@@ -189,14 +189,14 @@ WantedBy=timers.target`
 		return err
 	}
 
-	return u.Client.Run(fmt.Sprintf("systemctl daemon-reload && systemctl enable --now %s", timername))
+	return u.Client.Run(fmt.Sprintf("systemctl daemon-reload && systemctl enable --now %s", timername), false)
 }
 
 func (u *Ubuntu) CronDisable(app spec.Application, job spec.Job) error {
 	servicename := "bullet_" + app.Identifier + "_" + job.Key + ".service"
 	timername := "bullet_" + app.Identifier + "_" + job.Key + ".timer"
 
-	err := u.Client.Run(fmt.Sprintf("[ ! -e %s ] || systemctl disable --now %s", timername, timername))
+	err := u.Client.Run(fmt.Sprintf("[ ! -e %s ] || systemctl disable --now %s", timername, timername), false)
 	if err != nil {
 		return err
 	}
@@ -205,13 +205,13 @@ func (u *Ubuntu) CronDisable(app spec.Application, job spec.Job) error {
 		fmt.Sprintf("/etc/systemd/system/%s", servicename),
 		fmt.Sprintf("/etc/systemd/system/%s", timername),
 	} {
-		err = u.Client.Run(fmt.Sprintf("[ ! -e %s ] || rm %s", name, name))
+		err = u.Client.Run(fmt.Sprintf("[ ! -e %s ] || rm %s", name, name), false)
 		if err != nil {
 			return err
 		}
 	}
 
-	return u.Client.Run(fmt.Sprint("systemctl daemon-reload"))
+	return u.Client.Run(fmt.Sprint("systemctl daemon-reload"), false)
 }
 
 func (u *Ubuntu) CronStatus(app spec.Application, job spec.Job, tw *tabwriter.Writer) error {
