@@ -5,6 +5,8 @@ import (
 )
 
 func main() {
+	log.SetFlags(0)
+
 	err := RootCmd.Execute()
 	if err != nil {
 		log.Fatal(err)
