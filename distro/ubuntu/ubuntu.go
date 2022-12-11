@@ -94,6 +94,11 @@ func (u *Ubuntu) RestartAll(app spec.Application, prog spec.Program) error {
 		return err
 	}
 
+	printf := func(format string, v ...interface{}) {
+		fmt.Printf("\033[G\033[K"+format, v...)
+	}
+
+	var n int
 	for _, cont := range conts {
 		if cont.No == 0 {
 			// Skip runs
@@ -105,7 +110,14 @@ func (u *Ubuntu) RestartAll(app spec.Application, prog spec.Program) error {
 		if err != nil {
 			return err
 		}
+		n++
+		printf("%s: %d restarted", prog.Key, n)
 	}
+
+	if n > 0 {
+		fmt.Println()
+	}
+
 	return nil
 }
 
