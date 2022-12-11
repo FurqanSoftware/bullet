@@ -134,6 +134,7 @@ func ScaleContainer(c *ssh.Client, app spec.Application, prog spec.Program, n in
 		printCounts()
 	}
 
+	printCounts()
 	fmt.Println()
 
 	return nil

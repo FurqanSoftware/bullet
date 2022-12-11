@@ -43,6 +43,7 @@ func Scale(nodes []Node, spec *spec.Spec, comp *Composition) error {
 			return err
 		}
 
+		log.Print("Scaling programs")
 		scaleNode(n, c, d, spec, comp)
 	}
 	return nil
