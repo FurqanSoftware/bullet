@@ -235,8 +235,19 @@ func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 		`tag="{{.Name}}"`,
 		"--restart", "always",
 		"-v", appDir+"/current:/"+app.Identifier,
-		"-w", "/"+app.Identifier,
 	)
+
+	if prog.Container.WorkingDir != nil {
+		cmd = append(
+			cmd,
+			"-w", strconv.Quote(*prog.Container.WorkingDir),
+		)
+	} else {
+		cmd = append(
+			cmd,
+			"-w", "/"+app.Identifier,
+		)
+	}
 
 	if prog.Container.Entrypoint != nil {
 		cmd = append(
@@ -282,7 +293,16 @@ func createAttachContainer(c *ssh.Client, app spec.Application, prog spec.Progra
 	cmd = append(
 		cmd,
 		"-v", appDir+"/current:/"+app.Identifier,
-		"-w", "/"+app.Identifier,
+	)
+
+	if prog.Container.WorkingDir != nil {
+		cmd = append(cmd, "-w", strconv.Quote(*prog.Container.WorkingDir))
+	} else {
+		cmd = append(cmd, "-w", "/"+app.Identifier)
+	}
+
+	cmd = append(
+		cmd,
 		`--entrypoint=""`,
 		image,
 		prog.Command,
