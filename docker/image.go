@@ -2,8 +2,11 @@ package docker
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"html/template"
+	"io"
 	"os"
 	"strings"
 
@@ -62,13 +65,15 @@ func BuildImage(c *ssh.Client, app spec.Application, prog spec.Program, options 
 }
 
 func buildImageDockerfile(c *ssh.Client, app spec.Application, prog spec.Program, options BuildImageOptions) error {
-	f, err := os.Open(prog.Container.Dockerfile)
+	file, err := os.Open(prog.Container.Dockerfile)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-
-	fi, err := f.Stat()
+	fileBuf, err := io.ReadAll(file)
+	if err != nil {
+		return err
+	}
+	err = file.Close()
 	if err != nil {
 		return err
 	}
@@ -76,7 +81,20 @@ func buildImageDockerfile(c *ssh.Client, app spec.Application, prog spec.Program
 	appDir := fmt.Sprintf("/opt/%s", app.Identifier)
 	curDir := fmt.Sprintf("%s/current", appDir)
 
-	err = c.Push(fmt.Sprintf("%s/Dockerfile.%s", appDir, prog.Key), 0644, fi.Size(), f)
+	shaOut, _ := c.Output(fmt.Sprintf("sha256sum %s/Dockerfile.%s", appDir, prog.Key))
+	if err != nil {
+		return err
+	}
+	shaOutParts := bytes.Fields(shaOut)
+	if len(shaOutParts) >= 2 {
+		hash := sha256.New()
+		hash.Write(fileBuf)
+		if hex.EncodeToString(hash.Sum(nil)[:]) == string(shaOutParts[0]) {
+			return nil
+		}
+	}
+
+	err = c.Push(fmt.Sprintf("%s/Dockerfile.%s", appDir, prog.Key), 0644, int64(len(fileBuf)), bytes.NewReader(fileBuf))
 	if err != nil {
 		return err
 	}
