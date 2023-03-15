@@ -89,9 +89,7 @@ type ScaleContainerOptions struct {
 }
 
 func ScaleContainer(c *ssh.Client, app spec.Application, prog spec.Program, n int, options ScaleContainerOptions) error {
-	conts, err := ListContainers(c, app, prog, ListContainersOptions{
-		DockerPath: options.DockerPath,
-	})
+	conts, err := ListContainers(c, app, prog, ListContainersOptions(options))
 	if err != nil {
 		return nil
 	}
@@ -148,9 +146,7 @@ func RunContainer(c *ssh.Client, app spec.Application, prog spec.Program, option
 	name := fmt.Sprintf("%s_%s_0", app.Identifier, prog.Key)
 	image := fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
 
-	conts, err := ListContainers(c, app, prog, ListContainersOptions{
-		DockerPath: options.DockerPath,
-	})
+	conts, err := ListContainers(c, app, prog, ListContainersOptions(options))
 	if err != nil {
 		return nil
 	}
@@ -166,9 +162,7 @@ func RunContainer(c *ssh.Client, app spec.Application, prog spec.Program, option
 		return nil
 	}
 
-	conts, err = ListContainers(c, app, prog, ListContainersOptions{
-		DockerPath: options.DockerPath,
-	})
+	conts, err = ListContainers(c, app, prog, ListContainersOptions(options))
 	if err != nil {
 		return nil
 	}

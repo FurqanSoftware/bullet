@@ -228,7 +228,7 @@ func (u *Ubuntu) CronDisable(app spec.Application, job spec.Job) error {
 		}
 	}
 
-	return u.Client.Run(fmt.Sprint("systemctl daemon-reload"), false)
+	return u.Client.Run("systemctl daemon-reload", false)
 }
 
 func (u *Ubuntu) CronStatus(app spec.Application, job spec.Job, tw *tabwriter.Writer) error {

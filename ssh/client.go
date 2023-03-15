@@ -82,7 +82,7 @@ func (c Client) RunPTY(cmd string) error {
 		return err
 	}
 
-	sigch := make(chan os.Signal)
+	sigch := make(chan os.Signal, 1)
 	signal.Notify(sigch, os.Interrupt)
 	defer close(sigch)
 	go func() {
