@@ -22,5 +22,14 @@ docker.image: build.alpine
 test:
 	go test -v `go list ./... | grep -v /vendor/`
 
+.PHONY: lint
+lint:
+	staticcheck ./...
+
+.PHONY: lint.tools.install
+lint.tools.install:
+	go install honnef.co/go/tools/cmd/staticcheck@2023.1.2
+
+.PHONY: clean
 clean:
 	go clean -i ./...
