@@ -23,6 +23,11 @@ func New(c *ssh.Client) distro.Distro {
 }
 
 func (u *Ubuntu) InstallDocker() error {
+	version, err := u.Client.Output("docker version")
+	if err == nil && len(version) > 0 {
+		return nil
+	}
+
 	cmds := []string{
 		"apt-get update",
 		"apt-get install -y apt-transport-https ca-certificates curl software-properties-common",
