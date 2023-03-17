@@ -14,13 +14,13 @@ build.alpine:
 		bullet-foundry \
 		go build -buildvcs=false -o bullet github.com/FurqanSoftware/bullet
 
-.PHONY: build.docker.image
-docker.image: build.alpine
+.PHONY: build.dockerimage
+build.dockerimage: build.alpine
 	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
 
 .PHONY: test
 test:
-	go test -v `go list ./... | grep -v /vendor/`
+	go test -v ./...
 
 .PHONY: lint
 lint:
