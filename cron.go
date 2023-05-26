@@ -58,7 +58,33 @@ var CronDisableCmd = &cobra.Command{
 	},
 }
 
+var CronStatusCmd = &cobra.Command{
+	Use:   "cron:status",
+	Short: "Print cron job status",
+	Long:  `This command prints the status of all cron jobs.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		spec, err := spec.ParseFile("Bulletspec")
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		nodes, err := core.ParseNodeSet(Hosts, Port, Identity)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		err = core.CronStatus(nodes, spec, args)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(CronEnableCmd)
 	RootCmd.AddCommand(CronDisableCmd)
+	RootCmd.AddCommand(CronStatusCmd)
 }

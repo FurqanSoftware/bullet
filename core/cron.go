@@ -2,6 +2,8 @@ package core
 
 import (
 	"log"
+	"os"
+	"text/tabwriter"
 
 	"github.com/FurqanSoftware/bullet/distro"
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
@@ -60,6 +62,35 @@ func CronDisable(nodes []Node, spec *spec.Spec, keys []string) error {
 			if err != nil {
 				return err
 			}
+		}
+	}
+	return nil
+}
+
+func CronStatus(nodes []Node, spec *spec.Spec, keys []string) error {
+	for _, n := range nodes {
+		log.Printf("Connecting to %s", n.Addr())
+		c, err := ssh.Dial(n.Addr(), n.Identity)
+		if err != nil {
+			return err
+		}
+
+		d, err := distro.New(c)
+		if err != nil {
+			return err
+		}
+
+		tw := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		for _, j := range spec.Application.Cron.Jobs {
+			err = d.CronStatus(spec.Application, j, tw)
+			if err != nil {
+				return err
+			}
+		}
+		err = tw.Flush()
+		if err != nil {
+			return err
 		}
 	}
 	return nil
