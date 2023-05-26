@@ -1,6 +1,10 @@
 IMAGE_NAME = registry.furqansoftware.net/tools/bullet
 IMAGE_TAG = $(VERSION)
 
+.PHONY: install
+install:
+	go install .
+
 .PHONY: build
 build:
 	go build -o bullet github.com/FurqanSoftware/bullet
@@ -14,8 +18,12 @@ build.alpine:
 		bullet-foundry \
 		go build -buildvcs=false -o bullet github.com/FurqanSoftware/bullet
 
-.PHONY: build.dockerimage
-build.dockerimage: build.alpine
+.PHONY: docker.image.build
+docker.image.build: build.alpine
+	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+
+.PHONY: docker.image.push
+docker.image.push:
 	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
 
 .PHONY: test
