@@ -28,6 +28,7 @@ type Distro interface {
 	RestartAll(app spec.Application, prog spec.Program) error
 	Status(app spec.Application, prog spec.Program, tw *tabwriter.Writer) error
 	Scale(app spec.Application, prog spec.Program, n int) error
+	Log(app spec.Application, prog spec.Program, no int) error
 
 	CronEnable(app spec.Application, job spec.Job) error
 	CronDisable(app spec.Application, job spec.Job) error

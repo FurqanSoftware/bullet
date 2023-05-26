@@ -138,6 +138,15 @@ func ScaleContainer(c *ssh.Client, app spec.Application, prog spec.Program, n in
 	return nil
 }
 
+type LogContainerOptions struct {
+	DockerPath string
+}
+
+func LogContainer(c *ssh.Client, app spec.Application, prog spec.Program, no int, options LogContainerOptions) error {
+	name := fmt.Sprintf("%s_%s_%d", app.Identifier, prog.Key, no)
+	return logContainer(c, app, prog, options.DockerPath, name, no)
+}
+
 type RunContainerOptions struct {
 	DockerPath string
 }
@@ -317,4 +326,15 @@ func deleteContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 		}
 	}
 	return nil
+}
+
+func logContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, name string, no int) error {
+	cmd := []string{
+		dockerPath,
+		"logs",
+		"--tail 10",
+		"--follow",
+		name,
+	}
+	return c.Run(strings.Join(cmd, " "), true)
 }

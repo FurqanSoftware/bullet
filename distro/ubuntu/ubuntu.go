@@ -159,6 +159,12 @@ func (u *Ubuntu) Scale(app spec.Application, prog spec.Program, n int) error {
 	})
 }
 
+func (u *Ubuntu) Log(app spec.Application, prog spec.Program, no int) error {
+	return docker.LogContainer(u.Client, app, prog, no, docker.LogContainerOptions{
+		DockerPath: dockerPath,
+	})
+}
+
 func (u *Ubuntu) CronEnable(app spec.Application, job spec.Job) error {
 	appdir := fmt.Sprintf("/opt/%s", app.Identifier)
 	name := app.Identifier + "_cron_" + job.Key
