@@ -1,15 +1,16 @@
 package core
 
 import (
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"time"
 )
 
 type Release struct {
+	Time    string
 	Hash    string
 	Tarball Tarball
 }
@@ -19,27 +20,28 @@ type Tarball struct {
 }
 
 func NewRelease(tarPath string) (*Release, error) {
-	s, err := sha1Tarball(tarPath)
+	s, err := sha256Tarball(tarPath)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Release{
-		Hash: fmt.Sprintf("%d-%s", time.Now().Unix(), s),
+		Time: strconv.FormatInt(time.Now().Unix(), 10),
+		Hash: s,
 		Tarball: Tarball{
 			Path: tarPath,
 		},
 	}, nil
 }
 
-func sha1Tarball(path string) (string, error) {
+func sha256Tarball(path string) (string, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return "", err
 	}
 	defer f.Close()
 
-	h := sha1.New()
+	h := sha256.New()
 	_, err = io.Copy(h, f)
 	if err != nil {
 		return "", err

@@ -33,15 +33,23 @@ func Deploy(nodes []Node, spec *spec.Spec, rel *Release) error {
 }
 
 func deployNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, rel *Release) error {
+	curHash, _ := d.ReadFile(fmt.Sprintf("/opt/%s/current.hash", spec.Application.Identifier))
+	if rel.Hash == string(curHash) {
+		log.Print("Same as current hash. Skipping deploy.")
+		log.Printf(".. Hash: %s", rel.Hash)
+		return nil
+	}
+
 	log.Print("Uploading tarball")
-	tarPath := fmt.Sprintf("/tmp/%s-%s.tar.gz", spec.Application.Identifier, rel.Hash)
+	log.Printf(".. Hash: %s", rel.Hash)
+	tarPath := fmt.Sprintf("/tmp/%s-%s-%s.tar.gz", spec.Application.Identifier, rel.Time, rel.Hash)
 	err := uploadTarball(c, tarPath, rel.Tarball)
 	if err != nil {
 		return err
 	}
 
 	log.Print("Extracting tarball")
-	relDir := fmt.Sprintf("/opt/%s/releases/%s", spec.Application.Identifier, rel.Hash)
+	relDir := fmt.Sprintf("/opt/%s/releases/%s-%s", spec.Application.Identifier, rel.Time, rel.Hash)
 	err = d.ExtractTar(tarPath, relDir)
 	if err != nil {
 		return err
@@ -54,6 +62,10 @@ func deployNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, rel *Re
 
 	log.Print("Updating current marker")
 	err = d.Symlink(relDir, fmt.Sprintf("/opt/%s/current", spec.Application.Identifier))
+	if err != nil {
+		return err
+	}
+	err = d.WriteFile(fmt.Sprintf("/opt/%s/current.hash", spec.Application.Identifier), []byte(rel.Hash))
 	if err != nil {
 		return err
 	}

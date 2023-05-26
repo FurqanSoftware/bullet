@@ -18,6 +18,8 @@ type Distro interface {
 	Symlink(oldname, newname string) error
 	Touch(name string) error
 	Prune(name string, n int) error
+	ReadFile(name string) ([]byte, error)
+	WriteFile(name string, data []byte) error
 
 	ExtractTar(name, dir string) error
 

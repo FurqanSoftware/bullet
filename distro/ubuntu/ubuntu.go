@@ -2,6 +2,7 @@ package ubuntu
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"strings"
 	"text/tabwriter"
@@ -63,6 +64,14 @@ func (u *Ubuntu) Touch(name string) error {
 
 func (u *Ubuntu) Prune(name string, n int) error {
 	return u.Client.Run(fmt.Sprintf("cd %s; ls -F . | head -n -%d | xargs -r rm -r", name, n), false)
+}
+
+func (u *Ubuntu) ReadFile(name string) ([]byte, error) {
+	return u.Client.Output(fmt.Sprintf("cat %s", name))
+}
+
+func (u *Ubuntu) WriteFile(name string, data []byte) error {
+	return u.Client.Run(fmt.Sprintf("echo %s | base64 -d | tee %s", base64.StdEncoding.EncodeToString(data), name), true)
 }
 
 func (u *Ubuntu) ExtractTar(name, dir string) error {
