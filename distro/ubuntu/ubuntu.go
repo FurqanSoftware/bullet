@@ -143,13 +143,24 @@ func (u *Ubuntu) Status(app spec.Application, prog spec.Program, tw *tabwriter.W
 		return err
 	}
 
-	if len(conts) > 0 {
-		for _, cont := range conts {
-			fmt.Fprintf(tw, "%s:\t%s\t(%s)\n", prog.Key, strings.ToLower(cont.Status), cont.ID)
+	up := 0
+	healthy := 0
+	unhealthy := 0
+	for _, cont := range conts {
+		if strings.HasPrefix(cont.Status, "Up") {
+			up++
 		}
-	} else {
-		fmt.Fprintf(tw, "%s:\tdisabled\n", prog.Key)
+		if strings.Contains(cont.Status, "(healthy)") {
+			healthy++
+		} else {
+			unhealthy++
+		}
 	}
+
+	if up > 0 {
+		fmt.Fprintf(tw, "%s: %d up, %d healthy, %d unhealthy\n", prog.Key, up, healthy, unhealthy)
+	}
+
 	return nil
 }
 
