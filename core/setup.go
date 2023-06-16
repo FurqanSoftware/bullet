@@ -2,17 +2,17 @@ package core
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/FurqanSoftware/bullet/distro"
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/FurqanSoftware/bullet/ssh"
+	"github.com/FurqanSoftware/pog"
 )
 
-func Setup(nodes []Node, spec *spec.Spec) error {
+func Setup(nodes []Node, spec *spec.Spec, config string) error {
 	for _, n := range nodes {
-		log.Printf("Connecting to %s", n.Addr())
+		pog.Infof("Connecting to %s", n.Addr())
 		c, err := ssh.Dial(n.Addr(), n.Identity)
 		if err != nil {
 			return err
@@ -27,18 +27,25 @@ func Setup(nodes []Node, spec *spec.Spec) error {
 		if err != nil {
 			return err
 		}
+
+		if config != "" {
+			err = uploadEnvironmentFile(c, spec, config)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
 
 func setupNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec) error {
-	log.Print("Installing Docker")
+	pog.Info("Installing Docker")
 	err := d.InstallDocker()
 	if err != nil {
 		return err
 	}
 
-	log.Print("Creating application directory")
+	pog.Info("Creating application directory")
 	err = d.MkdirAll(fmt.Sprintf("/opt/%s/releases", spec.Application.Identifier))
 	if err != nil {
 		return err

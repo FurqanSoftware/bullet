@@ -13,6 +13,8 @@ var SetupCmd = &cobra.Command{
 	Short: "Setup server for application",
 	Long:  `This command prepares the server for the application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		config, _ := cmd.Flags().GetString("config")
+
 		spec, err := spec.ParseFile("Bulletspec")
 		if err != nil {
 			log.Fatal(err)
@@ -25,7 +27,7 @@ var SetupCmd = &cobra.Command{
 			return
 		}
 
-		err = core.Setup(nodes, spec)
+		err = core.Setup(nodes, spec, config)
 		if err != nil {
 			log.Fatal(err)
 			return
@@ -34,5 +36,6 @@ var SetupCmd = &cobra.Command{
 }
 
 func init() {
+	SetupCmd.PersistentFlags().String("config", "", "if set, push file as application configuration")
 	RootCmd.AddCommand(SetupCmd)
 }
