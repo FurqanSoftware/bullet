@@ -25,7 +25,7 @@ var RunCmd = &cobra.Command{
 			return
 		}
 
-		err = core.Run(nodes[0], spec, args[0])
+		err = core.Run(nodes, spec, args[0])
 		if err != nil {
 			log.Fatal(err)
 			return
