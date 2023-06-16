@@ -11,7 +11,7 @@ import (
 )
 
 func Log(nodes []Node, spec *spec.Spec, key string, no int) error {
-	var i int
+	var i int = 1
 	if len(nodes) > 1 {
 		for i, n := range nodes {
 			fmt.Printf("%d. %s:%d\n", i+1, n.Host, n.Port)
