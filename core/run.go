@@ -14,7 +14,7 @@ func Run(nodes []Node, spec *spec.Spec, key string) error {
 	var i int = 1
 	if len(nodes) > 1 {
 		for i, n := range nodes {
-			fmt.Printf("%d. %s:%d\n", i+1, n.Host, n.Port)
+			fmt.Printf("%d. %s\n", i+1, n.Label())
 		}
 		fmt.Print("? ")
 		fmt.Scanf("%d", &i)
@@ -22,7 +22,7 @@ func Run(nodes []Node, spec *spec.Spec, key string) error {
 
 	n := nodes[i-1]
 
-	log.Printf("Connecting to %s", n.Addr())
+	log.Printf("Connecting to %s", n.Label())
 	c, err := ssh.Dial(n.Addr(), n.Identity)
 	if err != nil {
 		return err

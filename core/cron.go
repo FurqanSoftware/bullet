@@ -14,7 +14,7 @@ import (
 
 func CronEnable(nodes []Node, spec *spec.Spec, keys []string) error {
 	for _, n := range nodes {
-		log.Printf("Connecting to %s", n.Addr())
+		log.Printf("Connecting to %s", n.Label())
 		c, err := ssh.Dial(n.Addr(), n.Identity)
 		if err != nil {
 			return err
@@ -42,7 +42,7 @@ func CronEnable(nodes []Node, spec *spec.Spec, keys []string) error {
 
 func CronDisable(nodes []Node, spec *spec.Spec, keys []string) error {
 	for _, n := range nodes {
-		log.Printf("Connecting to %s", n.Addr())
+		log.Printf("Connecting to %s", n.Label())
 		c, err := ssh.Dial(n.Addr(), n.Identity)
 		if err != nil {
 			return err
@@ -70,12 +70,12 @@ func CronDisable(nodes []Node, spec *spec.Spec, keys []string) error {
 
 func CronStatus(nodes []Node, spec *spec.Spec, keys []string) error {
 	for _, n := range nodes {
-		pog.SetStatus(pogConnecting(n.Addr()))
+		pog.SetStatus(pogConnecting(n))
 		c, err := ssh.Dial(n.Addr(), n.Identity)
 		if err != nil {
 			return err
 		}
-		pog.Infof("Connected to %s", n.Addr())
+		pog.Infof("Connected to %s", n.Label())
 		pog.SetStatus(nil)
 
 		d, err := distro.New(c)

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -9,6 +10,7 @@ import (
 )
 
 type Node struct {
+	Name string
 	Host string
 	Port int
 	Tags []string
@@ -21,6 +23,13 @@ func ParseNodeSet(hosts string, port int, identity string) ([]Node, error) {
 		return parseNodeSetManifest(hosts[1:], port, identity)
 	}
 	return parseNodeSetString(hosts, port, identity)
+}
+
+func (n Node) Label() string {
+	if n.Name == "" || n.Name == n.Host {
+		return n.Addr()
+	}
+	return fmt.Sprintf("%s (%s)", n.Name, n.Addr())
 }
 
 func (n Node) Addr() string {
@@ -69,6 +78,7 @@ func parseNodeSetString(hosts string, port int, identity string) ([]Node, error)
 	nodes := []Node{}
 	for _, h := range strings.Split(hosts, ",") {
 		nodes = append(nodes, Node{
+			Name:     h,
 			Host:     h,
 			Port:     port,
 			Identity: identity,

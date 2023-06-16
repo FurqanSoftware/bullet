@@ -13,12 +13,12 @@ import (
 
 func Status(nodes []Node, spec *spec.Spec) error {
 	for _, n := range nodes {
-		pog.SetStatus(pogConnecting(n.Addr()))
+		pog.SetStatus(pogConnecting(n))
 		c, err := ssh.Dial(n.Addr(), n.Identity)
 		if err != nil {
 			return err
 		}
-		pog.Infof("Connected to %s", n.Addr())
+		pog.Infof("Connected to %s", n.Label())
 		pog.SetStatus(nil)
 
 		d, err := distro.New(c)

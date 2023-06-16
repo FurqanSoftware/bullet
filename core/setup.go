@@ -12,7 +12,7 @@ import (
 
 func Setup(nodes []Node, spec *spec.Spec, config string) error {
 	for _, n := range nodes {
-		pog.Infof("Connecting to %s", n.Addr())
+		pog.Infof("Connecting to %s", n.Label())
 		c, err := ssh.Dial(n.Addr(), n.Identity)
 		if err != nil {
 			return err

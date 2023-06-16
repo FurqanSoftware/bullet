@@ -18,10 +18,10 @@ func (s pogStatus) Text() string        { return s.text }
 func (s pogStatus) Color() *color.Color { return s.color }
 func (s pogStatus) Throb() bool         { return s.throb }
 
-func pogConnecting(addr string) pogStatus {
+func pogConnecting(n Node) pogStatus {
 	return pogStatus{
 		icon:  '~',
-		text:  fmt.Sprintf("Connecting to %s", addr),
+		text:  fmt.Sprintf("Connecting to %s", n.Label()),
 		throb: true,
 	}
 }
