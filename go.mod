@@ -1,6 +1,8 @@
 module github.com/FurqanSoftware/bullet
 
 require (
+	github.com/FurqanSoftware/pog v0.0.0
+	github.com/fatih/color v1.15.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/mattn/go-tty v0.0.3
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
@@ -10,5 +12,7 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.0.0-20170407172122-cd8b52f8269e
 )
+
+replace github.com/FurqanSoftware/pog => ../pog
 
 go 1.13

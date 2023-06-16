@@ -1,7 +1,6 @@
 package core
 
 import (
-	"log"
 	"strconv"
 	"strings"
 
@@ -9,6 +8,7 @@ import (
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/FurqanSoftware/bullet/ssh"
+	"github.com/FurqanSoftware/pog"
 )
 
 type Composition struct {
@@ -32,18 +32,19 @@ func NewComposition(args []string) (*Composition, error) {
 
 func Scale(nodes []Node, spec *spec.Spec, comp *Composition) error {
 	for _, n := range nodes {
-		log.Printf("Connecting to %s", n.Addr())
+		pog.SetStatus(pogConnecting(n.Addr()))
 		c, err := ssh.Dial(n.Addr(), n.Identity)
 		if err != nil {
 			return err
 		}
+		pog.Infof("Connected to %s", n.Addr())
+		pog.SetStatus(nil)
 
 		d, err := distro.New(c)
 		if err != nil {
 			return err
 		}
 
-		log.Print("Scaling programs")
 		scaleNode(n, c, d, spec, comp)
 	}
 	return nil

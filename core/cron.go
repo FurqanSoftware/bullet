@@ -9,6 +9,7 @@ import (
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/FurqanSoftware/bullet/ssh"
+	"github.com/FurqanSoftware/pog"
 )
 
 func CronEnable(nodes []Node, spec *spec.Spec, keys []string) error {
@@ -69,11 +70,13 @@ func CronDisable(nodes []Node, spec *spec.Spec, keys []string) error {
 
 func CronStatus(nodes []Node, spec *spec.Spec, keys []string) error {
 	for _, n := range nodes {
-		log.Printf("Connecting to %s", n.Addr())
+		pog.SetStatus(pogConnecting(n.Addr()))
 		c, err := ssh.Dial(n.Addr(), n.Identity)
 		if err != nil {
 			return err
 		}
+		pog.Infof("Connected to %s", n.Addr())
+		pog.SetStatus(nil)
 
 		d, err := distro.New(c)
 		if err != nil {

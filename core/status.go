@@ -1,7 +1,6 @@
 package core
 
 import (
-	"log"
 	"os"
 	"text/tabwriter"
 
@@ -9,15 +8,18 @@ import (
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/FurqanSoftware/bullet/ssh"
+	"github.com/FurqanSoftware/pog"
 )
 
 func Status(nodes []Node, spec *spec.Spec) error {
 	for _, n := range nodes {
-		log.Printf("Connecting to %s", n.Addr())
+		pog.SetStatus(pogConnecting(n.Addr()))
 		c, err := ssh.Dial(n.Addr(), n.Identity)
 		if err != nil {
 			return err
 		}
+		pog.Infof("Connected to %s", n.Addr())
+		pog.SetStatus(nil)
 
 		d, err := distro.New(c)
 		if err != nil {
@@ -26,6 +28,7 @@ func Status(nodes []Node, spec *spec.Spec) error {
 
 		tw := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
+		pog.Infof("Checking containers")
 		for _, k := range spec.Application.ProgramKeys {
 			p := spec.Application.Programs[k]
 			err = d.Status(spec.Application, p, tw)

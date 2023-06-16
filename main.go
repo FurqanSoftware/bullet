@@ -2,10 +2,13 @@ package main
 
 import (
 	"log"
+
+	"github.com/FurqanSoftware/pog"
 )
 
 func main() {
 	log.SetFlags(0)
+	pog.InitDefault()
 
 	log.Println(` ______       _ _      _   `)
 	log.Println(` | ___ \     | | |    | |  `)
