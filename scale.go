@@ -25,6 +25,8 @@ var ScaleCmd = &cobra.Command{
 			return
 		}
 
+		nodes = core.SelectNodes(nodes)
+
 		comp, err := core.NewComposition(args)
 		if err != nil {
 			log.Fatal(err)

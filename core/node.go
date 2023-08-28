@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -23,6 +24,43 @@ func ParseNodeSet(hosts string, port int, identity string) ([]Node, error) {
 		return parseNodeSetManifest(hosts[1:], port, identity)
 	}
 	return parseNodeSetString(hosts, port, identity)
+}
+
+func SelectNodes(nodes []Node) []Node {
+	selected := nodes[:0]
+	selector := fmt.Sprintf("1-%d", len(nodes))
+	for i, n := range nodes {
+		fmt.Printf("%d. %s\n", i+1, n.Label())
+	}
+	fmt.Printf("? [%s] ", selector)
+	fmt.Scanf("%s", &selector)
+	ranges := strings.Split(selector, ",")
+	for _, r := range ranges {
+		if !strings.Contains(r, "-") {
+			i, err := strconv.Atoi(r)
+			if err != nil {
+				log.Fatal(err)
+			}
+			selected = append(selected, nodes[i-1])
+		} else {
+			parts := strings.SplitN(r, "-", 2)
+			l, err := strconv.Atoi(parts[0])
+			if err != nil {
+				log.Fatal(err)
+			}
+			r, err := strconv.Atoi(parts[1])
+			if err != nil {
+				log.Fatal(err)
+			}
+			if l > r {
+				continue
+			}
+			for i := l; i <= r; i++ {
+				selected = append(selected, nodes[i-1])
+			}
+		}
+	}
+	return selected
 }
 
 func (n Node) Label() string {
