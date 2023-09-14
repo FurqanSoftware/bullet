@@ -1,3 +1,5 @@
+github.com/FurqanSoftware/pog v0.0.0-20230914124239-d67a41584f01 h1:o0tXHfCqcAzzZJIbAtViA4TP8NewknAsscIDrjw8ZJM=
+github.com/FurqanSoftware/pog v0.0.0-20230914124239-d67a41584f01/go.mod h1:6n1FIN0aJ9TpDjsLjFna/AJFNqAM3ZbwecF8wyd+QxE=
 github.com/fatih/color v1.14.1/go.mod h1:2oHN61fhTpgcxD3TSWCgKDiH1+x4OiDVVGH8WlgGZGg=
 github.com/fatih/color v1.15.0 h1:kOqh6YHBtK8aywxGerMG2Eq3H6Qgoqeo13Bk2Mv/nBs=
 github.com/fatih/color v1.15.0/go.mod h1:0h5ZqXfHYED7Bhv2ZJamyIOUej9KtShiJESRwBDUSsw=
