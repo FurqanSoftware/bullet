@@ -5,7 +5,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"os/signal"
 	"path"
 
 	"github.com/mattn/go-tty"
@@ -66,6 +65,12 @@ func (c Client) RunPTY(cmd string) error {
 	}
 	defer tty.Close()
 
+	restore, err := tty.Raw()
+	if err != nil {
+		return err
+	}
+	defer restore()
+
 	modes := ssh.TerminalModes{
 		ssh.ECHO:          0,
 		ssh.TTY_OP_ISPEED: 14400,
@@ -82,17 +87,19 @@ func (c Client) RunPTY(cmd string) error {
 		return err
 	}
 
-	sigch := make(chan os.Signal, 1)
-	signal.Notify(sigch, os.Interrupt)
-	defer close(sigch)
+	sizeCh := tty.SIGWINCH()
+	doneCh := make(chan struct{})
 	go func() {
-		for sig := range sigch {
-			switch sig {
-			case os.Interrupt:
-				sess.Signal(ssh.SIGINT)
+		for {
+			select {
+			case size := <-sizeCh:
+				sess.WindowChange(size.H, size.W)
+			case <-doneCh:
+				return
 			}
 		}
 	}()
+	defer close(doneCh)
 
 	sess.Stdin = tty.Input()
 	sess.Stdout = tty.Output()
