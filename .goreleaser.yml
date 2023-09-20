@@ -9,13 +9,7 @@ builds:
       - darwin
       - windows
 archives:
-  - replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
-    files:
+  - files:
       - LICENSE
 checksum:
   name_template: 'checksums.txt'
