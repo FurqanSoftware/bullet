@@ -15,8 +15,14 @@ type Node struct {
 	Host string
 	Port int
 	Tags []string
+	HW   NodeHW
 
 	Identity string
+}
+
+type NodeHW struct {
+	Cores  int
+	Memory int // In megabyte
 }
 
 func ParseNodeSet(hosts string, port int, identity string) ([]Node, error) {

@@ -38,6 +38,7 @@ type Program struct {
 	Ports       []string
 	Volumes     []string
 	Healthcheck *ProgramHealthcheck
+	Scales      []Scale
 
 	Unsafe Unsafe
 }
@@ -55,6 +56,11 @@ type ProgramHealthcheck struct {
 	Timeout     time.Duration
 	Retries     int
 	StartPeriod time.Duration
+}
+
+type Scale struct {
+	If string
+	N  string
 }
 
 type Unsafe struct {

@@ -2,6 +2,7 @@ module github.com/FurqanSoftware/bullet
 
 require (
 	github.com/FurqanSoftware/pog v0.0.0-20230914124239-d67a41584f01
+	github.com/antonmedv/expr v1.15.3 // indirect
 	github.com/fatih/color v1.15.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/mattn/go-tty v0.0.3
