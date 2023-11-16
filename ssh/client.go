@@ -154,33 +154,26 @@ func (c Client) Forward(local, remote int) error {
 		if err != nil {
 			return err
 		}
+		go c.forwardConnect(conn, remote)
+	}
+}
 
-		go func() {
-			sess, err := c.Client.Dial("tcp", fmt.Sprintf("localhost:%d", remote))
-			if err != nil {
-				log.Println("dial:", err)
-				return
-			}
-			defer sess.Close()
+func (c Client) forwardConnect(conn net.Conn, remote int) {
+	sess, err := c.Client.Dial("tcp", fmt.Sprintf("localhost:%d", remote))
+	if err != nil {
+		log.Println("dial:", err)
+		return
+	}
+	defer sess.Close()
 
-			wg := sync.WaitGroup{}
-			wg.Add(2)
-			go func() {
-				defer wg.Done()
-				_, err := io.Copy(conn, sess)
-				if err != nil {
-					log.Println("copy <-:", err)
-				}
-			}()
-			go func() {
-				defer wg.Done()
-				_, err := io.Copy(sess, conn)
-				if err != nil {
-					log.Println("copy ->:", err)
-				}
-			}()
-			wg.Wait()
-		}()
+	go c.forwardPump(conn, sess)
+	c.forwardPump(sess, conn)
+}
+
+func (c Client) forwardPump(w io.Writer, r io.Reader) {
+	_, err := io.Copy(w, r)
+	if err != nil {
+		log.Println("pump:", err)
 	}
 }
 
