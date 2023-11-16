@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 
@@ -288,6 +289,33 @@ func (u *Ubuntu) Run(app spec.Application, prog spec.Program) error {
 	return docker.RunContainer(u.Client, app, prog, docker.RunContainerOptions{
 		DockerPath: dockerPath,
 	})
+}
+
+func (u *Ubuntu) Forward(app spec.Application, port string) error {
+	var (
+		local  int
+		remote int
+	)
+	parts := strings.SplitN(port, ":", 2)
+	var err error
+	if len(parts) == 2 {
+		local, err = strconv.Atoi(parts[0])
+		if err != nil {
+			return err
+		}
+		remote, err = strconv.Atoi(parts[1])
+		if err != nil {
+			return err
+		}
+	} else {
+		remote, err = strconv.Atoi(parts[0])
+		if err != nil {
+			return err
+		}
+		local = remote
+	}
+
+	return u.Client.Forward(local, remote)
 }
 
 func (u *Ubuntu) Detect() (bool, error) {

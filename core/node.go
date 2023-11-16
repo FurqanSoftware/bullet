@@ -32,6 +32,16 @@ func ParseNodeSet(hosts string, port int, identity string) ([]Node, error) {
 	return parseNodeSetString(hosts, port, identity)
 }
 
+func SelectNode(nodes []Node) Node {
+	selector := 1
+	for i, n := range nodes {
+		fmt.Printf("%d. %s\n", i+1, n.Label())
+	}
+	fmt.Printf("? [%d] ", selector)
+	fmt.Scanf("%d", &selector)
+	return nodes[selector-1]
+}
+
 func SelectNodes(nodes []Node) []Node {
 	selected := nodes[:0]
 	selector := fmt.Sprintf("1-%d", len(nodes))

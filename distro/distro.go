@@ -36,6 +36,8 @@ type Distro interface {
 
 	Run(app spec.Application, prog spec.Program) error
 
+	Forward(app spec.Application, port string) error
+
 	Detect() (bool, error)
 }
 

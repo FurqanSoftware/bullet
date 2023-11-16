@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
+	"net"
 	"os"
 	"path"
+	"sync"
 
 	"github.com/mattn/go-tty"
 	"golang.org/x/crypto/ssh"
@@ -138,6 +141,47 @@ func (c Client) Push(name string, mode os.FileMode, size int64, r io.Reader) err
 	sess.Stdout = os.Stdout
 	sess.Stderr = os.Stderr
 	return sess.Run(fmt.Sprintf("scp -t %s", name))
+}
+
+func (c Client) Forward(local, remote int) error {
+	l, err := net.Listen("tcp", fmt.Sprintf(":%d", local))
+	if err != nil {
+		return err
+	}
+
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			return err
+		}
+
+		go func() {
+			sess, err := c.Client.Dial("tcp", fmt.Sprintf("localhost:%d", remote))
+			if err != nil {
+				log.Println("dial:", err)
+				return
+			}
+			defer sess.Close()
+
+			wg := sync.WaitGroup{}
+			wg.Add(2)
+			go func() {
+				defer wg.Done()
+				_, err := io.Copy(conn, sess)
+				if err != nil {
+					log.Println("copy <-:", err)
+				}
+			}()
+			go func() {
+				defer wg.Done()
+				_, err := io.Copy(sess, conn)
+				if err != nil {
+					log.Println("copy ->:", err)
+				}
+			}()
+			wg.Wait()
+		}()
+	}
 }
 
 func publicKeys(paths []string) func() ([]ssh.Signer, error) {
