@@ -8,8 +8,8 @@ import (
 	"net"
 	"os"
 	"path"
-	"sync"
 
+	"github.com/FurqanSoftware/pog"
 	"github.com/mattn/go-tty"
 	"golang.org/x/crypto/ssh"
 )
@@ -149,12 +149,27 @@ func (c Client) Forward(local, remote int) error {
 		return err
 	}
 
+	pog.Infof("Listening on :%d", local)
+	pog.SetStatus(pogForward(0))
+	deltaCh := make(chan int)
+	go func() {
+		n := 0
+		for d := range deltaCh {
+			n += d
+			pog.SetStatus(pogForward(n))
+		}
+	}()
+
 	for {
 		conn, err := l.Accept()
 		if err != nil {
 			return err
 		}
-		go c.forwardConnect(conn, remote)
+		deltaCh <- 1
+		go func() {
+			c.forwardConnect(conn, remote)
+			deltaCh <- -1
+		}()
 	}
 }
 
