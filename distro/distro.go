@@ -38,6 +38,8 @@ type Distro interface {
 
 	Forward(app spec.Application, port string) error
 
+	Df() error
+
 	Detect() (bool, error)
 }
 

@@ -318,6 +318,10 @@ func (u *Ubuntu) Forward(app spec.Application, port string) error {
 	return u.Client.Forward(local, remote)
 }
 
+func (u *Ubuntu) Df() error {
+	return u.Client.Run("df", true)
+}
+
 func (u *Ubuntu) Detect() (bool, error) {
 	return true, nil
 }
