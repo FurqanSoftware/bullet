@@ -24,7 +24,7 @@ docker.image.build: build.alpine
 
 .PHONY: docker.image.push
 docker.image.push:
-	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+	docker push $(IMAGE_NAME):$(IMAGE_TAG)
 
 .PHONY: test
 test:
