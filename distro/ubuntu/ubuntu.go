@@ -72,7 +72,7 @@ func (u *Ubuntu) ReadFile(name string) ([]byte, error) {
 }
 
 func (u *Ubuntu) WriteFile(name string, data []byte) error {
-	return u.Client.Run(fmt.Sprintf("echo %s | base64 -d | tee %s", base64.StdEncoding.EncodeToString(data), name), true)
+	return u.Client.Run(fmt.Sprintf("echo %s | base64 -d | tee %s", base64.StdEncoding.EncodeToString(data), name), false)
 }
 
 func (u *Ubuntu) ExtractTar(name, dir string) error {
