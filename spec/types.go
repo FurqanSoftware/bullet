@@ -39,6 +39,7 @@ type Program struct {
 	Volumes     []string
 	Healthcheck *ProgramHealthcheck
 	Scales      []Scale
+	Reload      Reload
 
 	Unsafe Unsafe
 }
@@ -61,6 +62,12 @@ type ProgramHealthcheck struct {
 type Scale struct {
 	If string
 	N  string
+}
+
+type Reload struct {
+	Method  string
+	Signal  string
+	Command string
 }
 
 type Unsafe struct {

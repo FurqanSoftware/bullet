@@ -184,6 +184,24 @@ func RunContainer(c *ssh.Client, app spec.Application, prog spec.Program, option
 	return nil
 }
 
+type SignalContainerOptions struct {
+	DockerPath string
+}
+
+func SignalContainer(c *ssh.Client, app spec.Application, prog spec.Program, no int, signal string, options SignalContainerOptions) error {
+	name := fmt.Sprintf("%s_%s_%d", app.Identifier, prog.Key, no)
+	return signalContainer(c, app, prog, options.DockerPath, name, signal)
+}
+
+type ExecuteContainerOptions struct {
+	DockerPath string
+}
+
+func ExecuteContainer(c *ssh.Client, app spec.Application, prog spec.Program, no int, command string, options ExecuteContainerOptions) error {
+	name := fmt.Sprintf("%s_%s_%d", app.Identifier, prog.Key, no)
+	return executeContainer(c, app, prog, options.DockerPath, name, command)
+}
+
 func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, image, name string, no int) error {
 	appDir := fmt.Sprintf("/opt/%s", app.Identifier)
 
@@ -337,4 +355,25 @@ func logContainer(c *ssh.Client, app spec.Application, prog spec.Program, docker
 		name,
 	}
 	return c.Run(strings.Join(cmd, " "), true)
+}
+
+func signalContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, name string, signal string) error {
+	cmd := []string{
+		dockerPath,
+		"kill",
+		"--signal", signal,
+		name,
+	}
+	return c.Run(strings.Join(cmd, " "), false)
+}
+
+func executeContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, name string, command string) error {
+	cmd := []string{
+		dockerPath,
+		"exec",
+		name,
+		command,
+	}
+	fmt.Println(cmd)
+	return c.Run(strings.Join(cmd, " "), false)
 }

@@ -89,7 +89,7 @@ func (u *Ubuntu) ExtractTar(name, dir string) error {
 	return nil
 }
 
-func (u *Ubuntu) Build(app spec.Application, prog spec.Program) error {
+func (u *Ubuntu) Build(app spec.Application, prog spec.Program) (bool, error) {
 	return docker.BuildImage(u.Client, app, prog, docker.BuildImageOptions{
 		DockerPath: dockerPath,
 	})
@@ -175,6 +175,65 @@ func (u *Ubuntu) Log(app spec.Application, prog spec.Program, no int) error {
 	return docker.LogContainer(u.Client, app, prog, no, docker.LogContainerOptions{
 		DockerPath: dockerPath,
 	})
+}
+
+func (u *Ubuntu) Signal(app spec.Application, prog spec.Program, no int, signal string) error {
+	return docker.SignalContainer(u.Client, app, prog, no, signal, docker.SignalContainerOptions{
+		DockerPath: dockerPath,
+	})
+}
+
+func (u *Ubuntu) Reload(app spec.Application, prog spec.Program, no int, rebuilt bool) error {
+	method := prog.Reload.Method
+	if rebuilt {
+		method = ""
+	}
+	switch method {
+	case "signal":
+		return u.Signal(app, prog, no, prog.Reload.Signal)
+
+	case "command":
+		return docker.ExecuteContainer(u.Client, app, prog, no, prog.Reload.Command, docker.ExecuteContainerOptions{
+			DockerPath: dockerPath,
+		})
+
+	case "restart", "":
+		return u.Restart(app, prog, no)
+	}
+	return nil
+}
+
+func (u *Ubuntu) ReloadAll(app spec.Application, prog spec.Program, rebuilt bool) error {
+	conts, err := docker.ListContainers(u.Client, app, prog, docker.ListContainersOptions{
+		DockerPath: dockerPath,
+	})
+	if err != nil {
+		return err
+	}
+
+	printf := func(format string, v ...interface{}) {
+		fmt.Printf("\033[G\033[K"+format, v...)
+	}
+
+	var n int
+	for _, cont := range conts {
+		if cont.No == 0 {
+			// Skip runs
+			continue
+		}
+		err = u.Reload(app, prog, cont.No, rebuilt)
+		if err != nil {
+			return err
+		}
+		n++
+		printf("%s: %d reloaded", prog.Key, n)
+	}
+
+	if n > 0 {
+		fmt.Println()
+	}
+
+	return nil
 }
 
 func (u *Ubuntu) CronEnable(app spec.Application, job spec.Job) error {

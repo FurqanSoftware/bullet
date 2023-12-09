@@ -56,7 +56,7 @@ type BuildImageOptions struct {
 	DockerPath string
 }
 
-func BuildImage(c *ssh.Client, app spec.Application, prog spec.Program, options BuildImageOptions) error {
+func BuildImage(c *ssh.Client, app spec.Application, prog spec.Program, options BuildImageOptions) (bool, error) {
 	if prog.Container.Dockerfile != "" {
 		return buildImageDockerfile(c, app, prog, options)
 	} else {
@@ -64,18 +64,18 @@ func BuildImage(c *ssh.Client, app spec.Application, prog spec.Program, options 
 	}
 }
 
-func buildImageDockerfile(c *ssh.Client, app spec.Application, prog spec.Program, options BuildImageOptions) error {
+func buildImageDockerfile(c *ssh.Client, app spec.Application, prog spec.Program, options BuildImageOptions) (bool, error) {
 	file, err := os.Open(prog.Container.Dockerfile)
 	if err != nil {
-		return err
+		return false, err
 	}
 	fileBuf, err := io.ReadAll(file)
 	if err != nil {
-		return err
+		return false, err
 	}
 	err = file.Close()
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	appDir := fmt.Sprintf("/opt/%s", app.Identifier)
@@ -83,27 +83,27 @@ func buildImageDockerfile(c *ssh.Client, app spec.Application, prog spec.Program
 
 	shaOut, _ := c.Output(fmt.Sprintf("sha256sum %s/Dockerfile.%s", appDir, prog.Key))
 	if err != nil {
-		return err
+		return false, err
 	}
 	shaOutParts := bytes.Fields(shaOut)
 	if len(shaOutParts) >= 2 {
 		hash := sha256.New()
 		hash.Write(fileBuf)
 		if hex.EncodeToString(hash.Sum(nil)[:]) == string(shaOutParts[0]) {
-			return nil
+			return false, nil
 		}
 	}
 
 	err = c.Push(fmt.Sprintf("%s/Dockerfile.%s", appDir, prog.Key), 0644, int64(len(fileBuf)), bytes.NewReader(fileBuf))
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	name := fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
-	return c.Run(fmt.Sprintf("docker build -t %s -f %s/Dockerfile.%s %s", name, appDir, prog.Key, curDir), true)
+	return true, c.Run(fmt.Sprintf("docker build -t %s -f %s/Dockerfile.%s %s", name, appDir, prog.Key, curDir), true)
 }
 
-func buildImageDockerHub(c *ssh.Client, app spec.Application, prog spec.Program, options BuildImageOptions) error {
+func buildImageDockerHub(c *ssh.Client, app spec.Application, prog spec.Program, options BuildImageOptions) (bool, error) {
 	b := bytes.Buffer{}
 	err := dockerfileTpl.Execute(&b, struct {
 		Program spec.Program
@@ -111,18 +111,18 @@ func buildImageDockerHub(c *ssh.Client, app spec.Application, prog spec.Program,
 		Program: prog,
 	})
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	appDir := fmt.Sprintf("/opt/%s", app.Identifier)
 
 	err = c.Push(fmt.Sprintf("%s/Dockerfile.%s", appDir, prog.Key), 0644, int64(b.Len()), &b)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	name := fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
-	return c.Run(fmt.Sprintf("docker build -t %s -f %s/Dockerfile.%s %s", name, appDir, prog.Key, appDir), true)
+	return true, c.Run(fmt.Sprintf("docker build -t %s -f %s/Dockerfile.%s %s", name, appDir, prog.Key, appDir), true)
 }
 
 var dockerfileTpl = template.Must(template.New("").Parse(dockerfileTplText))

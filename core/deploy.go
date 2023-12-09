@@ -71,17 +71,19 @@ func deployNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, rel *Re
 	}
 
 	log.Print("Building images")
+	rebuilts := map[string]bool{}
 	for _, p := range spec.Application.Programs {
-		err = d.Build(spec.Application, p)
+		rebuilt, err := d.Build(spec.Application, p)
 		if err != nil {
 			return err
 		}
+		rebuilts[p.Key] = rebuilt
 	}
 
-	log.Print("Restarting containers")
+	log.Print("Reloading containers")
 	for _, k := range spec.Application.ProgramKeys {
 		p := spec.Application.Programs[k]
-		err = d.RestartAll(spec.Application, p)
+		err = d.ReloadAll(spec.Application, p, rebuilts[k])
 		if err != nil {
 			return err
 		}

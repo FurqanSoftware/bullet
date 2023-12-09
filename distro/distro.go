@@ -23,12 +23,15 @@ type Distro interface {
 
 	ExtractTar(name, dir string) error
 
-	Build(app spec.Application, prog spec.Program) error
+	Build(app spec.Application, prog spec.Program) (bool, error)
 	Restart(app spec.Application, prog spec.Program, no int) error
 	RestartAll(app spec.Application, prog spec.Program) error
 	Status(app spec.Application, prog spec.Program, tw *tabwriter.Writer) error
 	Scale(app spec.Application, prog spec.Program, n int) error
 	Log(app spec.Application, prog spec.Program, no int) error
+	Signal(app spec.Application, prog spec.Program, no int, signal string) error
+	Reload(app spec.Application, prog spec.Program, no int, rebuilt bool) error
+	ReloadAll(app spec.Application, prog spec.Program, rebuilt bool) error
 
 	CronEnable(app spec.Application, job spec.Job) error
 	CronDisable(app spec.Application, job spec.Job) error
