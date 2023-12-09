@@ -27,6 +27,7 @@ type Package struct {
 }
 
 type Deploy struct {
+	Current string
 }
 
 type Program struct {

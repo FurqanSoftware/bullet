@@ -89,6 +89,29 @@ func (u *Ubuntu) ExtractTar(name, dir string) error {
 	return nil
 }
 
+func (u *Ubuntu) UpdateCurrent(app spec.Application, relDir string) error {
+	curDir := fmt.Sprintf("/opt/%s/current", app.Identifier)
+	switch app.Deploy.Current {
+	case "replace":
+		cmds := []string{
+			fmt.Sprintf("mkdir -p %s", curDir),
+			fmt.Sprintf("find %s -mindepth 1 -delete", curDir),
+			fmt.Sprintf("cp -a %s/. %s/", relDir, curDir),
+		}
+		for _, cmd := range cmds {
+			err := u.Client.Run(cmd, false)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+
+	case "symlink", "":
+		return u.Symlink(relDir, curDir)
+	}
+	panic("unreachable")
+}
+
 func (u *Ubuntu) Build(app spec.Application, prog spec.Program) (bool, error) {
 	return docker.BuildImage(u.Client, app, prog, docker.BuildImageOptions{
 		DockerPath: dockerPath,

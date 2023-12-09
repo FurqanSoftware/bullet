@@ -23,6 +23,8 @@ type Distro interface {
 
 	ExtractTar(name, dir string) error
 
+	UpdateCurrent(app spec.Application, relDir string) error
+
 	Build(app spec.Application, prog spec.Program) (bool, error)
 	Restart(app spec.Application, prog spec.Program, no int) error
 	RestartAll(app spec.Application, prog spec.Program) error

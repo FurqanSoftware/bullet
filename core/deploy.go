@@ -60,11 +60,12 @@ func deployNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, rel *Re
 		return err
 	}
 
-	log.Print("Updating current marker")
-	err = d.Symlink(relDir, fmt.Sprintf("/opt/%s/current", spec.Application.Identifier))
+	log.Print("Updating current")
+	err = d.UpdateCurrent(spec.Application, relDir)
 	if err != nil {
 		return err
 	}
+
 	err = d.WriteFile(fmt.Sprintf("/opt/%s/current.hash", spec.Application.Identifier), []byte(rel.Hash))
 	if err != nil {
 		return err

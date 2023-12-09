@@ -374,6 +374,5 @@ func executeContainer(c *ssh.Client, app spec.Application, prog spec.Program, do
 		name,
 		command,
 	}
-	fmt.Println(cmd)
 	return c.Run(strings.Join(cmd, " "), false)
 }
