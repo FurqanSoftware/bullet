@@ -3,7 +3,6 @@ package ssh
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -196,7 +195,7 @@ func publicKeys(paths []string) func() ([]ssh.Signer, error) {
 	return func() ([]ssh.Signer, error) {
 		signers := []ssh.Signer{}
 		for _, path := range paths {
-			key, err := ioutil.ReadFile(path)
+			key, err := os.ReadFile(path)
 			if err != nil {
 				return nil, err
 			}

@@ -1,7 +1,7 @@
 package spec
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"sort"
 
@@ -31,7 +31,7 @@ func ParseFile(filename string) (*Spec, error) {
 		return nil, &Error{"ParseFile", err}
 	}
 	defer f.Close()
-	b, err := ioutil.ReadAll(f)
+	b, err := io.ReadAll(f)
 	if err != nil {
 		return nil, &Error{"ParseFile", err}
 	}
