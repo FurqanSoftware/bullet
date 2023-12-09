@@ -28,10 +28,13 @@ var LogTailCmd = &cobra.Command{
 		}
 
 		parts := strings.SplitN(args[0], ":", 2)
-		no, err := strconv.Atoi(parts[1])
-		if err != nil {
-			log.Fatal(err)
-			return
+		no := 1
+		if len(parts) == 2 {
+			no, err = strconv.Atoi(parts[1])
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
 		}
 
 		err = core.Log(nodes, spec, parts[0], no)
