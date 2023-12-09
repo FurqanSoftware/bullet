@@ -1,0 +1,32 @@
+variables:
+  GOCACHE: $CI_PROJECT_DIR/.go-build
+
+cache:
+  key: "$CI_PROJECT_PATH $CI_BUILD_REF_NAME"
+  paths:
+    - .go-build
+
+stages:
+  - lint
+  - build
+  - test
+
+lint:
+  image: registry.furqansoftware.net/cardboard/staticcheck:2023.1.5-1
+  stage: lint
+  script:
+    - staticcheck ./...
+
+build:
+  image: registry.furqansoftware.net/cardboard/golang:1.21.5-bullseye-0
+  stage: build
+  script:
+    - go build ./...
+
+test:
+  image: registry.furqansoftware.net/cardboard/golang:1.21.5-bullseye-0
+  stage: test
+  needs:
+    - build
+  script:
+    - go test -race ./...
