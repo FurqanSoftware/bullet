@@ -404,6 +404,10 @@ func (u *Ubuntu) Df() error {
 	return u.Client.Run("df", true)
 }
 
+func (u *Ubuntu) Top() error {
+	return u.Client.RunPTY("top")
+}
+
 func (u *Ubuntu) Detect() (bool, error) {
 	return true, nil
 }
