@@ -66,9 +66,10 @@ type Scale struct {
 }
 
 type Reload struct {
-	Method  string
-	Signal  string
-	Command string
+	Method     string
+	Signal     string
+	Command    string
+	PreCommand string
 }
 
 type Unsafe struct {
