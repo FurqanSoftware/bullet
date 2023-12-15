@@ -13,7 +13,7 @@ var RootCmd = &cobra.Command{
 	Short: "Bullet is a fast application deployment tool",
 	Long:  `Bullet is a fast and flexible application deployment tool built by Furqan Software and friends. Complete documentation is available at https://bullettool.com/.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
+		cmd.Help()
 	},
 }
 
