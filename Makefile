@@ -13,6 +13,9 @@ build:
 build.alpine:
 	(cd foundry; docker build -t bullet-foundry .)
 	docker run \
+		--rm -ti \
+		-e GOCACHE=/go/src/github.com/FurqanSoftware/bullet/.go-build \
+		-u $(shell id -u):$(shell id -g) \
 		-v `pwd`:/go/src/github.com/FurqanSoftware/bullet \
 		-w /go/src/github.com/FurqanSoftware/bullet \
 		bullet-foundry \
