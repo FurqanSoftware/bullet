@@ -8,5 +8,5 @@ type Error struct {
 }
 
 func (e *Error) Error() string {
-	return "exec: " + strconv.Quote(e.Name) + ": " + e.Err.Error()
+	return "spec: " + strconv.Quote(e.Name) + ": " + e.Err.Error()
 }
