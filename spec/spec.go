@@ -8,6 +8,10 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+type Spec struct {
+	Application Application
+}
+
 func Parse(filename string, b []byte) (*Spec, error) {
 	spec := Spec{}
 	err := yaml.Unmarshal(b, &spec)
@@ -36,4 +40,17 @@ func ParseFile(filename string) (*Spec, error) {
 		return nil, &Error{"ParseFile", err}
 	}
 	return Parse(filename, b)
+}
+
+func (s *Spec) ApplyScopeFile(name string) error {
+	scope := Scope{}
+	err := scope.ParseFile("Bulletscope." + name)
+	if err != nil {
+		return err
+	}
+	return s.ApplyScope(&scope)
+}
+
+func (s *Spec) ApplyScope(scope *Scope) error {
+	return s.Application.ApplyScope(scope)
 }

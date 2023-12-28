@@ -2,10 +2,6 @@ package spec
 
 import "time"
 
-type Spec struct {
-	Application Application
-}
-
 type Application struct {
 	Name       string
 	Identifier string
@@ -15,6 +11,17 @@ type Application struct {
 	ProgramKeys []string
 
 	Cron Cron
+}
+
+func (a *Application) ApplyScope(scope *Scope) error {
+	for k, prog := range a.Programs {
+		err := prog.ApplyScope(scope)
+		if err != nil {
+			return err
+		}
+		a.Programs[k] = prog
+	}
+	return nil
 }
 
 type Build struct {
@@ -43,6 +50,15 @@ type Program struct {
 	Reload      Reload
 
 	Unsafe Unsafe
+}
+
+func (p *Program) ApplyScope(scope *Scope) error {
+	var err error
+	p.Command, err = scope.Expand(p.Command)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 type Container struct {

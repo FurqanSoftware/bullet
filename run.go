@@ -18,6 +18,13 @@ var RunCmd = &cobra.Command{
 			log.Fatal(err)
 			return
 		}
+		if Scope != "" {
+			err = spec.ApplyScopeFile(Scope)
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+		}
 
 		nodes, err := core.ParseNodeSet(Hosts, Port, Identity)
 		if err != nil {
