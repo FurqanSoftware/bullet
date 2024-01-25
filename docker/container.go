@@ -253,6 +253,8 @@ func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 		"--log-driver",
 		"json-file",
 		"--log-opt",
+		"max-size=3g",
+		"--log-opt",
 		`tag="{{.Name}}"`,
 		"--restart", "always",
 		"-v", appDir+"/current:/"+app.Identifier,
