@@ -157,28 +157,28 @@ func RunContainer(c *ssh.Client, app spec.Application, prog spec.Program, option
 
 	conts, err := ListContainers(c, app, prog, ListContainersOptions(options))
 	if err != nil {
-		return nil
+		return err
 	}
 	if len(conts) > 0 {
 		err := deleteContainer(c, app, prog, options.DockerPath, name)
 		if err != nil {
-			return nil
+			return err
 		}
 	}
 
 	err = createAttachContainer(c, app, prog, options.DockerPath, image, name)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	conts, err = ListContainers(c, app, prog, ListContainersOptions(options))
 	if err != nil {
-		return nil
+		return err
 	}
 	if len(conts) > 0 {
 		err := deleteContainer(c, app, prog, options.DockerPath, name)
 		if err != nil {
-			return nil
+			return err
 		}
 	}
 	return nil
