@@ -25,6 +25,8 @@ var CronEnableCmd = &cobra.Command{
 			return
 		}
 
+		nodes = core.SelectNodes(nodes)
+
 		err = core.CronEnable(nodes, spec, args)
 		if err != nil {
 			log.Fatal(err)
@@ -49,6 +51,8 @@ var CronDisableCmd = &cobra.Command{
 			log.Fatal(err)
 			return
 		}
+
+		nodes = core.SelectNodes(nodes)
 
 		err = core.CronDisable(nodes, spec, args)
 		if err != nil {
