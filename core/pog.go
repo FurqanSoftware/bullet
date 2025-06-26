@@ -44,6 +44,14 @@ func pogReloadingContainer(p spec.Program, no int) pogStatus {
 	}
 }
 
+func pogRestartingContainer(p spec.Program, no int) pogStatus {
+	return pogStatus{
+		icon:  '~',
+		text:  fmt.Sprintf("Restarting container %s:%d", p.Key, no),
+		throb: true,
+	}
+}
+
 func pogText(s string) pogStatus {
 	return pogStatus{
 		icon:  '~',

@@ -124,41 +124,6 @@ func (u *Ubuntu) Restart(app spec.Application, prog spec.Program, no int) error 
 	})
 }
 
-func (u *Ubuntu) RestartAll(app spec.Application, prog spec.Program) error {
-	conts, err := docker.ListContainers(u.Client, app, prog, docker.ListContainersOptions{
-		DockerPath: dockerPath,
-	})
-	if err != nil {
-		return err
-	}
-
-	printf := func(format string, v ...interface{}) {
-		fmt.Printf("\033[G\033[K"+format, v...)
-	}
-
-	var n int
-	for _, cont := range conts {
-		if cont.No == 0 {
-			// Skip runs
-			continue
-		}
-		err = docker.RestartContainer(u.Client, app, prog, cont.No, docker.RestartContainerOptions{
-			DockerPath: dockerPath,
-		})
-		if err != nil {
-			return err
-		}
-		n++
-		printf("%s: %d restarted", prog.Key, n)
-	}
-
-	if n > 0 {
-		fmt.Println()
-	}
-
-	return nil
-}
-
 func (u *Ubuntu) Status(app spec.Application, prog spec.Program) ([]distro.Status, error) {
 	status := []distro.Status{}
 
