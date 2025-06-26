@@ -17,6 +17,7 @@ func Status(nodes []Node, spec *spec.Spec) error {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.Configure(func(cfg *tablewriter.Config) {
 		cfg.Header.Formatting.AutoFormat = tw.Off
+		cfg.Footer.Alignment.Global = tw.AlignLeft
 	})
 
 	hdata := []any{""}
@@ -25,6 +26,8 @@ func Status(nodes []Node, spec *spec.Spec) error {
 	}
 	table.Header(hdata...)
 
+	upsum := map[string]int{}
+	healthysum := map[string]int{}
 	for _, n := range nodes {
 		pog.SetStatus(pogConnecting(n))
 		c, err := ssh.Dial(n.Addr(), n.Identity)
@@ -51,9 +54,11 @@ func Status(nodes []Node, spec *spec.Spec) error {
 			for _, s := range status {
 				if s.Up {
 					up[k]++
+					upsum[k]++
 				}
 				if s.Healthy {
 					healthy[k]++
+					healthysum[k]++
 				}
 			}
 			if up[k] > 0 {
@@ -74,6 +79,16 @@ func Status(nodes []Node, spec *spec.Spec) error {
 		}
 		table.Append(rdata...)
 	}
+
+	fdata := []any{""}
+	for _, k := range spec.Application.ProgramKeys {
+		if upsum[k] == 0 {
+			fdata = append(fdata, "0")
+		} else {
+			fdata = append(fdata, fmt.Sprintf("%d (%d)", upsum[k], healthysum[k]))
+		}
+	}
+	table.Footer(fdata...)
 
 	return table.Render()
 }
