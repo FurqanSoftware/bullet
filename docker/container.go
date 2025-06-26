@@ -88,10 +88,10 @@ type ScaleContainerOptions struct {
 	DockerPath string
 }
 
-func ScaleContainer(c *ssh.Client, app spec.Application, prog spec.Program, n int, options ScaleContainerOptions) error {
+func ScaleContainer(c *ssh.Client, app spec.Application, prog spec.Program, n int, options ScaleContainerOptions) (up, down int, err error) {
 	conts, err := ListContainers(c, app, prog, ListContainersOptions(options))
 	if err != nil {
-		return nil
+		return
 	}
 	lastNo := 0
 	for _, cont := range conts {
@@ -101,41 +101,26 @@ func ScaleContainer(c *ssh.Client, app spec.Application, prog spec.Program, n in
 		}
 	}
 
-	printf := func(format string, v ...interface{}) {
-		fmt.Printf("\033[G\033[K"+format, v...)
-	}
-
-	var up, down int
-
-	printCounts := func() {
-		printf("%s: %d up, %d down, %d desired, %d ready", prog.Key, up, down, n, len(conts)-down+up)
-	}
-
 	d := len(conts) - n
 	for ; d > 0; d-- {
 		name := fmt.Sprintf("%s_%s_%d", app.Identifier, prog.Key, lastNo-d+1)
 		err = deleteContainer(c, app, prog, options.DockerPath, name)
 		if err != nil {
-			return nil
+			return
 		}
 		down++
-		printCounts()
 	}
 	for ; d < 0; d++ {
 		name := fmt.Sprintf("%s_%s_%d", app.Identifier, prog.Key, lastNo-d)
 		image := fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
 		err = createContainer(c, app, prog, options.DockerPath, image, name, lastNo-d)
 		if err != nil {
-			return nil
+			return
 		}
 		up++
-		printCounts()
 	}
 
-	printCounts()
-	fmt.Println()
-
-	return nil
+	return
 }
 
 type LogContainerOptions struct {

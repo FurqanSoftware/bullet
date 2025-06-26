@@ -103,17 +103,23 @@ func scaleNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, comp *Co
 		}
 	}
 
-	for key, n := range comp.Sizes {
-		prog, ok := spec.Application.Programs[key]
+	pog.SetStatus(pogText("Scaling programs"))
+	for k, n := range comp.Sizes {
+		prog, ok := spec.Application.Programs[k]
 		if !ok {
 			// TODO(hjr265): This should yield an error.
 			continue
 		}
 
-		err := d.Scale(spec.Application, prog, n)
+		pog.SetStatus(pogScalingProgram(prog))
+		up, down, err := d.Scale(spec.Application, prog, n)
 		if err != nil {
 			return err
 		}
+		pog.Infof("Scaled program %s", k)
+		pog.Infof("∟ Desired: %d", n)
+		pog.Infof("∟ Ready: %d (%+d)", n, up-down)
+		pog.SetStatus(nil)
 	}
 	return nil
 }

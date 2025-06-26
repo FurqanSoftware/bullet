@@ -2,12 +2,12 @@ package core
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/FurqanSoftware/bullet/distro"
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/FurqanSoftware/bullet/ssh"
+	"github.com/FurqanSoftware/pog"
 )
 
 func Run(nodes []Node, spec *spec.Spec, key string) error {
@@ -22,11 +22,13 @@ func Run(nodes []Node, spec *spec.Spec, key string) error {
 
 	n := nodes[i-1]
 
-	log.Printf("Connecting to %s", n.Label())
+	pog.SetStatus(pogConnecting(n))
 	c, err := ssh.Dial(n.Addr(), n.Identity)
 	if err != nil {
 		return err
 	}
+	pog.Infof("Connected to %s", n.Label())
+	pog.SetStatus(nil)
 
 	d, err := distro.New(c)
 	if err != nil {

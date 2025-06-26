@@ -146,7 +146,7 @@ func (u *Ubuntu) Status(app spec.Application, prog spec.Program) ([]distro.Statu
 	return status, nil
 }
 
-func (u *Ubuntu) Scale(app spec.Application, prog spec.Program, n int) error {
+func (u *Ubuntu) Scale(app spec.Application, prog spec.Program, n int) (int, int, error) {
 	return docker.ScaleContainer(u.Client, app, prog, n, docker.ScaleContainerOptions{
 		DockerPath: dockerPath,
 	})

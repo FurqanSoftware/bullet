@@ -28,7 +28,7 @@ type Distro interface {
 	Build(app spec.Application, prog spec.Program) (bool, error)
 	Restart(app spec.Application, prog spec.Program, no int) error
 	Status(app spec.Application, prog spec.Program) ([]Status, error)
-	Scale(app spec.Application, prog spec.Program, n int) error
+	Scale(app spec.Application, prog spec.Program, n int) (int, int, error)
 	Log(app spec.Application, prog spec.Program, no int) error
 	Signal(app spec.Application, prog spec.Program, no int, signal string) error
 	Reload(app spec.Application, prog spec.Program, no int, rebuilt bool) error

@@ -52,6 +52,14 @@ func pogRestartingContainer(p spec.Program, no int) pogStatus {
 	}
 }
 
+func pogScalingProgram(p spec.Program) pogStatus {
+	return pogStatus{
+		icon:  '~',
+		text:  fmt.Sprintf("Scaling program %s", p.Key),
+		throb: true,
+	}
+}
+
 func pogText(s string) pogStatus {
 	return pogStatus{
 		icon:  '~',
