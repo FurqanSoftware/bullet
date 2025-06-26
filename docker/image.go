@@ -94,7 +94,7 @@ func buildImageDockerfile(c *ssh.Client, app spec.Application, prog spec.Program
 		}
 	}
 
-	err = c.Push(fmt.Sprintf("%s/Dockerfile.%s", appDir, prog.Key), 0644, int64(len(fileBuf)), bytes.NewReader(fileBuf))
+	err = c.Push(fmt.Sprintf("%s/Dockerfile.%s", appDir, prog.Key), 0644, int64(len(fileBuf)), bytes.NewReader(fileBuf), nil)
 	if err != nil {
 		return false, err
 	}
@@ -116,7 +116,7 @@ func buildImageDockerHub(c *ssh.Client, app spec.Application, prog spec.Program,
 
 	appDir := fmt.Sprintf("/opt/%s", app.Identifier)
 
-	err = c.Push(fmt.Sprintf("%s/Dockerfile.%s", appDir, prog.Key), 0644, int64(b.Len()), &b)
+	err = c.Push(fmt.Sprintf("%s/Dockerfile.%s", appDir, prog.Key), 0644, int64(b.Len()), &b, nil)
 	if err != nil {
 		return false, err
 	}

@@ -8,7 +8,9 @@ import (
 )
 
 func main() {
+	log.SetPrefix("\033[2K\r")
 	log.SetFlags(0)
+
 	pog.InitDefault()
 
 	fmt.Fprintln(log.Writer(), ` ______       _ _      _   `)

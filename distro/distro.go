@@ -28,12 +28,11 @@ type Distro interface {
 	Build(app spec.Application, prog spec.Program) (bool, error)
 	Restart(app spec.Application, prog spec.Program, no int) error
 	RestartAll(app spec.Application, prog spec.Program) error
-	Status(app spec.Application, prog spec.Program, tw *tabwriter.Writer) error
+	Status(app spec.Application, prog spec.Program) ([]Status, error)
 	Scale(app spec.Application, prog spec.Program, n int) error
 	Log(app spec.Application, prog spec.Program, no int) error
 	Signal(app spec.Application, prog spec.Program, no int, signal string) error
 	Reload(app spec.Application, prog spec.Program, no int, rebuilt bool) error
-	ReloadAll(app spec.Application, prog spec.Program, rebuilt bool) error
 
 	CronEnable(app spec.Application, job spec.Job) error
 	CronDisable(app spec.Application, job spec.Job) error
@@ -47,6 +46,13 @@ type Distro interface {
 	Top() error
 
 	Detect() (bool, error)
+}
+
+type Status struct {
+	Program spec.Program
+	No      int
+	Up      bool
+	Healthy bool
 }
 
 func New(c *ssh.Client) (Distro, error) {

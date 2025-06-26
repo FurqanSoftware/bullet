@@ -17,9 +17,15 @@ type Release struct {
 
 type Tarball struct {
 	Path string
+	Size int64
 }
 
 func NewRelease(tarPath string) (*Release, error) {
+	fi, err := os.Stat(tarPath)
+	if err != nil {
+		return nil, err
+	}
+
 	s, err := sha256Tarball(tarPath)
 	if err != nil {
 		return nil, err
@@ -30,6 +36,7 @@ func NewRelease(tarPath string) (*Release, error) {
 		Hash: s,
 		Tarball: Tarball{
 			Path: tarPath,
+			Size: fi.Size(),
 		},
 	}, nil
 }

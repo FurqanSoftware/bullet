@@ -1,6 +1,7 @@
 package ssh
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"log"
@@ -119,7 +120,7 @@ func (c Client) Output(cmd string) ([]byte, error) {
 	return sess.Output(cmd)
 }
 
-func (c Client) Push(name string, mode os.FileMode, size int64, r io.Reader) error {
+func (c Client) Push(name string, mode os.FileMode, size int64, r io.Reader, chstatus chan PushStatus) error {
 	sess, err := c.Client.NewSession()
 	if err != nil {
 		return err
@@ -130,11 +131,17 @@ func (c Client) Push(name string, mode os.FileMode, size int64, r io.Reader) err
 	if err != nil {
 		return err
 	}
+	wb := bufio.NewWriter(w)
 	go func() {
+		wt := writeTracker{w: wb, size: size, ch: chstatus}
+		defer wt.Stop()
 		defer w.Close()
-		fmt.Fprintf(w, "C%#o %d %s\n", mode, size, path.Base(name))
-		io.Copy(w, r)
+		fmt.Fprintf(wb, "C%#o %d %s\n", mode, size, path.Base(name))
+		wb.Flush()
+		io.Copy(&wt, r)
+		wb.Flush()
 		fmt.Fprint(w, "\x00")
+		wb.Flush()
 	}()
 
 	sess.Stdout = os.Stdout

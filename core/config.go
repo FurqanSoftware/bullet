@@ -37,5 +37,5 @@ func uploadEnvironmentFile(c *ssh.Client, spec *spec.Spec, filename string) erro
 	if err != nil {
 		return err
 	}
-	return c.Push(fmt.Sprintf("/opt/%s/env", spec.Application.Identifier), s.Mode(), s.Size(), f)
+	return c.Push(fmt.Sprintf("/opt/%s/env", spec.Application.Identifier), s.Mode(), s.Size(), f, nil)
 }

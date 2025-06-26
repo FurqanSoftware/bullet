@@ -159,33 +159,26 @@ func (u *Ubuntu) RestartAll(app spec.Application, prog spec.Program) error {
 	return nil
 }
 
-func (u *Ubuntu) Status(app spec.Application, prog spec.Program, tw *tabwriter.Writer) error {
+func (u *Ubuntu) Status(app spec.Application, prog spec.Program) ([]distro.Status, error) {
+	status := []distro.Status{}
+
 	conts, err := docker.ListContainers(u.Client, app, prog, docker.ListContainersOptions{
 		DockerPath: dockerPath,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	up := 0
-	healthy := 0
-	unhealthy := 0
 	for _, cont := range conts {
-		if strings.HasPrefix(cont.Status, "Up") {
-			up++
-		}
-		if strings.Contains(cont.Status, "(healthy)") {
-			healthy++
-		} else {
-			unhealthy++
-		}
+		status = append(status, distro.Status{
+			Program: prog,
+			No:      cont.No,
+			Up:      strings.HasPrefix(cont.Status, "Up"),
+			Healthy: strings.Contains(cont.Status, "(healthy)"),
+		})
 	}
 
-	if up > 0 {
-		fmt.Fprintf(tw, "%s: %d up, %d healthy, %d unhealthy\n", prog.Key, up, healthy, unhealthy)
-	}
-
-	return nil
+	return status, nil
 }
 
 func (u *Ubuntu) Scale(app spec.Application, prog spec.Program, n int) error {
@@ -235,39 +228,6 @@ func (u *Ubuntu) Reload(app spec.Application, prog spec.Program, no int, rebuilt
 	return nil
 }
 
-func (u *Ubuntu) ReloadAll(app spec.Application, prog spec.Program, rebuilt bool) error {
-	conts, err := docker.ListContainers(u.Client, app, prog, docker.ListContainersOptions{
-		DockerPath: dockerPath,
-	})
-	if err != nil {
-		return err
-	}
-
-	printf := func(format string, v ...interface{}) {
-		fmt.Printf("\033[G\033[K"+format, v...)
-	}
-
-	var n int
-	for _, cont := range conts {
-		if cont.No == 0 {
-			// Skip runs
-			continue
-		}
-		err = u.Reload(app, prog, cont.No, rebuilt)
-		if err != nil {
-			return err
-		}
-		n++
-		printf("%s: %d reloaded", prog.Key, n)
-	}
-
-	if n > 0 {
-		fmt.Println()
-	}
-
-	return nil
-}
-
 func (u *Ubuntu) CronEnable(app spec.Application, job spec.Job) error {
 	appdir := fmt.Sprintf("/opt/%s", app.Identifier)
 	name := app.Identifier + "_cron_" + job.Key
@@ -295,7 +255,7 @@ ExecStart=` + fmt.Sprintf("%s run --rm --env-file %s/env --name %s -v %s/current
 
 [Install]
 WantedBy=multi-user.target`
-	err := u.Client.Push(fmt.Sprintf("/etc/systemd/system/%s", servicename), 0644, int64(len(service)), strings.NewReader(service))
+	err := u.Client.Push(fmt.Sprintf("/etc/systemd/system/%s", servicename), 0644, int64(len(service)), strings.NewReader(service), nil)
 	if err != nil {
 		return err
 	}
@@ -319,7 +279,7 @@ OnCalendar=` + job.Schedule + `
 
 [Install]
 WantedBy=timers.target`
-	err = u.Client.Push(fmt.Sprintf("/etc/systemd/system/%s", timername), 0644, int64(len(timer)), strings.NewReader(timer))
+	err = u.Client.Push(fmt.Sprintf("/etc/systemd/system/%s", timername), 0644, int64(len(timer)), strings.NewReader(timer), nil)
 	if err != nil {
 		return err
 	}

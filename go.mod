@@ -11,13 +11,19 @@ require (
 )
 
 require (
+	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.17 // indirect
+	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	github.com/olekukonko/errors v0.0.0-20250405072817-4e6d85265da6 // indirect
+	github.com/olekukonko/ll v0.0.8 // indirect
+	github.com/olekukonko/tablewriter v1.0.7 // indirect
+	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/spf13/pflag v1.0.0 // indirect
-	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 )
 
-go 1.21.5
+go 1.24.2
