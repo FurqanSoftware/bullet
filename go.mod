@@ -7,7 +7,7 @@ require (
 	github.com/mattn/go-tty v0.0.3
 	github.com/spf13/cobra v0.0.0-20170612063610-b4dbd37a0183
 	golang.org/x/crypto v0.7.0
-	gopkg.in/yaml.v2 v2.0.0-20170407172122-cd8b52f8269e
+	gopkg.in/yaml.v2 v2.2.8
 )
 
 require (
