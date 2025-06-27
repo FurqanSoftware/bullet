@@ -12,7 +12,7 @@ stages:
   - test
 
 lint:
-  image: registry.furqansoftware.net/cardboard/staticcheck:2023.1.5-1
+  image: registry.furqansoftware.net/cardboard/staticcheck:2025.1.1-0
   stage: lint
   script:
     - staticcheck ./...
