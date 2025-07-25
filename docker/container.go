@@ -242,19 +242,20 @@ func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 		"--log-opt",
 		`tag="{{.Name}}"`,
 		"--restart", "always",
-		"-v", appDir+"/current:/"+app.Identifier,
 	)
 
-	if prog.Container.WorkingDir != nil {
-		cmd = append(
-			cmd,
-			"-w", strconv.Quote(*prog.Container.WorkingDir),
-		)
+	if prog.Container.ApplicationDir != nil {
+		cmd = append(cmd, "-v", strconv.Quote(appDir+"/current:"+*prog.Container.ApplicationDir))
 	} else {
-		cmd = append(
-			cmd,
-			"-w", "/"+app.Identifier,
-		)
+		cmd = append(cmd, "-v", appDir+"/current:/"+app.Identifier)
+	}
+
+	if prog.Container.WorkingDir != nil {
+		cmd = append(cmd, "-w", strconv.Quote(*prog.Container.WorkingDir))
+	} else if prog.Container.ApplicationDir != nil {
+		cmd = append(cmd, "-w", strconv.Quote(*prog.Container.ApplicationDir))
+	} else {
+		cmd = append(cmd, "-w", "/"+app.Identifier)
 	}
 
 	if prog.Container.Entrypoint != nil {
@@ -298,13 +299,16 @@ func createAttachContainer(c *ssh.Client, app spec.Application, prog spec.Progra
 		cmd = append(cmd, "--network=host")
 	}
 
-	cmd = append(
-		cmd,
-		"-v", appDir+"/current:/"+app.Identifier,
-	)
+	if prog.Container.ApplicationDir != nil {
+		cmd = append(cmd, "-v", strconv.Quote(appDir+"/current:"+*prog.Container.ApplicationDir))
+	} else {
+		cmd = append(cmd, "-v", appDir+"/current:/"+app.Identifier)
+	}
 
 	if prog.Container.WorkingDir != nil {
 		cmd = append(cmd, "-w", strconv.Quote(*prog.Container.WorkingDir))
+	} else if prog.Container.ApplicationDir != nil {
+		cmd = append(cmd, "-w", strconv.Quote(*prog.Container.ApplicationDir))
 	} else {
 		cmd = append(cmd, "-w", "/"+app.Identifier)
 	}

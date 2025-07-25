@@ -62,10 +62,11 @@ func (p *Program) ApplyScope(scope *Scope) error {
 }
 
 type Container struct {
-	Dockerfile string
-	Image      string
-	Entrypoint *string
-	WorkingDir *string
+	Dockerfile     string
+	Image          string
+	Entrypoint     *string
+	WorkingDir     *string
+	ApplicationDir *string
 }
 
 type ProgramHealthcheck struct {
