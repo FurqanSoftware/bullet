@@ -9,7 +9,7 @@ type Configuration struct {
 }
 
 func Load(c *Configuration) error {
-	err := envconfig.Process("BULLET", &c)
+	err := envconfig.Process("BULLET", c)
 	return err
 }
 
