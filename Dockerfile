@@ -1,6 +1,6 @@
 FROM alpine:3.15
 
-MAINTAINER bullet@furqansoftware.com
+LABEL maintainer="bullet@furqansoftware.com"
 
 RUN apk add --no-cache bash build-base git make openssh-client
 
