@@ -5,7 +5,8 @@ import (
 )
 
 type Configuration struct {
-	SSHRetries int `envconfig:"SSH_RETRIES"`
+	SSHRetries int           `envconfig:"SSH_RETRIES"`
+	SSHTimeout time.Duration `envconfig:"SSH_TIMEOUT" default:"30s"`
 }
 
 func Load(c *Configuration) error {

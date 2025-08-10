@@ -35,6 +35,7 @@ func Dial(addr, identity string) (*Client, error) {
 				ssh.PublicKeysCallback(publicKeys(keyPaths)),
 			},
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+			Timeout:         cfg.Current.SSHTimeout,
 		})
 		return
 	},
