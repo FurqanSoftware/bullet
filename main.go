@@ -9,7 +9,10 @@ import (
 )
 
 func main() {
-	cfg.LoadCurrent()
+	err := cfg.LoadCurrent()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	log.SetPrefix("\033[2K\r")
 	log.SetFlags(0)
@@ -24,7 +27,7 @@ func main() {
 	fmt.Fprintln(log.Writer(), ` \____/ \__,_|_|_|\___|\__|`)
 	fmt.Fprintln(log.Writer())
 
-	err := RootCmd.Execute()
+	err = RootCmd.Execute()
 	if err != nil {
 		log.Fatal(err)
 	}
