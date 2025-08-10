@@ -3,8 +3,10 @@ module github.com/FurqanSoftware/bullet
 require (
 	github.com/FurqanSoftware/pog v0.0.0-20230914124239-d67a41584f01
 	github.com/antonmedv/expr v1.15.3
+	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dustin/go-humanize v1.0.1
 	github.com/fatih/color v1.15.0
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mattn/go-tty v0.0.3
 	github.com/olekukonko/tablewriter v1.0.7
 	github.com/spf13/cobra v0.0.0-20170612063610-b4dbd37a0183

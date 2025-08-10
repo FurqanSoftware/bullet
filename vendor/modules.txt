@@ -17,6 +17,9 @@ github.com/antonmedv/expr/parser/operator
 github.com/antonmedv/expr/parser/utils
 github.com/antonmedv/expr/vm
 github.com/antonmedv/expr/vm/runtime
+# github.com/avast/retry-go v3.0.0+incompatible
+## explicit
+github.com/avast/retry-go
 # github.com/dustin/go-humanize v1.0.1
 ## explicit; go 1.16
 github.com/dustin/go-humanize
@@ -26,6 +29,9 @@ github.com/fatih/color
 # github.com/inconshreveable/mousetrap v1.0.0
 ## explicit
 github.com/inconshreveable/mousetrap
+# github.com/kelseyhightower/envconfig v1.4.0
+## explicit
+github.com/kelseyhightower/envconfig
 # github.com/mattn/go-colorable v0.1.13
 ## explicit; go 1.15
 github.com/mattn/go-colorable

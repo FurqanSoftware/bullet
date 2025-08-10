@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/FurqanSoftware/bullet/cfg"
 	"github.com/FurqanSoftware/pog"
 )
 
 func main() {
+	cfg.LoadCurrent()
+
 	log.SetPrefix("\033[2K\r")
 	log.SetFlags(0)
 

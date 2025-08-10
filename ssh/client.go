@@ -9,7 +9,9 @@ import (
 	"os"
 	"path"
 
+	"github.com/FurqanSoftware/bullet/cfg"
 	"github.com/FurqanSoftware/pog"
+	"github.com/avast/retry-go"
 	"github.com/mattn/go-tty"
 	"golang.org/x/crypto/ssh"
 )
@@ -25,13 +27,21 @@ func Dial(addr, identity string) (*Client, error) {
 	}
 	keyPaths = append(keyPaths, os.ExpandEnv("$HOME/.ssh/id_rsa"))
 
-	c, err := ssh.Dial("tcp", addr, &ssh.ClientConfig{
-		User: "root",
-		Auth: []ssh.AuthMethod{
-			ssh.PublicKeysCallback(publicKeys(keyPaths)),
-		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	})
+	var c *ssh.Client
+	err := retry.Do(func() (err error) {
+		c, err = ssh.Dial("tcp", addr, &ssh.ClientConfig{
+			User: "root",
+			Auth: []ssh.AuthMethod{
+				ssh.PublicKeysCallback(publicKeys(keyPaths)),
+			},
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		})
+		return
+	},
+		retry.Attempts(uint(cfg.Current.SSHRetries+1)),
+		retry.OnRetry(func(n uint, err error) {
+			pog.Debugf(".. Retrying")
+		}))
 	if err != nil {
 		return nil, err
 	}
