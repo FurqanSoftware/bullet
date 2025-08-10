@@ -1,6 +1,8 @@
 package cfg
 
 import (
+	"time"
+
 	"github.com/kelseyhightower/envconfig"
 )
 
