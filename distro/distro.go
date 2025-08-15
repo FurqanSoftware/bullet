@@ -41,7 +41,7 @@ type Distro interface {
 
 	Forward(app spec.Application, port string) error
 
-	Df() error
+	Df(options DfOptions) error
 	Top() error
 
 	Detect() (bool, error)
@@ -52,6 +52,11 @@ type Status struct {
 	No      int
 	Up      bool
 	Healthy bool
+}
+
+type DfOptions struct {
+	Watch     bool
+	Arguments string
 }
 
 func New(c *ssh.Client) (Distro, error) {

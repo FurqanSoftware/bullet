@@ -334,8 +334,15 @@ func (u *Ubuntu) Forward(app spec.Application, port string) error {
 	return u.Client.Forward(local, remote)
 }
 
-func (u *Ubuntu) Df() error {
-	return u.Client.Run("df", true)
+func (u *Ubuntu) Df(options distro.DfOptions) error {
+	cmd := []string{"df"}
+	if options.Arguments != "" {
+		cmd = append(cmd, options.Arguments)
+	}
+	if options.Watch {
+		return u.Client.RunPTY("watch " + strings.Join(cmd, " "))
+	}
+	return u.Client.Run(strings.Join(cmd, " "), true)
 }
 
 func (u *Ubuntu) Top() error {

@@ -8,7 +8,7 @@ import (
 	"github.com/FurqanSoftware/pog"
 )
 
-func Df(s scope.Scope, g cfg.Configuration) error {
+func Df(s scope.Scope, g cfg.Configuration, options distro.DfOptions) error {
 	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))
 		c, err := sshDial(n, g)
@@ -23,7 +23,7 @@ func Df(s scope.Scope, g cfg.Configuration) error {
 			return err
 		}
 
-		d.Df()
+		d.Df(options)
 	}
 	return nil
 }
