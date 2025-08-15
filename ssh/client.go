@@ -68,7 +68,7 @@ func (c Client) Run(cmd string, echo bool) error {
 	return sess.Run(cmd)
 }
 
-func (c Client) RunPTY(cmd string) error {
+func (c Client) RunPTY(cmd string, echo bool) error {
 	sess, err := c.Client.NewSession()
 	if err != nil {
 		return err
@@ -91,6 +91,9 @@ func (c Client) RunPTY(cmd string) error {
 		ssh.ECHO:          0,
 		ssh.TTY_OP_ISPEED: 14400,
 		ssh.TTY_OP_OSPEED: 14400,
+	}
+	if echo {
+		modes[ssh.ECHO] = 1
 	}
 
 	w, h, err := tty.Size()

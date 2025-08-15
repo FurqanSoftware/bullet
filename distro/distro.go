@@ -44,6 +44,8 @@ type Distro interface {
 	Df(options DfOptions) error
 	Top() error
 
+	Shell() error
+
 	Detect() (bool, error)
 }
 

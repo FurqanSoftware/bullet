@@ -320,7 +320,7 @@ func createAttachContainer(c *ssh.Client, app spec.Application, prog spec.Progra
 		prog.Command,
 	)
 
-	return c.RunPTY(strings.Join(cmd, " "))
+	return c.RunPTY(strings.Join(cmd, " "), false)
 }
 
 func deleteContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, name string) error {

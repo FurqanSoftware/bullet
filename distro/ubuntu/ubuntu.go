@@ -340,13 +340,17 @@ func (u *Ubuntu) Df(options distro.DfOptions) error {
 		cmd = append(cmd, options.Arguments)
 	}
 	if options.Watch {
-		return u.Client.RunPTY("watch " + strings.Join(cmd, " "))
+		return u.Client.RunPTY("watch "+strings.Join(cmd, " "), false)
 	}
 	return u.Client.Run(strings.Join(cmd, " "), true)
 }
 
 func (u *Ubuntu) Top() error {
-	return u.Client.RunPTY("top")
+	return u.Client.RunPTY("top", false)
+}
+
+func (u *Ubuntu) Shell() error {
+	return u.Client.RunPTY("/bin/bash", true)
 }
 
 func (u *Ubuntu) Detect() (bool, error) {
