@@ -17,9 +17,10 @@ var (
 )
 
 var RootCmd = &cobra.Command{
-	Use:   "bullet",
-	Short: "Bullet is a fast application deployment tool",
-	Long:  `Bullet is a fast and flexible application deployment tool built by Furqan Software and friends. Complete documentation is available at https://bullettool.com/.`,
+	Use:          "bullet",
+	Short:        "Bullet is a fast application deployment tool",
+	Long:         `Bullet is a fast and flexible application deployment tool built by Furqan Software and friends. Complete documentation is available at https://bullettool.com/.`,
+	SilenceUsage: true,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		printBanner()
 
