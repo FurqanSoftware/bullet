@@ -23,7 +23,7 @@ var LogTailCmd = &cobra.Command{
 			}
 		}
 
-		s := selectNode(currentScope)
+		s := NewSelector().Node(currentScope)
 		return core.Log(s, currentConfiguration, parts[0], no)
 	},
 }

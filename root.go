@@ -10,10 +10,7 @@ import (
 )
 
 var (
-	flagHosts    string
-	flagPort     int
-	flagIdentity string
-	flagConfig   string
+	flagConfig string
 
 	currentScope         scope.Scope
 	currentConfiguration cfg.Configuration
@@ -58,8 +55,6 @@ var RootCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.PersistentFlags().StringVarP(&flagHosts, "hosts", "H", "", "List of target hosts (comma separated)")
-	RootCmd.PersistentFlags().IntVarP(&flagPort, "port", "p", 22, "Port to connect to")
-	RootCmd.PersistentFlags().StringVarP(&flagIdentity, "identity", "i", "", "Path to an SSH identity file (usually a private key)")
 	RootCmd.PersistentFlags().StringVarP(&flagConfig, "config", "c", "", "Name of the configuration to apply")
+	cfg.AddFlags(RootCmd.PersistentFlags())
 }

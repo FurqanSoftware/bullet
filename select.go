@@ -2,38 +2,52 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/FurqanSoftware/bullet/scope"
 )
 
-func selectNode(s scope.Scope) scope.Scope {
+type Selector struct {
+	stdin  io.Reader
+	stdout io.Writer
+}
+
+func NewSelector() *Selector {
+	return &Selector{
+		stdin:  os.Stdin,
+		stdout: os.Stdout,
+	}
+}
+
+func (r *Selector) Node(s scope.Scope) scope.Scope {
 	if len(s.Nodes) == 1 {
 		return s
 	}
 	selector := 1
 	for i, n := range s.Nodes {
-		fmt.Printf("%d. %s\n", i+1, n.Label())
+		fmt.Fprintf(r.stdout, "%d. %s\n", i+1, n.Label())
 	}
-	fmt.Printf("? [%d] ", selector)
-	fmt.Scanf("%d", &selector)
+	fmt.Fprintf(r.stdout, "? [%d] ", selector)
+	fmt.Fscanf(r.stdin, "%d", &selector)
 	s.Nodes = []scope.Node{s.Nodes[selector-1]}
 	return s
 }
 
-func selectNodes(s scope.Scope) scope.Scope {
+func (r *Selector) Nodes(s scope.Scope) scope.Scope {
 	if len(s.Nodes) == 1 {
 		return s
 	}
 	selected := []scope.Node{}
 	selector := fmt.Sprintf("1-%d", len(s.Nodes))
 	for i, n := range s.Nodes {
-		fmt.Printf("%d. %s\n", i+1, n.Label())
+		fmt.Fprintf(r.stdout, "%d. %s\n", i+1, n.Label())
 	}
-	fmt.Printf("? [%s] ", selector)
-	fmt.Scanf("%s", &selector)
+	fmt.Fprintf(r.stdout, "? [%s] ", selector)
+	fmt.Fscanf(r.stdin, "%s", &selector)
 	ranges := strings.Split(selector, ",")
 	for _, r := range ranges {
 		if !strings.Contains(r, "-") {

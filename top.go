@@ -10,7 +10,7 @@ var TopCmd = &cobra.Command{
 	Short: "Display Linux processes",
 	Long:  `This command displays Linux processes.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := selectNode(currentScope)
+		s := NewSelector().Node(currentScope)
 		return core.Top(s, currentConfiguration)
 	},
 }

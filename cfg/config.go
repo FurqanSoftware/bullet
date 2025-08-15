@@ -46,7 +46,27 @@ func (c *Configuration) ApplyEnvironment() error {
 func (c *Configuration) ApplyFlags(flags *pflag.FlagSet) error {
 	flagHosts := flags.Lookup("hosts")
 	if flagHosts.Changed {
-		c.Hosts = flagHosts.Value.String()
+		var err error
+		c.Hosts, err = flags.GetString("hosts")
+		if err != nil {
+			return err
+		}
+	}
+	flagPort := flags.Lookup("port")
+	if flagPort.Changed {
+		var err error
+		c.Port, err = flags.GetInt("port")
+		if err != nil {
+			return err
+		}
+	}
+	flagIdentity := flags.Lookup("identity")
+	if flagIdentity.Changed {
+		var err error
+		c.Identity, err = flags.GetString("identity")
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

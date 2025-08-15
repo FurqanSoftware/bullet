@@ -10,7 +10,7 @@ var DfCmd = &cobra.Command{
 	Short: "Print free space on node disks",
 	Long:  `This command prints the available free space on disk of the node.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := selectNodes(currentScope)
+		s := NewSelector().Nodes(currentScope)
 		return core.Df(s, currentConfiguration)
 	},
 }

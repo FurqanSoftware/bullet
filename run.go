@@ -10,7 +10,7 @@ var RunCmd = &cobra.Command{
 	Short: "Run a specific program on the server",
 	Long:  `This command runs a specific program of the app on the server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := selectNode(currentScope)
+		s := NewSelector().Node(currentScope)
 		return core.Run(s, currentConfiguration, args[0])
 	},
 }
