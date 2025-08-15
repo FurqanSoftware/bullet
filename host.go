@@ -8,7 +8,7 @@ import (
 
 var HostShellCmd = &cobra.Command{
 	Use:   "host:shell",
-	Short: "Connects to node over SSH",
+	Short: "Connect to node over SSH",
 	Long:  `This command starts an SSH session with the selected node.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s := NewSelector().Node(currentScope)
