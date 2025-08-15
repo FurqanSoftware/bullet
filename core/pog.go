@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 
+	"github.com/FurqanSoftware/bullet/scope"
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/dustin/go-humanize"
 	"github.com/fatih/color"
@@ -20,7 +21,7 @@ func (s pogStatus) Text() string        { return s.text }
 func (s pogStatus) Color() *color.Color { return s.color }
 func (s pogStatus) Throb() bool         { return s.throb }
 
-func pogConnecting(n Node) pogStatus {
+func pogConnecting(n scope.Node) pogStatus {
 	return pogStatus{
 		icon:  '~',
 		text:  fmt.Sprintf("Connecting to %s", n.Label()),

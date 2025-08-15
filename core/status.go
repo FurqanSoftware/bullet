@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/FurqanSoftware/bullet/cfg"
 	"github.com/FurqanSoftware/bullet/distro"
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
-	"github.com/FurqanSoftware/bullet/spec"
-	"github.com/FurqanSoftware/bullet/ssh"
+	"github.com/FurqanSoftware/bullet/scope"
 	"github.com/FurqanSoftware/pog"
 	"github.com/olekukonko/tablewriter"
 	"github.com/olekukonko/tablewriter/tw"
 )
 
-func Status(nodes []Node, spec *spec.Spec) error {
+func Status(s scope.Scope, g cfg.Configuration) error {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.Configure(func(cfg *tablewriter.Config) {
 		cfg.Header.Formatting.AutoFormat = tw.Off
@@ -21,16 +21,16 @@ func Status(nodes []Node, spec *spec.Spec) error {
 	})
 
 	hdata := []any{""}
-	for _, k := range spec.Application.ProgramKeys {
+	for _, k := range s.Spec.Application.ProgramKeys {
 		hdata = append(hdata, k)
 	}
 	table.Header(hdata...)
 
 	upsum := map[string]int{}
 	healthysum := map[string]int{}
-	for _, n := range nodes {
+	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))
-		c, err := ssh.Dial(n.Addr(), n.Identity)
+		c, err := sshDial(n, g)
 		if err != nil {
 			return err
 		}
@@ -45,9 +45,9 @@ func Status(nodes []Node, spec *spec.Spec) error {
 		pog.SetStatus(pogText("Checking containers"))
 		up := map[string]int{}
 		healthy := map[string]int{}
-		for _, k := range spec.Application.ProgramKeys {
-			p := spec.Application.Programs[k]
-			status, err := d.Status(spec.Application, p)
+		for _, k := range s.Spec.Application.ProgramKeys {
+			p := s.Spec.Application.Programs[k]
+			status, err := d.Status(s.Spec.Application, p)
 			if err != nil {
 				return err
 			}
@@ -70,7 +70,7 @@ func Status(nodes []Node, spec *spec.Spec) error {
 		pog.SetStatus(nil)
 
 		rdata := []any{n.Name}
-		for _, k := range spec.Application.ProgramKeys {
+		for _, k := range s.Spec.Application.ProgramKeys {
 			if up[k] == 0 {
 				rdata = append(rdata, "0")
 			} else {
@@ -81,7 +81,7 @@ func Status(nodes []Node, spec *spec.Spec) error {
 	}
 
 	fdata := []any{""}
-	for _, k := range spec.Application.ProgramKeys {
+	for _, k := range s.Spec.Application.ProgramKeys {
 		if upsum[k] == 0 {
 			fdata = append(fdata, "0")
 		} else {

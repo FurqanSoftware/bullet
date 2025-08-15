@@ -8,8 +8,8 @@ import (
 	"net"
 	"os"
 	"path"
+	"time"
 
-	"github.com/FurqanSoftware/bullet/cfg"
 	"github.com/FurqanSoftware/pog"
 	"github.com/avast/retry-go"
 	"github.com/mattn/go-tty"
@@ -17,39 +17,41 @@ import (
 )
 
 type Client struct {
-	Client *ssh.Client
+	Client  *ssh.Client
+	retries int
+	timeout time.Duration
 }
 
-func Dial(addr, identity string) (*Client, error) {
+func Dial(addr, identity string, opts ...Option) (*Client, error) {
+	c := Client{}
+	for _, o := range opts {
+		o.Apply(&c)
+	}
 	keyPaths := []string{}
 	if identity != "" {
 		keyPaths = append(keyPaths, identity)
 	}
 	keyPaths = append(keyPaths, os.ExpandEnv("$HOME/.ssh/id_rsa"))
 
-	var c *ssh.Client
 	err := retry.Do(func() (err error) {
-		c, err = ssh.Dial("tcp", addr, &ssh.ClientConfig{
+		c.Client, err = ssh.Dial("tcp", addr, &ssh.ClientConfig{
 			User: "root",
 			Auth: []ssh.AuthMethod{
 				ssh.PublicKeysCallback(publicKeys(keyPaths)),
 			},
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-			Timeout:         cfg.Current.SSHTimeout,
+			Timeout:         c.timeout,
 		})
 		return
 	},
-		retry.Attempts(uint(cfg.Current.SSHRetries+1)),
+		retry.Attempts(uint(c.retries+1)),
 		retry.OnRetry(func(n uint, err error) {
 			pog.Debugf(".. Retrying")
 		}))
 	if err != nil {
 		return nil, err
 	}
-
-	return &Client{
-		Client: c,
-	}, nil
+	return &c, nil
 }
 
 func (c Client) Run(cmd string, echo bool) error {

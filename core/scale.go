@@ -4,8 +4,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/FurqanSoftware/bullet/cfg"
 	"github.com/FurqanSoftware/bullet/distro"
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
+	"github.com/FurqanSoftware/bullet/scope"
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/FurqanSoftware/bullet/ssh"
 	"github.com/FurqanSoftware/pog"
@@ -31,7 +33,7 @@ func NewComposition(args []string) (*Composition, error) {
 	return &comp, nil
 }
 
-func DefaultComposition(n Node, spec *spec.Spec) (*Composition, error) {
+func DefaultComposition(n scope.Node, spec *spec.Spec) (*Composition, error) {
 	comp := Composition{
 		Sizes: make(map[string]int, len(spec.Application.Programs)),
 	}
@@ -71,10 +73,10 @@ func DefaultComposition(n Node, spec *spec.Spec) (*Composition, error) {
 	return &comp, nil
 }
 
-func Scale(nodes []Node, spec *spec.Spec, comp *Composition) error {
-	for _, n := range nodes {
+func Scale(s scope.Scope, g cfg.Configuration, comp *Composition) error {
+	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))
-		c, err := ssh.Dial(n.Addr(), n.Identity)
+		c, err := sshDial(n, g)
 		if err != nil {
 			return err
 		}
@@ -86,7 +88,7 @@ func Scale(nodes []Node, spec *spec.Spec, comp *Composition) error {
 			return err
 		}
 
-		err = scaleNode(n, c, d, spec, comp)
+		err = scaleNode(n, c, d, s, comp)
 		if err != nil {
 			return err
 		}
@@ -94,10 +96,10 @@ func Scale(nodes []Node, spec *spec.Spec, comp *Composition) error {
 	return nil
 }
 
-func scaleNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, comp *Composition) error {
+func scaleNode(n scope.Node, c *ssh.Client, d distro.Distro, s scope.Scope, comp *Composition) error {
 	if len(comp.Sizes) == 0 {
 		var err error
-		comp, err = DefaultComposition(n, spec)
+		comp, err = DefaultComposition(n, s.Spec)
 		if err != nil {
 			return err
 		}
@@ -105,14 +107,14 @@ func scaleNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, comp *Co
 
 	pog.SetStatus(pogText("Scaling programs"))
 	for k, n := range comp.Sizes {
-		prog, ok := spec.Application.Programs[k]
+		prog, ok := s.Spec.Application.Programs[k]
 		if !ok {
 			// TODO(hjr265): This should yield an error.
 			continue
 		}
 
 		pog.SetStatus(pogScalingProgram(prog))
-		up, down, err := d.Scale(spec.Application, prog, n)
+		up, down, err := d.Scale(s.Spec.Application, prog, n)
 		if err != nil {
 			return err
 		}

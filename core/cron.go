@@ -5,17 +5,17 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/FurqanSoftware/bullet/cfg"
 	"github.com/FurqanSoftware/bullet/distro"
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
-	"github.com/FurqanSoftware/bullet/spec"
-	"github.com/FurqanSoftware/bullet/ssh"
+	"github.com/FurqanSoftware/bullet/scope"
 	"github.com/FurqanSoftware/pog"
 )
 
-func CronEnable(nodes []Node, spec *spec.Spec, keys []string) error {
-	for _, n := range nodes {
+func CronEnable(s scope.Scope, g cfg.Configuration, keys []string) error {
+	for _, n := range s.Nodes {
 		log.Printf("Connecting to %s", n.Label())
-		c, err := ssh.Dial(n.Addr(), n.Identity)
+		c, err := sshDial(n, g)
 		if err != nil {
 			return err
 		}
@@ -27,11 +27,11 @@ func CronEnable(nodes []Node, spec *spec.Spec, keys []string) error {
 
 		log.Print("Enabling cron job(s)")
 		for _, k := range keys {
-			j := spec.Application.Cron.Job(k)
+			j := s.Spec.Application.Cron.Job(k)
 			if j.Command == "" {
 				log.Fatalf("Bad job key %q", k)
 			}
-			err = d.CronEnable(spec.Application, j)
+			err = d.CronEnable(s.Spec.Application, j)
 			if err != nil {
 				return err
 			}
@@ -40,10 +40,10 @@ func CronEnable(nodes []Node, spec *spec.Spec, keys []string) error {
 	return nil
 }
 
-func CronDisable(nodes []Node, spec *spec.Spec, keys []string) error {
-	for _, n := range nodes {
+func CronDisable(s scope.Scope, g cfg.Configuration, keys []string) error {
+	for _, n := range s.Nodes {
 		log.Printf("Connecting to %s", n.Label())
-		c, err := ssh.Dial(n.Addr(), n.Identity)
+		c, err := sshDial(n, g)
 		if err != nil {
 			return err
 		}
@@ -55,11 +55,11 @@ func CronDisable(nodes []Node, spec *spec.Spec, keys []string) error {
 
 		log.Print("Disabling cron job(s)")
 		for _, k := range keys {
-			j := spec.Application.Cron.Job(k)
+			j := s.Spec.Application.Cron.Job(k)
 			if j.Command == "" {
 				log.Fatalf("Bad job key %q", k)
 			}
-			err = d.CronDisable(spec.Application, j)
+			err = d.CronDisable(s.Spec.Application, j)
 			if err != nil {
 				return err
 			}
@@ -68,10 +68,10 @@ func CronDisable(nodes []Node, spec *spec.Spec, keys []string) error {
 	return nil
 }
 
-func CronStatus(nodes []Node, spec *spec.Spec, keys []string) error {
-	for _, n := range nodes {
+func CronStatus(s scope.Scope, g cfg.Configuration, keys []string) error {
+	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))
-		c, err := ssh.Dial(n.Addr(), n.Identity)
+		c, err := sshDial(n, g)
 		if err != nil {
 			return err
 		}
@@ -85,8 +85,8 @@ func CronStatus(nodes []Node, spec *spec.Spec, keys []string) error {
 
 		tw := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
-		for _, j := range spec.Application.Cron.Jobs {
-			err = d.CronStatus(spec.Application, j, tw)
+		for _, j := range s.Spec.Application.Cron.Jobs {
+			err = d.CronStatus(s.Spec.Application, j, tw)
 			if err != nil {
 				return err
 			}

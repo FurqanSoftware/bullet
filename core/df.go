@@ -1,17 +1,17 @@
 package core
 
 import (
+	"github.com/FurqanSoftware/bullet/cfg"
 	"github.com/FurqanSoftware/bullet/distro"
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
-	"github.com/FurqanSoftware/bullet/spec"
-	"github.com/FurqanSoftware/bullet/ssh"
+	"github.com/FurqanSoftware/bullet/scope"
 	"github.com/FurqanSoftware/pog"
 )
 
-func Df(nodes []Node, spec *spec.Spec) error {
-	for _, n := range nodes {
+func Df(s scope.Scope, g cfg.Configuration) error {
+	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))
-		c, err := ssh.Dial(n.Addr(), n.Identity)
+		c, err := sshDial(n, g)
 		if err != nil {
 			return err
 		}

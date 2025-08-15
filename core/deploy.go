@@ -5,22 +5,23 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/FurqanSoftware/bullet/cfg"
 	"github.com/FurqanSoftware/bullet/distro"
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
-	"github.com/FurqanSoftware/bullet/spec"
+	"github.com/FurqanSoftware/bullet/scope"
 	"github.com/FurqanSoftware/bullet/ssh"
 	"github.com/FurqanSoftware/pog"
 	"github.com/dustin/go-humanize"
 )
 
-func Deploy(nodes []Node, spec *spec.Spec, rel *Release) error {
+func Deploy(s scope.Scope, g cfg.Configuration, rel *Release) error {
 	pog.Infof("Deploying %s", filepath.Base(rel.Tarball.Path))
 	pog.Infof("∟ Hash: %s", rel.Hash)
 	pog.Infof("∟ Size: %s", humanize.Bytes(uint64(rel.Tarball.Size)))
 
-	for _, n := range nodes {
+	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))
-		c, err := ssh.Dial(n.Addr(), n.Identity)
+		c, err := sshDial(n, g)
 		if err != nil {
 			return err
 		}
@@ -32,7 +33,7 @@ func Deploy(nodes []Node, spec *spec.Spec, rel *Release) error {
 			return err
 		}
 
-		err = deployNode(n, c, d, spec, rel)
+		err = deployNode(n, c, d, s, rel)
 		if err != nil {
 			return err
 		}
@@ -40,14 +41,14 @@ func Deploy(nodes []Node, spec *spec.Spec, rel *Release) error {
 	return nil
 }
 
-func deployNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, rel *Release) error {
-	curHash, _ := d.ReadFile(fmt.Sprintf("/opt/%s/current.hash", spec.Application.Identifier))
+func deployNode(n scope.Node, c *ssh.Client, d distro.Distro, s scope.Scope, rel *Release) error {
+	curHash, _ := d.ReadFile(fmt.Sprintf("/opt/%s/current.hash", s.Spec.Application.Identifier))
 	if rel.Hash == string(curHash) {
 		pog.Info("Same as current hash. Skipping deploy.")
 		return nil
 	}
 
-	tarPath := fmt.Sprintf("/tmp/%s-%s-%s.tar.gz", spec.Application.Identifier, rel.Time, rel.Hash)
+	tarPath := fmt.Sprintf("/tmp/%s-%s-%s.tar.gz", s.Spec.Application.Identifier, rel.Time, rel.Hash)
 	err := uploadTarball(c, tarPath, rel.Tarball)
 	if err != nil {
 		return err
@@ -56,7 +57,7 @@ func deployNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, rel *Re
 	pog.SetStatus(nil)
 
 	pog.SetStatus(pogText("Extracting tarball"))
-	relDir := fmt.Sprintf("/opt/%s/releases/%s-%s", spec.Application.Identifier, rel.Time, rel.Hash)
+	relDir := fmt.Sprintf("/opt/%s/releases/%s-%s", s.Spec.Application.Identifier, rel.Time, rel.Hash)
 	err = d.ExtractTar(tarPath, relDir)
 	if err != nil {
 		return err
@@ -73,22 +74,22 @@ func deployNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, rel *Re
 	pog.SetStatus(nil)
 
 	pog.SetStatus(pogText("Updating current"))
-	err = d.UpdateCurrent(spec.Application, relDir)
+	err = d.UpdateCurrent(s.Spec.Application, relDir)
 	if err != nil {
 		return err
 	}
 	pog.Info("Updated current")
 	pog.SetStatus(nil)
 
-	err = d.WriteFile(fmt.Sprintf("/opt/%s/current.hash", spec.Application.Identifier), []byte(rel.Hash))
+	err = d.WriteFile(fmt.Sprintf("/opt/%s/current.hash", s.Spec.Application.Identifier), []byte(rel.Hash))
 	if err != nil {
 		return err
 	}
 
 	pog.SetStatus(pogText("Building images"))
 	rebuilts := map[string]bool{}
-	for _, p := range spec.Application.Programs {
-		rebuilt, err := d.Build(spec.Application, p)
+	for _, p := range s.Spec.Application.Programs {
+		rebuilt, err := d.Build(s.Spec.Application, p)
 		if err != nil {
 			return err
 		}
@@ -97,7 +98,7 @@ func deployNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, rel *Re
 		}
 	}
 	pog.Infof("Built %d image(s)", len(rebuilts))
-	for _, k := range spec.Application.ProgramKeys {
+	for _, k := range s.Spec.Application.ProgramKeys {
 		if !rebuilts[k] {
 			continue
 		}
@@ -108,18 +109,18 @@ func deployNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, rel *Re
 	pog.SetStatus(pogText("Reloading containers"))
 	nreload := map[string]int{}
 	nreloadsum := 0
-	for _, k := range spec.Application.ProgramKeys {
-		p := spec.Application.Programs[k]
-		status, err := d.Status(spec.Application, p)
+	for _, k := range s.Spec.Application.ProgramKeys {
+		p := s.Spec.Application.Programs[k]
+		statuses, err := d.Status(s.Spec.Application, p)
 		if err != nil {
 			return err
 		}
-		for _, s := range status {
-			if s.No == 0 {
+		for _, status := range statuses {
+			if status.No == 0 {
 				continue
 			}
-			pog.SetStatus(pogReloadingContainer(p, s.No))
-			err = d.Reload(spec.Application, p, s.No, rebuilts[k])
+			pog.SetStatus(pogReloadingContainer(p, status.No))
+			err = d.Reload(s.Spec.Application, p, status.No, rebuilts[k])
 			if err != nil {
 				return err
 			}
@@ -128,7 +129,7 @@ func deployNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, rel *Re
 		}
 	}
 	pog.Infof("Reloaded %d container(s)", nreloadsum)
-	for _, k := range spec.Application.ProgramKeys {
+	for _, k := range s.Spec.Application.ProgramKeys {
 		if nreload[k] == 0 {
 			continue
 		}
@@ -137,7 +138,7 @@ func deployNode(n Node, c *ssh.Client, d distro.Distro, spec *spec.Spec, rel *Re
 	pog.SetStatus(nil)
 
 	pog.SetStatus(pogText("Removing stale releases"))
-	err = d.Prune(fmt.Sprintf("/opt/%s/releases", spec.Application.Identifier), 5)
+	err = d.Prune(fmt.Sprintf("/opt/%s/releases", s.Spec.Application.Identifier), 5)
 	if err != nil {
 		return err
 	}

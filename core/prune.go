@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/FurqanSoftware/bullet/cfg"
 	"github.com/FurqanSoftware/bullet/distro"
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
-	"github.com/FurqanSoftware/bullet/spec"
-	"github.com/FurqanSoftware/bullet/ssh"
+	"github.com/FurqanSoftware/bullet/scope"
 )
 
-func Prune(nodes []Node, spec *spec.Spec) error {
-	for _, n := range nodes {
+func Prune(s scope.Scope, g cfg.Configuration) error {
+	for _, n := range s.Nodes {
 		log.Printf("Connecting to %s", n.Label())
-		c, err := ssh.Dial(n.Addr(), n.Identity)
+		c, err := sshDial(n, g)
 		if err != nil {
 			return err
 		}
@@ -24,7 +24,7 @@ func Prune(nodes []Node, spec *spec.Spec) error {
 		}
 
 		log.Print("Removing stale releases")
-		err = d.Prune(fmt.Sprintf("/opt/%s/releases", spec.Application.Identifier), 5)
+		err = d.Prune(fmt.Sprintf("/opt/%s/releases", s.Spec.Application.Identifier), 5)
 		if err != nil {
 			return err
 		}

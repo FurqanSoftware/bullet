@@ -1,29 +1,17 @@
 package core
 
 import (
-	"fmt"
 	"log"
 
+	"github.com/FurqanSoftware/bullet/cfg"
 	"github.com/FurqanSoftware/bullet/distro"
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
-	"github.com/FurqanSoftware/bullet/spec"
-	"github.com/FurqanSoftware/bullet/ssh"
+	"github.com/FurqanSoftware/bullet/scope"
 )
 
-func Log(nodes []Node, spec *spec.Spec, key string, no int) error {
-	var i int = 1
-	if len(nodes) > 1 {
-		for i, n := range nodes {
-			fmt.Printf("%d. %s\n", i+1, n.Label())
-		}
-		fmt.Print("? ")
-		fmt.Scanf("%d", &i)
-	}
-
-	n := nodes[i-1]
-
-	log.Printf("Connecting to %s", n.Label())
-	c, err := ssh.Dial(n.Addr(), n.Identity)
+func Log(s scope.Scope, g cfg.Configuration, key string, no int) error {
+	log.Printf("Connecting to %s", s.Nodes[0].Label())
+	c, err := sshDial(s.Nodes[0], g)
 	if err != nil {
 		return err
 	}
@@ -33,11 +21,11 @@ func Log(nodes []Node, spec *spec.Spec, key string, no int) error {
 		return err
 	}
 
-	prog, ok := spec.Application.Programs[key]
+	prog, ok := s.Spec.Application.Programs[key]
 	if !ok {
 		// TODO(hjr265): This should yield an error.
 		return nil
 	}
 
-	return d.Log(spec.Application, prog, no)
+	return d.Log(s.Spec.Application, prog, no)
 }

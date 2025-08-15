@@ -1,6 +1,8 @@
 package spec
 
-import "time"
+import (
+	"time"
+)
 
 type Application struct {
 	Name       string
@@ -13,9 +15,9 @@ type Application struct {
 	Cron Cron
 }
 
-func (a *Application) ApplyScope(scope *Scope) error {
+func (a *Application) ExpandVars(vars Vars) error {
 	for k, prog := range a.Programs {
-		err := prog.ApplyScope(scope)
+		err := prog.ExpandVars(vars)
 		if err != nil {
 			return err
 		}
@@ -52,9 +54,9 @@ type Program struct {
 	Unsafe Unsafe
 }
 
-func (p *Program) ApplyScope(scope *Scope) error {
+func (p *Program) ExpandVars(vars Vars) error {
 	var err error
-	p.Command, err = scope.Expand(p.Command)
+	p.Command, err = vars.Expand(p.Command)
 	if err != nil {
 		return err
 	}

@@ -42,15 +42,6 @@ func ParseFile(filename string) (*Spec, error) {
 	return Parse(filename, b)
 }
 
-func (s *Spec) ApplyScopeFile(name string) error {
-	scope := Scope{}
-	err := scope.ParseFile("Bulletscope." + name)
-	if err != nil {
-		return err
-	}
-	return s.ApplyScope(&scope)
-}
-
-func (s *Spec) ApplyScope(scope *Scope) error {
-	return s.Application.ApplyScope(scope)
+func (s *Spec) ExpandVars(vars Vars) error {
+	return s.Application.ExpandVars(vars)
 }
