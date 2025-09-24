@@ -8,15 +8,18 @@ import (
 	"github.com/FurqanSoftware/bullet/distro"
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
 	"github.com/FurqanSoftware/bullet/scope"
+	"github.com/FurqanSoftware/pog"
 )
 
 func Prune(s scope.Scope, g cfg.Configuration) error {
 	for _, n := range s.Nodes {
-		log.Printf("Connecting to %s", n.Label())
+		pog.SetStatus(pogConnecting(n))
 		c, err := sshDial(n, g)
 		if err != nil {
 			return err
 		}
+		pog.Infof("Connected to %s", n.Label())
+		pog.SetStatus(nil)
 
 		d, err := distro.New(c)
 		if err != nil {

@@ -13,11 +13,13 @@ import (
 
 func EnvironPush(s scope.Scope, g cfg.Configuration, filename string) error {
 	for _, n := range s.Nodes {
-		pog.Infof("Connecting to %s", n.Label())
+		pog.SetStatus(pogConnecting(n))
 		c, err := sshDial(n, g)
 		if err != nil {
 			return err
 		}
+		pog.Infof("Connected to %s", n.Label())
+		pog.SetStatus(nil)
 
 		err = uploadEnvironFile(c, s, filename)
 		if err != nil {

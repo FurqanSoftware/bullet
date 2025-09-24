@@ -14,11 +14,13 @@ import (
 
 func CronEnable(s scope.Scope, g cfg.Configuration, keys []string) error {
 	for _, n := range s.Nodes {
-		log.Printf("Connecting to %s", n.Label())
+		pog.SetStatus(pogConnecting(n))
 		c, err := sshDial(n, g)
 		if err != nil {
 			return err
 		}
+		pog.Infof("Connected to %s", n.Label())
+		pog.SetStatus(nil)
 
 		d, err := distro.New(c)
 		if err != nil {
@@ -42,11 +44,13 @@ func CronEnable(s scope.Scope, g cfg.Configuration, keys []string) error {
 
 func CronDisable(s scope.Scope, g cfg.Configuration, keys []string) error {
 	for _, n := range s.Nodes {
-		log.Printf("Connecting to %s", n.Label())
+		pog.SetStatus(pogConnecting(n))
 		c, err := sshDial(n, g)
 		if err != nil {
 			return err
 		}
+		pog.Infof("Connected to %s", n.Label())
+		pog.SetStatus(nil)
 
 		d, err := distro.New(c)
 		if err != nil {

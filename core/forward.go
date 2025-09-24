@@ -9,11 +9,13 @@ import (
 )
 
 func Forward(s scope.Scope, g cfg.Configuration, port string) error {
-	pog.Infof("Connecting to %s", s.Nodes[0].Label())
+	pog.SetStatus(pogConnecting(s.Nodes[0]))
 	c, err := sshDial(s.Nodes[0], g)
 	if err != nil {
 		return err
 	}
+	pog.Infof("Connected to %s", s.Nodes[0].Label())
+	pog.SetStatus(nil)
 
 	d, err := distro.New(c)
 	if err != nil {
