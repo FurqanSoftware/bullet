@@ -30,7 +30,7 @@ func EnvironPush(s scope.Scope, g cfg.Configuration, filename string) error {
 }
 
 func uploadEnvironFile(c *ssh.Client, s scope.Scope, filename string) error {
-	pog.Infof("Uploading environment file")
+	pog.SetStatus(pogText("Uploading environment file"))
 	f, err := os.Open(filename)
 	if err != nil {
 		return err
@@ -40,5 +40,11 @@ func uploadEnvironFile(c *ssh.Client, s scope.Scope, filename string) error {
 	if err != nil {
 		return err
 	}
-	return c.Push(fmt.Sprintf("/opt/%s/env", s.Spec.Application.Identifier), fi.Mode(), fi.Size(), f, nil)
+	err = c.Push(fmt.Sprintf("/opt/%s/env", s.Spec.Application.Identifier), fi.Mode(), fi.Size(), f, nil)
+	if err != nil {
+		return err
+	}
+	pog.Info("Uploaded environment file")
+	pog.SetStatus(nil)
+	return nil
 }

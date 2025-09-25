@@ -42,13 +42,15 @@ func Setup(s scope.Scope, g cfg.Configuration, environ string) error {
 }
 
 func setupNode(n scope.Node, c *ssh.Client, d distro.Distro, s scope.Scope) error {
-	pog.Info("Installing Docker")
+	pog.SetStatus(pogText("Installing Docker"))
 	err := d.InstallDocker()
 	if err != nil {
 		return err
 	}
+	pog.Info("Installed Docker")
+	pog.SetStatus(nil)
 
-	pog.Info("Creating application directory")
+	pog.SetStatus(pogText("Creating application directory"))
 	err = d.MkdirAll(fmt.Sprintf("/opt/%s/releases", s.Spec.Application.Identifier))
 	if err != nil {
 		return err
@@ -57,6 +59,8 @@ func setupNode(n scope.Node, c *ssh.Client, d distro.Distro, s scope.Scope) erro
 	if err != nil {
 		return err
 	}
+	pog.Info("Created application directory")
+	pog.SetStatus(nil)
 
 	return nil
 }
