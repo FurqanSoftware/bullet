@@ -10,15 +10,15 @@ require (
 	github.com/mattn/go-tty v0.0.3
 	github.com/olekukonko/tablewriter v1.0.7
 	github.com/onsi/gomega v1.38.0
-	github.com/spf13/cobra v0.0.0-20170612063610-b4dbd37a0183
-	github.com/spf13/pflag v1.0.0
+	github.com/spf13/cobra v1.10.1
+	github.com/spf13/pflag v1.0.10
 	golang.org/x/crypto v0.45.0
 	gopkg.in/yaml.v2 v2.2.8
 )
 
 require (
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
