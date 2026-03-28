@@ -1,6 +1,8 @@
 package core
 
 import (
+	"fmt"
+
 	"github.com/FurqanSoftware/bullet/cfg"
 	"github.com/FurqanSoftware/bullet/distro"
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
@@ -24,8 +26,7 @@ func Run(s scope.Scope, g cfg.Configuration, key string) error {
 
 	prog, ok := s.Spec.Application.Programs[key]
 	if !ok {
-		// TODO(hjr265): This should yield an error.
-		return nil
+		return fmt.Errorf("unknown program key %q", key)
 	}
 
 	return d.Run(s.Spec.Application, prog)

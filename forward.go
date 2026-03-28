@@ -10,7 +10,10 @@ var ForwardCmd = &cobra.Command{
 	Short: "Forward a specific port from the server",
 	Long:  `This command forwards a specific program from the server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := NewSelector().Node(currentScope)
+		s, err := NewSelector().Node(currentScope)
+		if err != nil {
+			return err
+		}
 		return core.Forward(s, currentConfiguration, args[0])
 	},
 }

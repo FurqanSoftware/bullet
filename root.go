@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/FurqanSoftware/bullet/cfg"
 	"github.com/FurqanSoftware/bullet/scope"
 	"github.com/FurqanSoftware/bullet/spec"
@@ -21,7 +19,7 @@ var RootCmd = &cobra.Command{
 	Short:        "Bullet is a fast application deployment tool",
 	Long:         `Bullet is a fast and flexible application deployment tool built by Furqan Software and friends. Complete documentation is available at https://bullettool.com/.`,
 	SilenceUsage: true,
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		printBanner()
 
 		g, err := cfg.NewLoader().
@@ -30,25 +28,24 @@ var RootCmd = &cobra.Command{
 			ApplyFlags(cmd.Flags()).
 			Configuration()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		s := scope.Scope{}
 		s.Spec, err = spec.ParseFile("Bulletspec")
 		if err != nil {
-			log.Fatal(err)
-			return
+			return err
 		}
 		s.Spec.ExpandVars(g.Vars)
 
 		s.Nodes, err = scope.ParseNodeSet(g.Hosts, g.Port, g.Identity)
 		if err != nil {
-			log.Fatal(err)
-			return
+			return err
 		}
 
 		currentScope = s
 		currentConfiguration = g
+		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()

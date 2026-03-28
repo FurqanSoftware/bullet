@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -23,9 +22,9 @@ func NewSelector() *Selector {
 	}
 }
 
-func (r *Selector) Node(s scope.Scope) scope.Scope {
+func (r *Selector) Node(s scope.Scope) (scope.Scope, error) {
 	if len(s.Nodes) == 1 {
-		return s
+		return s, nil
 	}
 	selector := 1
 	for i, n := range s.Nodes {
@@ -34,12 +33,12 @@ func (r *Selector) Node(s scope.Scope) scope.Scope {
 	fmt.Fprintf(r.stdout, "? [%d] ", selector)
 	fmt.Fscanf(r.stdin, "%d", &selector)
 	s.Nodes = []scope.Node{s.Nodes[selector-1]}
-	return s
+	return s, nil
 }
 
-func (r *Selector) Nodes(s scope.Scope) scope.Scope {
+func (r *Selector) Nodes(s scope.Scope) (scope.Scope, error) {
 	if len(s.Nodes) == 1 {
-		return s
+		return s, nil
 	}
 	selected := []scope.Node{}
 	selector := fmt.Sprintf("1-%d", len(s.Nodes))
@@ -53,18 +52,18 @@ func (r *Selector) Nodes(s scope.Scope) scope.Scope {
 		if !strings.Contains(r, "-") {
 			i, err := strconv.Atoi(r)
 			if err != nil {
-				log.Fatal(err)
+				return s, err
 			}
 			selected = append(selected, s.Nodes[i-1])
 		} else {
 			parts := strings.SplitN(r, "-", 2)
 			l, err := strconv.Atoi(parts[0])
 			if err != nil {
-				log.Fatal(err)
+				return s, err
 			}
 			r, err := strconv.Atoi(parts[1])
 			if err != nil {
-				log.Fatal(err)
+				return s, err
 			}
 			if l > r {
 				continue
@@ -75,5 +74,5 @@ func (r *Selector) Nodes(s scope.Scope) scope.Scope {
 		}
 	}
 	s.Nodes = selected
-	return s
+	return s, nil
 }

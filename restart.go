@@ -10,7 +10,10 @@ var RestartCmd = &cobra.Command{
 	Short: "Restart application in server",
 	Long:  `This command restarts the application in the server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := NewSelector().Nodes(currentScope)
+		s, err := NewSelector().Nodes(currentScope)
+		if err != nil {
+			return err
+		}
 		return core.Restart(s, currentConfiguration)
 	},
 }

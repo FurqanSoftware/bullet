@@ -109,7 +109,7 @@ func (u *Ubuntu) UpdateCurrent(app spec.Application, relDir string) error {
 	case "symlink", "":
 		return u.Symlink(relDir, curDir)
 	}
-	panic("unreachable")
+	return fmt.Errorf("unknown deploy current method %q", app.Deploy.Current)
 }
 
 func (u *Ubuntu) Build(app spec.Application, prog spec.Program) (bool, error) {

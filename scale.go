@@ -15,7 +15,10 @@ var ScaleCmd = &cobra.Command{
 			return err
 		}
 
-		s := NewSelector().Nodes(currentScope)
+		s, err := NewSelector().Nodes(currentScope)
+		if err != nil {
+			return err
+		}
 		return core.Scale(s, currentConfiguration, comp)
 	},
 }

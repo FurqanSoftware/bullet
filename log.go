@@ -23,7 +23,10 @@ var LogTailCmd = &cobra.Command{
 			}
 		}
 
-		s := NewSelector().Node(currentScope)
+		s, err := NewSelector().Node(currentScope)
+		if err != nil {
+			return err
+		}
 		return core.Log(s, currentConfiguration, parts[0], no)
 	},
 }

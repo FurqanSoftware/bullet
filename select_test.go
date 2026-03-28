@@ -53,9 +53,10 @@ func TestSelectorNode(t *testing.T) {
 				io.WriteString(stdinw, c.in)
 			}()
 
-			s := r.Node(scope.Scope{
+			s, err := r.Node(scope.Scope{
 				Nodes: c.nodes,
 			})
+			g.Expect(err).ToNot(HaveOccurred())
 			g.Expect(s.Nodes).To(HaveLen(1))
 			g.Expect(s.Nodes[0]).To(Equal(c.want))
 
@@ -110,9 +111,10 @@ func TestSelectorNodes(t *testing.T) {
 				io.WriteString(stdinw, c.in)
 			}()
 
-			s := r.Nodes(scope.Scope{
+			s, err := r.Nodes(scope.Scope{
 				Nodes: c.nodes,
 			})
+			g.Expect(err).ToNot(HaveOccurred())
 			g.Expect(s.Nodes).To(Equal(c.want))
 
 			stdoutw.Close()

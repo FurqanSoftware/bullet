@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -109,8 +110,7 @@ func scaleNode(n scope.Node, c *ssh.Client, d distro.Distro, s scope.Scope, comp
 	for k, n := range comp.Sizes {
 		prog, ok := s.Spec.Application.Programs[k]
 		if !ok {
-			// TODO(hjr265): This should yield an error.
-			continue
+			return fmt.Errorf("unknown program key %q", k)
 		}
 
 		pog.SetStatus(pogScalingProgram(prog))

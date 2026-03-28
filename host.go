@@ -11,7 +11,10 @@ var HostShellCmd = &cobra.Command{
 	Short: "Connect to node over SSH",
 	Long:  `This command starts an SSH session with the selected node.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := NewSelector().Node(currentScope)
+		s, err := NewSelector().Node(currentScope)
+		if err != nil {
+			return err
+		}
 		return core.Shell(s, currentConfiguration)
 	},
 }
@@ -26,7 +29,10 @@ var HostDfCmd = &cobra.Command{
 	Short: "Print free space on node disks",
 	Long:  `This command prints the available free space on disk of the node.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := NewSelector().Node(currentScope)
+		s, err := NewSelector().Node(currentScope)
+		if err != nil {
+			return err
+		}
 		return core.Df(s, currentConfiguration, distro.DfOptions{
 			Watch:     flagDfWatch,
 			Arguments: flagDfArguments,
@@ -39,7 +45,10 @@ var HostTopCmd = &cobra.Command{
 	Short: "Display Linux processes",
 	Long:  `This command displays Linux processes.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := NewSelector().Node(currentScope)
+		s, err := NewSelector().Node(currentScope)
+		if err != nil {
+			return err
+		}
 		return core.Top(s, currentConfiguration)
 	},
 }

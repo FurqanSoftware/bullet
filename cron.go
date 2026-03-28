@@ -10,7 +10,10 @@ var CronEnableCmd = &cobra.Command{
 	Short: "Enable a cron job",
 	Long:  `This command enables a cron job on the server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := NewSelector().Nodes(currentScope)
+		s, err := NewSelector().Nodes(currentScope)
+		if err != nil {
+			return err
+		}
 		return core.CronEnable(s, currentConfiguration, args)
 	},
 }
@@ -20,7 +23,10 @@ var CronDisableCmd = &cobra.Command{
 	Short: "Disable a cron job",
 	Long:  `This command disables a cron job on the server.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := NewSelector().Nodes(currentScope)
+		s, err := NewSelector().Nodes(currentScope)
+		if err != nil {
+			return err
+		}
 		return core.CronDisable(s, currentConfiguration, args)
 	},
 }
@@ -30,7 +36,10 @@ var CronStatusCmd = &cobra.Command{
 	Short: "Print cron job status",
 	Long:  `This command prints the status of all cron jobs.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := NewSelector().Nodes(currentScope)
+		s, err := NewSelector().Nodes(currentScope)
+		if err != nil {
+			return err
+		}
 		return core.CronStatus(s, currentConfiguration, args)
 	},
 }

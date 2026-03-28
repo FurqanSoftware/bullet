@@ -3,68 +3,56 @@ package core
 import (
 	"fmt"
 
+	bpog "github.com/FurqanSoftware/bullet/pog"
 	"github.com/FurqanSoftware/bullet/scope"
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/dustin/go-humanize"
-	"github.com/fatih/color"
 )
 
-type pogStatus struct {
-	icon  byte
-	text  string
-	color *color.Color
-	throb bool
-}
-
-func (s pogStatus) Icon() byte          { return s.icon }
-func (s pogStatus) Text() string        { return s.text }
-func (s pogStatus) Color() *color.Color { return s.color }
-func (s pogStatus) Throb() bool         { return s.throb }
-
-func pogConnecting(n scope.Node) pogStatus {
-	return pogStatus{
-		icon:  '~',
-		text:  fmt.Sprintf("Connecting to %s", n.Label()),
-		throb: true,
+func pogConnecting(n scope.Node) bpog.Status {
+	return bpog.Status{
+		IconVal:  '~',
+		TextVal:  fmt.Sprintf("Connecting to %s", n.Label()),
+		ThrobVal: true,
 	}
 }
 
-func pogUploadTarball(n, size int64) pogStatus {
-	return pogStatus{
-		icon:  '~',
-		text:  fmt.Sprintf("Uploading tarball, %s of %s (%d%%) done", humanize.Bytes(uint64(n)), humanize.Bytes(uint64(size)), n*100/size),
-		throb: true,
+func pogUploadTarball(n, size int64) bpog.Status {
+	return bpog.Status{
+		IconVal:  '~',
+		TextVal:  fmt.Sprintf("Uploading tarball, %s of %s (%d%%) done", humanize.Bytes(uint64(n)), humanize.Bytes(uint64(size)), n*100/size),
+		ThrobVal: true,
 	}
 }
 
-func pogReloadingContainer(p spec.Program, no int) pogStatus {
-	return pogStatus{
-		icon:  '~',
-		text:  fmt.Sprintf("Reloading container %s:%d", p.Key, no),
-		throb: true,
+func pogReloadingContainer(p spec.Program, no int) bpog.Status {
+	return bpog.Status{
+		IconVal:  '~',
+		TextVal:  fmt.Sprintf("Reloading container %s:%d", p.Key, no),
+		ThrobVal: true,
 	}
 }
 
-func pogRestartingContainer(p spec.Program, no int) pogStatus {
-	return pogStatus{
-		icon:  '~',
-		text:  fmt.Sprintf("Restarting container %s:%d", p.Key, no),
-		throb: true,
+func pogRestartingContainer(p spec.Program, no int) bpog.Status {
+	return bpog.Status{
+		IconVal:  '~',
+		TextVal:  fmt.Sprintf("Restarting container %s:%d", p.Key, no),
+		ThrobVal: true,
 	}
 }
 
-func pogScalingProgram(p spec.Program) pogStatus {
-	return pogStatus{
-		icon:  '~',
-		text:  fmt.Sprintf("Scaling program %s", p.Key),
-		throb: true,
+func pogScalingProgram(p spec.Program) bpog.Status {
+	return bpog.Status{
+		IconVal:  '~',
+		TextVal:  fmt.Sprintf("Scaling program %s", p.Key),
+		ThrobVal: true,
 	}
 }
 
-func pogText(s string) pogStatus {
-	return pogStatus{
-		icon:  '~',
-		text:  s,
-		throb: true,
+func pogText(s string) bpog.Status {
+	return bpog.Status{
+		IconVal:  '~',
+		TextVal:  s,
+		ThrobVal: true,
 	}
 }

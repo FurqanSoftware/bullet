@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/FurqanSoftware/bullet/cfg"
 	"github.com/FurqanSoftware/bullet/distro"
@@ -26,7 +25,7 @@ func Prune(s scope.Scope, g cfg.Configuration) error {
 			return err
 		}
 
-		log.Print("Removing stale releases")
+		pog.Info("Removing stale releases")
 		err = d.Prune(fmt.Sprintf("/opt/%s/releases", s.Spec.Application.Identifier), 5)
 		if err != nil {
 			return err

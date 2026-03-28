@@ -1,7 +1,7 @@
 package core
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"text/tabwriter"
 
@@ -27,11 +27,11 @@ func CronEnable(s scope.Scope, g cfg.Configuration, keys []string) error {
 			return err
 		}
 
-		log.Print("Enabling cron job(s)")
+		pog.Info("Enabling cron job(s)")
 		for _, k := range keys {
 			j := s.Spec.Application.Cron.Job(k)
 			if j.Command == "" {
-				log.Fatalf("Bad job key %q", k)
+				return fmt.Errorf("bad job key %q", k)
 			}
 			err = d.CronEnable(s.Spec.Application, j)
 			if err != nil {
@@ -57,11 +57,11 @@ func CronDisable(s scope.Scope, g cfg.Configuration, keys []string) error {
 			return err
 		}
 
-		log.Print("Disabling cron job(s)")
+		pog.Info("Disabling cron job(s)")
 		for _, k := range keys {
 			j := s.Spec.Application.Cron.Job(k)
 			if j.Command == "" {
-				log.Fatalf("Bad job key %q", k)
+				return fmt.Errorf("bad job key %q", k)
 			}
 			err = d.CronDisable(s.Spec.Application, j)
 			if err != nil {
