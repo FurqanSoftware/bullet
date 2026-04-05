@@ -15,10 +15,12 @@ import (
 	"github.com/antonmedv/expr"
 )
 
+// Composition maps program keys to their desired instance counts.
 type Composition struct {
 	Sizes map[string]int
 }
 
+// NewComposition parses "key=count" arguments into a Composition.
 func NewComposition(args []string) (*Composition, error) {
 	comp := Composition{
 		Sizes: map[string]int{},
@@ -34,6 +36,7 @@ func NewComposition(args []string) (*Composition, error) {
 	return &comp, nil
 }
 
+// DefaultComposition evaluates the scaling rules from the spec against a node's properties.
 func DefaultComposition(n scope.Node, spec *spec.Spec) (*Composition, error) {
 	comp := Composition{
 		Sizes: make(map[string]int, len(spec.Application.Programs)),
@@ -74,6 +77,7 @@ func DefaultComposition(n scope.Node, spec *spec.Spec) (*Composition, error) {
 	return &comp, nil
 }
 
+// Scale adjusts the number of container instances on each node to match the composition.
 func Scale(s scope.Scope, g cfg.Configuration, comp *Composition) error {
 	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))

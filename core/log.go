@@ -10,6 +10,7 @@ import (
 	"github.com/FurqanSoftware/pog"
 )
 
+// Log tails the logs of a program's container instance.
 func Log(s scope.Scope, g cfg.Configuration, key string, no int) error {
 	pog.SetStatus(pogConnecting(s.Nodes[0]))
 	c, err := sshDial(s.Nodes[0], g)

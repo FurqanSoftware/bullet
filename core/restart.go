@@ -8,6 +8,7 @@ import (
 	"github.com/FurqanSoftware/pog"
 )
 
+// Restart restarts all application containers on the selected nodes.
 func Restart(s scope.Scope, g cfg.Configuration) error {
 	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))

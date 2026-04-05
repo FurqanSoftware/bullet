@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// Node represents a target server with connection details, tags, and hardware info.
 type Node struct {
 	Name string
 	Host string
@@ -19,11 +20,14 @@ type Node struct {
 	Identity string
 }
 
+// NodeHW holds hardware information about a node, used in scaling expressions.
 type NodeHW struct {
 	Cores  int
 	Memory int // In megabyte
 }
 
+// ParseNodeSet parses a hosts string into a set of nodes. The string can be
+// a comma-separated list of hostnames or a manifest file reference prefixed with @.
 func ParseNodeSet(hosts string, port int, identity string) ([]Node, error) {
 	if strings.HasPrefix(hosts, "@") {
 		return parseNodeSetManifest(hosts[1:], port, identity)
@@ -31,6 +35,7 @@ func ParseNodeSet(hosts string, port int, identity string) ([]Node, error) {
 	return parseNodeSetString(hosts, port, identity)
 }
 
+// Label returns a display label for the node, including the name and address.
 func (n Node) Label() string {
 	if n.Name == "" || n.Name == n.Host {
 		return n.Addr()
@@ -38,10 +43,12 @@ func (n Node) Label() string {
 	return fmt.Sprintf("%s (%s)", n.Name, n.Addr())
 }
 
+// Addr returns the host:port address string.
 func (n Node) Addr() string {
 	return n.Host + ":" + strconv.Itoa(n.Port)
 }
 
+// HasTag returns true if the node has the given tag.
 func (n Node) HasTag(tag string) bool {
 	for _, t := range n.Tags {
 		if t == tag {
@@ -51,6 +58,7 @@ func (n Node) HasTag(tag string) bool {
 	return false
 }
 
+// HasTags returns true if the node has all of the given tags.
 func (n Node) HasTags(tags []string) bool {
 	for _, tag := range tags {
 		if !n.HasTag(tag) {

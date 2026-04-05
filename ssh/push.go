@@ -4,6 +4,7 @@ import (
 	"io"
 )
 
+// PushStatus reports the progress of a file upload (bytes transferred and total size).
 type PushStatus struct {
 	N, Size int64
 }

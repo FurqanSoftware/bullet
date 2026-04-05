@@ -14,10 +14,12 @@ import (
 	"github.com/FurqanSoftware/bullet/ssh"
 )
 
+// Ubuntu implements the Distro interface for Ubuntu servers.
 type Ubuntu struct {
 	Client *ssh.Client
 }
 
+// New returns a new Ubuntu Distro implementation for the given SSH client.
 func New(c *ssh.Client) distro.Distro {
 	return &Ubuntu{
 		Client: c,

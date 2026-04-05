@@ -11,6 +11,7 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+// Configuration holds the runtime configuration for a Bullet session.
 type Configuration struct {
 	Hosts    string `envconfig:"HOSTS"`
 	Port     int    `envconfig:"PORT"`
@@ -22,10 +23,12 @@ type Configuration struct {
 	SSHTimeout time.Duration `envconfig:"SSH_TIMEOUT" default:"30s"`
 }
 
+// Parse unmarshals YAML configuration from b into c.
 func (c *Configuration) Parse(filename string, b []byte) error {
 	return yaml.Unmarshal(b, c)
 }
 
+// ParseFile reads and parses a YAML configuration file.
 func (c *Configuration) ParseFile(filename string) error {
 	f, err := os.Open(filename)
 	if err != nil {
@@ -39,10 +42,12 @@ func (c *Configuration) ParseFile(filename string) error {
 	return c.Parse(filename, b)
 }
 
+// ApplyEnvironment applies BULLET_* environment variables to the configuration.
 func (c *Configuration) ApplyEnvironment() error {
 	return envconfig.Process("BULLET", c)
 }
 
+// ApplyFlags overrides configuration values with any explicitly set CLI flags.
 func (c *Configuration) ApplyFlags(flags *pflag.FlagSet) error {
 	flagHosts := flags.Lookup("hosts")
 	if flagHosts.Changed {

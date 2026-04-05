@@ -12,6 +12,7 @@ import (
 	"github.com/FurqanSoftware/pog"
 )
 
+// CronEnable enables the specified cron jobs on all selected nodes.
 func CronEnable(s scope.Scope, g cfg.Configuration, keys []string) error {
 	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))
@@ -42,6 +43,7 @@ func CronEnable(s scope.Scope, g cfg.Configuration, keys []string) error {
 	return nil
 }
 
+// CronDisable disables the specified cron jobs on all selected nodes.
 func CronDisable(s scope.Scope, g cfg.Configuration, keys []string) error {
 	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))
@@ -72,6 +74,7 @@ func CronDisable(s scope.Scope, g cfg.Configuration, keys []string) error {
 	return nil
 }
 
+// CronStatus prints the status of all cron jobs on the selected nodes.
 func CronStatus(s scope.Scope, g cfg.Configuration, keys []string) error {
 	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))

@@ -14,6 +14,7 @@ import (
 	"github.com/FurqanSoftware/bullet/ssh"
 )
 
+// Image represents a Docker image on a remote server.
 type Image struct {
 	Application spec.Application
 	Program     spec.Program
@@ -21,10 +22,12 @@ type Image struct {
 	Repository  string
 }
 
+// GetImageOptions configures GetImage.
 type GetImageOptions struct {
 	DockerPath string
 }
 
+// GetImage retrieves the Docker image for a program from the remote server.
 func GetImage(c *ssh.Client, app spec.Application, prog spec.Program, options GetImageOptions) (*Image, error) {
 	name := fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
 
@@ -52,10 +55,13 @@ func GetImage(c *ssh.Client, app spec.Application, prog spec.Program, options Ge
 	return &img, nil
 }
 
+// BuildImageOptions configures BuildImage.
 type BuildImageOptions struct {
 	DockerPath string
 }
 
+// BuildImage builds the Docker image for a program on the remote server.
+// It returns true if the image was rebuilt.
 func BuildImage(c *ssh.Client, app spec.Application, prog spec.Program, options BuildImageOptions) (bool, error) {
 	if prog.Container.Dockerfile != "" {
 		return buildImageDockerfile(c, app, prog, options)

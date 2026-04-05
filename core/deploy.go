@@ -14,6 +14,7 @@ import (
 	"github.com/dustin/go-humanize"
 )
 
+// Deploy uploads and deploys a release to all nodes in scope.
 func Deploy(s scope.Scope, g cfg.Configuration, rel *Release) error {
 	pog.Infof("Deploying %s", filepath.Base(rel.Tarball.Path))
 	pog.Infof("∟ Hash: %s", rel.Hash)

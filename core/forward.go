@@ -8,6 +8,7 @@ import (
 	"github.com/FurqanSoftware/pog"
 )
 
+// Forward sets up port forwarding from the local machine to the selected node.
 func Forward(s scope.Scope, g cfg.Configuration, port string) error {
 	pog.SetStatus(pogConnecting(s.Nodes[0]))
 	c, err := sshDial(s.Nodes[0], g)

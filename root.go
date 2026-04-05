@@ -17,6 +17,7 @@ var (
 	currentConfiguration cfg.Configuration
 )
 
+// RootCmd is the top-level Cobra command for the bullet CLI.
 var RootCmd = &cobra.Command{
 	Use:          "bullet",
 	Short:        "Bullet is a fast application deployment tool",

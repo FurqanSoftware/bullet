@@ -9,17 +9,20 @@ import (
 	"time"
 )
 
+// Release represents a deployable release, identified by timestamp and content hash.
 type Release struct {
 	Time    string
 	Hash    string
 	Tarball Tarball
 }
 
+// Tarball holds the local path and size of a release archive.
 type Tarball struct {
 	Path string
 	Size int64
 }
 
+// NewRelease creates a Release from a tarball path, computing its SHA256 hash.
 func NewRelease(tarPath string) (*Release, error) {
 	fi, err := os.Stat(tarPath)
 	if err != nil {

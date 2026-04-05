@@ -8,8 +8,10 @@ import (
 	"github.com/FurqanSoftware/bullet/ssh"
 )
 
+// ErrBadDistribution is returned when no supported distribution is detected on the server.
 var ErrBadDistribution = errors.New("distro: unsupported distribution")
 
+// Distro abstracts OS-specific operations on a remote server.
 type Distro interface {
 	InstallDocker() error
 
@@ -49,6 +51,7 @@ type Distro interface {
 	Detect() (bool, error)
 }
 
+// Status represents the state of a container instance.
 type Status struct {
 	Program spec.Program
 	No      int
@@ -56,11 +59,13 @@ type Status struct {
 	Healthy bool
 }
 
+// DfOptions configures the Df command.
 type DfOptions struct {
 	Watch     bool
 	Arguments string
 }
 
+// New detects and returns a Distro implementation for the remote server.
 func New(c *ssh.Client) (Distro, error) {
 	for _, fn := range DistroFuncs {
 		d := fn(c)
@@ -76,6 +81,8 @@ func New(c *ssh.Client) (Distro, error) {
 	return nil, ErrBadDistribution
 }
 
+// DistroFunc is a constructor for a Distro implementation.
 type DistroFunc func(c *ssh.Client) Distro
 
+// DistroFuncs is the registry of available distribution implementations.
 var DistroFuncs = []DistroFunc{}

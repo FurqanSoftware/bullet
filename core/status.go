@@ -13,6 +13,7 @@ import (
 	"github.com/olekukonko/tablewriter/tw"
 )
 
+// Status prints a table of container status across all nodes.
 func Status(s scope.Scope, g cfg.Configuration) error {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.Configure(func(cfg *tablewriter.Config) {

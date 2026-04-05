@@ -8,6 +8,7 @@ import (
 	"github.com/FurqanSoftware/pog"
 )
 
+// Top runs the top command interactively on the selected node.
 func Top(s scope.Scope, g cfg.Configuration) error {
 	pog.SetStatus(pogConnecting(s.Nodes[0]))
 	c, err := sshDial(s.Nodes[0], g)

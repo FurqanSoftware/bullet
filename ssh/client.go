@@ -16,12 +16,14 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+// Client wraps an SSH connection with retry and timeout support.
 type Client struct {
 	Client  *ssh.Client
 	retries int
 	timeout time.Duration
 }
 
+// Dial connects to the SSH server at addr using the given identity key and options.
 func Dial(addr, identity string, opts ...Option) (*Client, error) {
 	c := Client{}
 	for _, o := range opts {
@@ -54,6 +56,7 @@ func Dial(addr, identity string, opts ...Option) (*Client, error) {
 	return &c, nil
 }
 
+// Run executes a command on the remote server. If echo is true, stdout and stderr are forwarded.
 func (c Client) Run(cmd string, echo bool) error {
 	sess, err := c.Client.NewSession()
 	if err != nil {
@@ -68,6 +71,7 @@ func (c Client) Run(cmd string, echo bool) error {
 	return sess.Run(cmd)
 }
 
+// RunPTY executes a command with a pseudo-terminal for interactive use.
 func (c Client) RunPTY(cmd string, echo bool) error {
 	sess, err := c.Client.NewSession()
 	if err != nil {
@@ -126,6 +130,7 @@ func (c Client) RunPTY(cmd string, echo bool) error {
 	return sess.Run(cmd)
 }
 
+// Output executes a command and returns its stdout output.
 func (c Client) Output(cmd string) ([]byte, error) {
 	sess, err := c.Client.NewSession()
 	if err != nil {
@@ -136,6 +141,7 @@ func (c Client) Output(cmd string) ([]byte, error) {
 	return sess.Output(cmd)
 }
 
+// Push uploads a file to the remote server via SCP, reporting progress on chstatus.
 func (c Client) Push(name string, mode os.FileMode, size int64, r io.Reader, chstatus chan PushStatus) error {
 	sess, err := c.Client.NewSession()
 	if err != nil {
@@ -165,6 +171,7 @@ func (c Client) Push(name string, mode os.FileMode, size int64, r io.Reader, chs
 	return sess.Run(fmt.Sprintf("scp -t %s", name))
 }
 
+// Forward sets up local-to-remote port forwarding over the SSH connection.
 func (c Client) Forward(local, remote int) error {
 	l, err := net.Listen("tcp", fmt.Sprintf(":%d", local))
 	if err != nil {

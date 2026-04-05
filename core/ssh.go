@@ -17,6 +17,7 @@ func sshDial(n scope.Node, g cfg.Configuration) (*ssh.Client, error) {
 	)
 }
 
+// SSH opens an interactive SSH session to the selected node.
 func SSH(s scope.Scope, g cfg.Configuration) error {
 	pog.SetStatus(pogConnecting(s.Nodes[0]))
 	c, err := sshDial(s.Nodes[0], g)

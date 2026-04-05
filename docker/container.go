@@ -10,6 +10,7 @@ import (
 	"github.com/FurqanSoftware/bullet/ssh"
 )
 
+// Container represents a Docker container on a remote server.
 type Container struct {
 	Application spec.Application
 	Program     spec.Program
@@ -20,10 +21,12 @@ type Container struct {
 	Status string
 }
 
+// ListContainersOptions configures ListContainers.
 type ListContainersOptions struct {
 	DockerPath string
 }
 
+// ListContainers lists all containers for a program on the remote server.
 func ListContainers(c *ssh.Client, app spec.Application, prog spec.Program, options ListContainersOptions) ([]Container, error) {
 	reName, err := regexp.Compile(fmt.Sprintf(`^%s_%s_(\d+)$`, regexp.QuoteMeta(app.Identifier), regexp.QuoteMeta(prog.Key)))
 	if err != nil {
@@ -63,10 +66,12 @@ func ListContainers(c *ssh.Client, app spec.Application, prog spec.Program, opti
 	return conts, nil
 }
 
+// RestartContainerOptions configures RestartContainer.
 type RestartContainerOptions struct {
 	DockerPath string
 }
 
+// RestartContainer stops and recreates a container instance.
 func RestartContainer(c *ssh.Client, app spec.Application, prog spec.Program, no int, options RestartContainerOptions) error {
 	name := fmt.Sprintf("%s_%s_%d", app.Identifier, prog.Key, no)
 	image := ""
@@ -84,10 +89,13 @@ func RestartContainer(c *ssh.Client, app spec.Application, prog spec.Program, no
 	return createContainer(c, app, prog, options.DockerPath, image, name, no)
 }
 
+// ScaleContainerOptions configures ScaleContainer.
 type ScaleContainerOptions struct {
 	DockerPath string
 }
 
+// ScaleContainer adjusts the number of container instances for a program, returning
+// the number of containers created (up) and removed (down).
 func ScaleContainer(c *ssh.Client, app spec.Application, prog spec.Program, n int, options ScaleContainerOptions) (up, down int, err error) {
 	conts, err := ListContainers(c, app, prog, ListContainersOptions(options))
 	if err != nil {
@@ -123,19 +131,23 @@ func ScaleContainer(c *ssh.Client, app spec.Application, prog spec.Program, n in
 	return
 }
 
+// LogContainerOptions configures LogContainer.
 type LogContainerOptions struct {
 	DockerPath string
 }
 
+// LogContainer tails the logs of a container instance.
 func LogContainer(c *ssh.Client, app spec.Application, prog spec.Program, no int, options LogContainerOptions) error {
 	name := fmt.Sprintf("%s_%s_%d", app.Identifier, prog.Key, no)
 	return logContainer(c, app, prog, options.DockerPath, name, no)
 }
 
+// RunContainerOptions configures RunContainer.
 type RunContainerOptions struct {
 	DockerPath string
 }
 
+// RunContainer creates an interactive one-off container and removes it after exit.
 func RunContainer(c *ssh.Client, app spec.Application, prog spec.Program, options RunContainerOptions) error {
 	name := fmt.Sprintf("%s_%s_0", app.Identifier, prog.Key)
 	image := fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
@@ -169,19 +181,23 @@ func RunContainer(c *ssh.Client, app spec.Application, prog spec.Program, option
 	return nil
 }
 
+// SignalContainerOptions configures SignalContainer.
 type SignalContainerOptions struct {
 	DockerPath string
 }
 
+// SignalContainer sends a signal to a running container.
 func SignalContainer(c *ssh.Client, app spec.Application, prog spec.Program, no int, signal string, options SignalContainerOptions) error {
 	name := fmt.Sprintf("%s_%s_%d", app.Identifier, prog.Key, no)
 	return signalContainer(c, app, prog, options.DockerPath, name, signal)
 }
 
+// ExecuteContainerOptions configures ExecuteContainer.
 type ExecuteContainerOptions struct {
 	DockerPath string
 }
 
+// ExecuteContainer runs a command inside a running container.
 func ExecuteContainer(c *ssh.Client, app spec.Application, prog spec.Program, no int, command string, options ExecuteContainerOptions) error {
 	name := fmt.Sprintf("%s_%s_%d", app.Identifier, prog.Key, no)
 	return executeContainer(c, app, prog, options.DockerPath, name, command)

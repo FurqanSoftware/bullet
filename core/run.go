@@ -10,6 +10,7 @@ import (
 	"github.com/FurqanSoftware/pog"
 )
 
+// Run executes a program as a one-off interactive container.
 func Run(s scope.Scope, g cfg.Configuration, key string) error {
 	pog.SetStatus(pogConnecting(s.Nodes[0]))
 	c, err := sshDial(s.Nodes[0], g)

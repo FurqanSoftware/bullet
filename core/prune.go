@@ -10,6 +10,7 @@ import (
 	"github.com/FurqanSoftware/pog"
 )
 
+// Prune removes old releases, keeping the 5 most recent.
 func Prune(s scope.Scope, g cfg.Configuration) error {
 	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))

@@ -7,6 +7,7 @@ import (
 	"github.com/FurqanSoftware/pog"
 )
 
+// Shell opens an interactive bash session on the selected node.
 func Shell(s scope.Scope, g cfg.Configuration) error {
 	pog.SetStatus(pogConnecting(s.Nodes[0]))
 	c, err := sshDial(s.Nodes[0], g)

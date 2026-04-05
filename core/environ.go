@@ -11,6 +11,7 @@ import (
 	"github.com/FurqanSoftware/pog"
 )
 
+// EnvironPush uploads an environment file to the selected nodes.
 func EnvironPush(s scope.Scope, g cfg.Configuration, filename string) error {
 	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))

@@ -8,6 +8,7 @@ import (
 	"github.com/FurqanSoftware/pog"
 )
 
+// Df displays disk usage on the selected node.
 func Df(s scope.Scope, g cfg.Configuration, options distro.DfOptions) error {
 	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))

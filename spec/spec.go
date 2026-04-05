@@ -8,10 +8,12 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+// Spec represents a parsed Bulletspec file.
 type Spec struct {
 	Application Application
 }
 
+// Parse parses a Bulletspec from YAML bytes.
 func Parse(filename string, b []byte) (*Spec, error) {
 	spec := Spec{}
 	err := yaml.Unmarshal(b, &spec)
@@ -29,6 +31,7 @@ func Parse(filename string, b []byte) (*Spec, error) {
 	return &spec, nil
 }
 
+// ParseFile reads and parses a Bulletspec YAML file.
 func ParseFile(filename string) (*Spec, error) {
 	f, err := os.Open(filename)
 	if err != nil {
@@ -42,6 +45,7 @@ func ParseFile(filename string) (*Spec, error) {
 	return Parse(filename, b)
 }
 
+// ExpandVars expands template variables in the spec's program commands.
 func (s *Spec) ExpandVars(vars Vars) error {
 	return s.Application.ExpandVars(vars)
 }

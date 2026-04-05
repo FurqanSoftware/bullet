@@ -10,11 +10,13 @@ import (
 	"github.com/FurqanSoftware/bullet/scope"
 )
 
+// Selector prompts the user to select one or more nodes from a scope.
 type Selector struct {
 	stdin  io.Reader
 	stdout io.Writer
 }
 
+// NewSelector returns a Selector that reads from stdin and writes to stdout.
 func NewSelector() *Selector {
 	return &Selector{
 		stdin:  os.Stdin,
@@ -22,6 +24,7 @@ func NewSelector() *Selector {
 	}
 }
 
+// Node prompts the user to select a single node from the scope.
 func (r *Selector) Node(s scope.Scope) (scope.Scope, error) {
 	if len(s.Nodes) == 1 {
 		return s, nil
@@ -39,6 +42,7 @@ func (r *Selector) Node(s scope.Scope) (scope.Scope, error) {
 	return s, nil
 }
 
+// Nodes prompts the user to select one or more nodes from the scope.
 func (r *Selector) Nodes(s scope.Scope) (scope.Scope, error) {
 	if len(s.Nodes) == 1 {
 		return s, nil

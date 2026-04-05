@@ -11,6 +11,7 @@ import (
 	"github.com/FurqanSoftware/pog"
 )
 
+// Setup prepares servers for deployment by installing Docker and creating the application directory.
 func Setup(s scope.Scope, g cfg.Configuration, environ string) error {
 	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))
