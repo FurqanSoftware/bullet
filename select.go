@@ -32,6 +32,9 @@ func (r *Selector) Node(s scope.Scope) (scope.Scope, error) {
 	}
 	fmt.Fprintf(r.stdout, "? [%d] ", selector)
 	fmt.Fscanf(r.stdin, "%d", &selector)
+	if selector < 1 || selector > len(s.Nodes) {
+		return s, fmt.Errorf("invalid node number %d, must be between 1 and %d", selector, len(s.Nodes))
+	}
 	s.Nodes = []scope.Node{s.Nodes[selector-1]}
 	return s, nil
 }
@@ -54,6 +57,9 @@ func (r *Selector) Nodes(s scope.Scope) (scope.Scope, error) {
 			if err != nil {
 				return s, err
 			}
+			if i < 1 || i > len(s.Nodes) {
+				return s, fmt.Errorf("invalid node number %d, must be between 1 and %d", i, len(s.Nodes))
+			}
 			selected = append(selected, s.Nodes[i-1])
 		} else {
 			parts := strings.SplitN(r, "-", 2)
@@ -64,6 +70,9 @@ func (r *Selector) Nodes(s scope.Scope) (scope.Scope, error) {
 			r, err := strconv.Atoi(parts[1])
 			if err != nil {
 				return s, err
+			}
+			if l < 1 || r > len(s.Nodes) {
+				return s, fmt.Errorf("invalid node range %d-%d, must be between 1 and %d", l, r, len(s.Nodes))
 			}
 			if l > r {
 				continue
