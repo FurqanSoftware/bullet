@@ -190,7 +190,8 @@ func (u *Ubuntu) Reload(app spec.Application, prog spec.Program, no int, rebuilt
 	case "restart", "":
 		return u.Restart(app, prog, no)
 	}
-	return nil
+
+	return fmt.Errorf("unknown reload method %q", method)
 }
 
 func (u *Ubuntu) CronEnable(app spec.Application, job spec.Job) error {
