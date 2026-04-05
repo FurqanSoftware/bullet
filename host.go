@@ -8,8 +8,8 @@ import (
 
 var HostShellCmd = &cobra.Command{
 	Use:   "host:shell",
-	Short: "Connect to node over SSH",
-	Long:  `This command starts an SSH session with the selected node.`,
+	Short: "Open an interactive shell on a server",
+	Long:  `Start an interactive bash session over SSH on the selected node.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s, err := NewSelector().Node(currentScope)
 		if err != nil {
@@ -26,8 +26,9 @@ var (
 
 var HostDfCmd = &cobra.Command{
 	Use:   "host:df",
-	Short: "Print free space on node disks",
-	Long:  `This command prints the available free space on disk of the node.`,
+	Short: "Show disk usage on a server",
+	Long: `Run df on the selected node to show disk space usage. Use --watch
+for continuous updates or --arguments to pass additional flags to df.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s, err := NewSelector().Node(currentScope)
 		if err != nil {
@@ -42,8 +43,8 @@ var HostDfCmd = &cobra.Command{
 
 var HostTopCmd = &cobra.Command{
 	Use:   "host:top",
-	Short: "Display Linux processes",
-	Long:  `This command displays Linux processes.`,
+	Short: "Show running processes on a server",
+	Long:  `Run top interactively on the selected node.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s, err := NewSelector().Node(currentScope)
 		if err != nil {

@@ -6,9 +6,12 @@ import (
 )
 
 var ForwardCmd = &cobra.Command{
-	Use:   "forward",
-	Short: "Forward a specific port from the server",
-	Long:  `This command forwards a specific program from the server.`,
+	Use:   "forward [local:]remote",
+	Short: "Forward a remote port locally",
+	Long: `Set up SSH port forwarding from a local port to a port on the
+selected server. If only one port is given, the same port is used
+locally and remotely (e.g. "8080"). Use "local:remote" to map
+different ports (e.g. "3000:8080").`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s, err := NewSelector().Node(currentScope)
 		if err != nil {

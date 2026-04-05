@@ -9,9 +9,13 @@ import (
 )
 
 var LogTailCmd = &cobra.Command{
-	Use:               "log",
-	Short:             "Tail application log",
-	Long:              `This command tails the application log.`,
+	Use:               "log [program[:instance]]",
+	Short:             "Tail container logs",
+	Long: `Stream logs from a program's container on the selected node.
+Shows the last 10 lines, then follows new output.
+
+Specify an instance number after a colon to tail a specific
+container (e.g. "web:2"). Defaults to instance 1.`,
 	ValidArgsFunction: completeProgramKeysColon,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		parts := strings.SplitN(args[0], ":", 2)

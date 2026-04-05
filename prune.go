@@ -7,8 +7,9 @@ import (
 
 var PruneCmd = &cobra.Command{
 	Use:   "prune",
-	Short: "Remove old release tarballs",
-	Long:  `This command removes old release tarballs.`,
+	Short: "Remove old releases",
+	Long: `Delete old releases from the selected nodes, keeping the 5 most
+recent. This is also run automatically at the end of each deploy.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return core.Prune(currentScope, currentConfiguration)
 	},

@@ -6,9 +6,13 @@ import (
 )
 
 var DeployCmd = &cobra.Command{
-	Use:   "deploy",
-	Short: "Deploy app to server",
-	Long:  `This command packages and deploys the app to specific servers.`,
+	Use:   "deploy [tarball]",
+	Short: "Deploy a release to servers",
+	Long: `Upload a tarball to the selected servers, extract it as a new release,
+build Docker images, and reload running containers.
+
+Skips nodes where the same release (by SHA256 hash) is already deployed.
+Old releases are pruned automatically, keeping the 5 most recent.`,
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return []string{"tar.gz"}, cobra.ShellCompDirectiveFilterFileExt
 	},

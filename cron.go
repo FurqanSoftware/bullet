@@ -6,9 +6,10 @@ import (
 )
 
 var CronEnableCmd = &cobra.Command{
-	Use:               "cron:enable",
-	Short:             "Enable a cron job",
-	Long:              `This command enables a cron job on the server.`,
+	Use:               "cron:enable [job ...]",
+	Short:             "Enable cron jobs",
+	Long: `Create systemd timer and service units for the specified cron jobs
+and enable them on the selected nodes.`,
 	ValidArgsFunction: completeCronJobKeys,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s, err := NewSelector().Nodes(currentScope)
@@ -20,9 +21,10 @@ var CronEnableCmd = &cobra.Command{
 }
 
 var CronDisableCmd = &cobra.Command{
-	Use:               "cron:disable",
-	Short:             "Disable a cron job",
-	Long:              `This command disables a cron job on the server.`,
+	Use:               "cron:disable [job ...]",
+	Short:             "Disable cron jobs",
+	Long: `Stop and remove systemd timer and service units for the specified
+cron jobs on the selected nodes.`,
 	ValidArgsFunction: completeCronJobKeys,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s, err := NewSelector().Nodes(currentScope)
@@ -35,8 +37,9 @@ var CronDisableCmd = &cobra.Command{
 
 var CronStatusCmd = &cobra.Command{
 	Use:   "cron:status",
-	Short: "Print cron job status",
-	Long:  `This command prints the status of all cron jobs.`,
+	Short: "Show cron job status",
+	Long: `Print the status of all cron jobs on the selected nodes, including
+whether each timer is active and when it will next trigger.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s, err := NewSelector().Nodes(currentScope)
 		if err != nil {

@@ -11,8 +11,9 @@ var (
 
 var SetupCmd = &cobra.Command{
 	Use:   "setup",
-	Short: "Setup server for application",
-	Long:  `This command prepares the server for the application.`,
+	Short: "Prepare servers for deployment",
+	Long: `Install Docker and create the application directory structure on the
+selected servers. Optionally push an initial environment file with --environ.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return core.Setup(currentScope, currentConfiguration, flagSetupEnviron)
 	},

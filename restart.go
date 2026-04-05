@@ -7,8 +7,9 @@ import (
 
 var RestartCmd = &cobra.Command{
 	Use:   "restart",
-	Short: "Restart application in server",
-	Long:  `This command restarts the application in the server.`,
+	Short: "Restart all application containers",
+	Long: `Stop and recreate all running containers for the application on
+the selected nodes.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s, err := NewSelector().Nodes(currentScope)
 		if err != nil {

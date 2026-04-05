@@ -6,9 +6,13 @@ import (
 )
 
 var ScaleCmd = &cobra.Command{
-	Use:               "scale",
-	Short:             "Scale a specific service on the server",
-	Long:              `This command scales a specific service of the app on the server.`,
+	Use:               "scale [program=count ...]",
+	Short:             "Scale program instances",
+	Long: `Adjust the number of container instances for one or more programs.
+
+When called with arguments (e.g. "web=4 worker=2"), scales to the
+specified counts. When called without arguments, evaluates the
+scaling rules defined in the Bulletspec.`,
 	ValidArgsFunction: completeProgramKeysEquals,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		comp, err := core.NewComposition(args)
