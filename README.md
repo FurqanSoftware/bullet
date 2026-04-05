@@ -100,23 +100,28 @@ bullet -H 192.168.0.3 deploy app.tar.gz
 bullet -H 192.168.0.3 scale web=2
 ```
 
-### Other Commands
+### Commands
 
 ```sh
-bullet status              # Show container status
-bullet restart             # Restart containers
-bullet run <program>       # Run a one-off container
-bullet log <program>       # Tail container logs
-bullet cron:enable <job>   # Enable a cron job
-bullet cron:disable <job>  # Disable a cron job
-bullet cron:status         # Show cron job status
-bullet environ:push <file> # Push environment file to server
-bullet forward <port>      # Forward a remote port locally
-bullet prune               # Remove old releases
-bullet host:shell          # SSH into a server
-bullet host:df             # Show disk usage
-bullet host:top            # Show running processes
+bullet deploy [tarball]          # Deploy a release to servers
+bullet setup                     # Prepare servers for deployment
+bullet status                    # Show container status across nodes
+bullet restart                   # Restart all application containers
+bullet run [program]             # Run a one-off program container
+bullet scale [program=count ...] # Scale program instances
+bullet log [program[:instance]]  # Tail container logs
+bullet cron:enable [job ...]     # Enable cron jobs
+bullet cron:disable [job ...]    # Disable cron jobs
+bullet cron:status               # Show cron job status
+bullet environ:push [file]       # Push an environment file to servers
+bullet forward [local:]remote    # Forward a remote port locally
+bullet prune                     # Remove old releases
+bullet host:shell                # Open an interactive shell on a server
+bullet host:df                   # Show disk usage on a server
+bullet host:top                  # Show running processes on a server
 ```
+
+See the [docs/](docs/) directory for detailed documentation.
 
 ## Shell Completion
 
