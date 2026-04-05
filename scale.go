@@ -6,9 +6,10 @@ import (
 )
 
 var ScaleCmd = &cobra.Command{
-	Use:   "scale",
-	Short: "Scale a specific service on the server",
-	Long:  `This command scales a specific service of the app on the server.`,
+	Use:               "scale",
+	Short:             "Scale a specific service on the server",
+	Long:              `This command scales a specific service of the app on the server.`,
+	ValidArgsFunction: completeProgramKeysEquals,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		comp, err := core.NewComposition(args)
 		if err != nil {

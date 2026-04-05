@@ -6,9 +6,10 @@ import (
 )
 
 var CronEnableCmd = &cobra.Command{
-	Use:   "cron:enable",
-	Short: "Enable a cron job",
-	Long:  `This command enables a cron job on the server.`,
+	Use:               "cron:enable",
+	Short:             "Enable a cron job",
+	Long:              `This command enables a cron job on the server.`,
+	ValidArgsFunction: completeCronJobKeys,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s, err := NewSelector().Nodes(currentScope)
 		if err != nil {
@@ -19,9 +20,10 @@ var CronEnableCmd = &cobra.Command{
 }
 
 var CronDisableCmd = &cobra.Command{
-	Use:   "cron:disable",
-	Short: "Disable a cron job",
-	Long:  `This command disables a cron job on the server.`,
+	Use:               "cron:disable",
+	Short:             "Disable a cron job",
+	Long:              `This command disables a cron job on the server.`,
+	ValidArgsFunction: completeCronJobKeys,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s, err := NewSelector().Nodes(currentScope)
 		if err != nil {

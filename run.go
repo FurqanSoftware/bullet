@@ -6,9 +6,10 @@ import (
 )
 
 var RunCmd = &cobra.Command{
-	Use:   "run",
-	Short: "Run a specific program on the server",
-	Long:  `This command runs a specific program of the app on the server.`,
+	Use:               "run",
+	Short:             "Run a specific program on the server",
+	Long:              `This command runs a specific program of the app on the server.`,
+	ValidArgsFunction: completeProgramKeys,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s, err := NewSelector().Node(currentScope)
 		if err != nil {

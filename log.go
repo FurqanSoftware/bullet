@@ -9,9 +9,10 @@ import (
 )
 
 var LogTailCmd = &cobra.Command{
-	Use:   "log",
-	Short: "Tail application log",
-	Long:  `This command tails the application log.`,
+	Use:               "log",
+	Short:             "Tail application log",
+	Long:              `This command tails the application log.`,
+	ValidArgsFunction: completeProgramKeysColon,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		parts := strings.SplitN(args[0], ":", 2)
 		no := 1

@@ -118,6 +118,32 @@ bullet host:df             # Show disk usage
 bullet host:top            # Show running processes
 ```
 
+## Shell Completion
+
+Bullet supports autocompletion for bash, zsh, fish, and powershell. It completes command names, flag values (e.g. `-c` from `Bulletcfg.*` files), and arguments (e.g. program keys and cron job keys from `Bulletspec`).
+
+To enable it, add the following to your shell configuration:
+
+**Bash** (`~/.bashrc`):
+```sh
+eval "$(bullet completion bash)"
+```
+
+**Zsh** (`~/.zshrc`):
+```sh
+eval "$(bullet completion zsh)"
+```
+
+**Fish** (`~/.config/fish/config.fish`):
+```sh
+bullet completion fish | source
+```
+
+**PowerShell**:
+```powershell
+bullet completion powershell | Out-String | Invoke-Expression
+```
+
 ## But, Kubernetes?
 
 https://k8s.af/
