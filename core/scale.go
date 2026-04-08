@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
@@ -13,6 +14,8 @@ import (
 	"github.com/FurqanSoftware/bullet/ssh"
 	"github.com/FurqanSoftware/pog"
 	"github.com/antonmedv/expr"
+	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/tw"
 )
 
 // Composition maps program keys to their desired instance counts.
@@ -77,8 +80,21 @@ func DefaultComposition(n scope.Node, spec *spec.Spec) (*Composition, error) {
 	return &comp, nil
 }
 
+type scaleResult struct {
+	Desired int
+	Up      int
+	Down    int
+}
+
 // Scale adjusts the number of container instances on each node to match the composition.
 func Scale(s scope.Scope, g cfg.Configuration, comp *Composition) error {
+	type nodeResult struct {
+		Name    string
+		Results map[string]scaleResult
+		Keys    []string
+	}
+	var nodeResults []nodeResult
+
 	for _, n := range s.Nodes {
 		pog.SetStatus(pogConnecting(n))
 		c, err := sshDial(n, g)
@@ -93,39 +109,105 @@ func Scale(s scope.Scope, g cfg.Configuration, comp *Composition) error {
 			return err
 		}
 
-		err = scaleNode(n, c, d, s, comp)
+		results, keys, err := scaleNode(n, c, d, s, comp)
 		if err != nil {
 			return err
 		}
+
+		nodeResults = append(nodeResults, nodeResult{
+			Name:    n.Name,
+			Results: results,
+			Keys:    keys,
+		})
 	}
-	return nil
+
+	// Collect all program keys in order.
+	seen := map[string]bool{}
+	var keys []string
+	for _, nr := range nodeResults {
+		for _, k := range nr.Keys {
+			if !seen[k] {
+				seen[k] = true
+				keys = append(keys, k)
+			}
+		}
+	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.Configure(func(cfg *tablewriter.Config) {
+		cfg.Header.Formatting.AutoFormat = tw.Off
+		cfg.Footer.Alignment.Global = tw.AlignLeft
+	})
+
+	hdata := []any{""}
+	for _, k := range keys {
+		hdata = append(hdata, k)
+	}
+	table.Header(hdata...)
+
+	desiredSum := map[string]int{}
+	changeSum := map[string]int{}
+	for _, nr := range nodeResults {
+		rdata := []any{nr.Name}
+		for _, k := range keys {
+			r, ok := nr.Results[k]
+			if !ok {
+				rdata = append(rdata, "")
+			} else {
+				change := r.Up - r.Down
+				desiredSum[k] += r.Desired
+				changeSum[k] += change
+				rdata = append(rdata, fmt.Sprintf("%d (%+d)", r.Desired, change))
+			}
+		}
+		table.Append(rdata...)
+	}
+
+	fdata := []any{""}
+	for _, k := range keys {
+		fdata = append(fdata, fmt.Sprintf("%d (%+d)", desiredSum[k], changeSum[k]))
+	}
+	table.Footer(fdata...)
+
+	fmt.Println()
+	return table.Render()
 }
 
-func scaleNode(n scope.Node, c *ssh.Client, d distro.Distro, s scope.Scope, comp *Composition) error {
+func scaleNode(n scope.Node, c *ssh.Client, d distro.Distro, s scope.Scope, comp *Composition) (map[string]scaleResult, []string, error) {
 	if len(comp.Sizes) == 0 {
 		var err error
 		comp, err = DefaultComposition(n, s.Spec)
 		if err != nil {
-			return err
+			return nil, nil, err
 		}
 	}
+
+	results := map[string]scaleResult{}
+	var keys []string
 
 	pog.SetStatus(pogText("Scaling programs"))
 	for k, n := range comp.Sizes {
 		prog, ok := s.Spec.Application.Programs[k]
 		if !ok {
-			return fmt.Errorf("unknown program key %q", k)
+			return nil, nil, fmt.Errorf("unknown program key %q", k)
 		}
 
 		pog.SetStatus(pogScalingProgram(prog))
 		up, down, err := d.Scale(s.Spec.Application, prog, n)
 		if err != nil {
-			return err
+			return nil, nil, err
 		}
 		pog.Infof("Scaled program %s", k)
 		pog.Infof("∟ Desired: %d", n)
 		pog.Infof("∟ Ready: %d (%+d)", n, up-down)
 		pog.SetStatus(nil)
+
+		results[k] = scaleResult{
+			Desired: n,
+			Up:      up,
+			Down:    down,
+		}
+		keys = append(keys, k)
 	}
-	return nil
+	return results, keys, nil
 }
