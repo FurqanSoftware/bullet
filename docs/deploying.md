@@ -64,6 +64,12 @@ bullet -H 192.168.0.3 deploy app.tar.gz
 
 Bullet uploads the tarball, extracts it, builds Docker images, and reloads running containers. If the release has already been deployed (same SHA256 hash), the node is skipped.
 
+You can combine setup, environment push, and scaling into a single deploy:
+
+```sh
+bullet -H 192.168.0.3 deploy app.tar.gz --setup --environ env.production --scale
+```
+
 ## Scaling
 
 After the first deploy, start your containers:

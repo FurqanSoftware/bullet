@@ -19,6 +19,7 @@ What it does:
 2. Creates `/opt/<identifier>/releases/` directory.
 3. Creates an empty `/opt/<identifier>/env` file.
 4. Optionally uploads the environment file.
+5. Prints a summary table showing what happened on each node.
 
 ## deploy
 
@@ -26,14 +27,25 @@ Package and deploy the application to servers.
 
 ```sh
 bullet -H 192.168.0.3 deploy app.tar.gz
+bullet -H 192.168.0.3 deploy app.tar.gz --environ env.production
+bullet -H 192.168.0.3 deploy app.tar.gz --setup --scale
+bullet -H 192.168.0.3 deploy app.tar.gz --setup --environ env.production --scale
 ```
 
 The argument is a path to a tarball containing your application files.
+
+| Flag        | Description                                                        |
+|-------------|--------------------------------------------------------------------|
+| `--environ` | Path to an environment file to push before deploying.              |
+| `--setup`   | Run server setup (install Docker, create directories) before deploying. |
+| `--scale`   | Auto scale programs using Bulletspec rules after deploying.        |
 
 What it does:
 
 1. Computes the SHA256 hash of the tarball.
 2. For each selected node:
+   - Optionally runs server setup (if `--setup` is set).
+   - Optionally uploads the environment file (if `--environ` is set).
    - Checks if this release is already deployed (by comparing hashes). Skips if so.
    - Uploads the tarball to `/tmp/` on the server.
    - Extracts it to `/opt/<identifier>/releases/<timestamp>-<hash>/`.
@@ -43,6 +55,8 @@ What it does:
    - Builds Docker images for programs that have a `dockerfile` defined.
    - Reloads running containers using the configured [reload method](bulletspec.md#reload).
    - Prunes old releases, keeping the 5 most recent.
+   - Optionally scales programs using the Bulletspec scaling rules (if `--scale` is set).
+3. Prints a summary table showing what happened on each node.
 
 ## status
 
@@ -90,13 +104,7 @@ When called with arguments, each argument is in `program=count` format.
 
 When called without arguments, Bullet evaluates the [scaling rules](bulletspec.md#scaling-rules) defined in the Bulletspec against each node's properties (tags, hardware) to determine the desired instance counts.
 
-Bullet reports how many containers were created or removed:
-
-```
-Scaled program web
-∟ Desired: 4
-∟ Ready: 4 (+2)
-```
+Bullet reports how many containers were created or removed and prints a summary table showing the desired count and change for each program on each node.
 
 ## cron:enable
 

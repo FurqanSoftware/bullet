@@ -103,7 +103,7 @@ bullet -H 192.168.0.3 scale web=2
 ### Commands
 
 ```sh
-bullet deploy [tarball]          # Deploy a release to servers
+bullet deploy [tarball]          # Deploy a release (--setup, --environ, --scale)
 bullet setup                     # Prepare servers for deployment
 bullet status                    # Show container status across nodes
 bullet restart                   # Restart all application containers
