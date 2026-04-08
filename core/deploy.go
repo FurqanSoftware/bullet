@@ -17,13 +17,14 @@ import (
 )
 
 type deployResult struct {
-	Skipped  bool
-	Rebuilt  map[string]bool
-	Reloaded map[string]int
+	Skipped       bool
+	EnvironPushed bool
+	Rebuilt       map[string]bool
+	Reloaded      map[string]int
 }
 
 // Deploy uploads and deploys a release to all nodes in scope.
-func Deploy(s scope.Scope, g cfg.Configuration, rel *Release) error {
+func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string) error {
 	pog.Infof("Deploying %s", filepath.Base(rel.Tarball.Path))
 	pog.Infof("∟ Hash: %s", rel.Hash)
 	pog.Infof("∟ Size: %s", humanize.Bytes(uint64(rel.Tarball.Size)))
@@ -44,10 +45,20 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release) error {
 			return err
 		}
 
+		var environPushed bool
+		if environ != "" {
+			err = uploadEnvironFile(c, s, environ)
+			if err != nil {
+				return err
+			}
+			environPushed = true
+		}
+
 		r, err := deployNode(n, c, d, s, rel)
 		if err != nil {
 			return err
 		}
+		r.EnvironPushed = environPushed
 
 		results[n.Name] = r
 	}
@@ -58,7 +69,7 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release) error {
 		cfg.Footer.Alignment.Global = tw.AlignLeft
 	})
 
-	hdata := []any{""}
+	hdata := []any{"", "Environ"}
 	for _, k := range s.Spec.Application.ProgramKeys {
 		hdata = append(hdata, k)
 	}
@@ -68,7 +79,11 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release) error {
 	reloadedSum := map[string]int{}
 	for _, n := range s.Nodes {
 		r := results[n.Name]
-		rdata := []any{n.Name}
+		envCell := ""
+		if r.EnvironPushed {
+			envCell = "Pushed"
+		}
+		rdata := []any{n.Name, envCell}
 		if r.Skipped {
 			for range s.Spec.Application.ProgramKeys {
 				rdata = append(rdata, "Skipped")
@@ -96,7 +111,7 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release) error {
 		table.Append(rdata...)
 	}
 
-	fdata := []any{""}
+	fdata := []any{"", ""}
 	for _, k := range s.Spec.Application.ProgramKeys {
 		cell := ""
 		if rebuiltSum[k] > 0 {
