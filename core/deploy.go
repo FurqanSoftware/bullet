@@ -17,6 +17,7 @@ import (
 )
 
 type deployResult struct {
+	Setup         *setupResult
 	Skipped       bool
 	EnvironPushed bool
 	Rebuilt       map[string]bool
@@ -25,7 +26,7 @@ type deployResult struct {
 }
 
 // Deploy uploads and deploys a release to all nodes in scope.
-func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, scale bool) error {
+func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, setup bool, scale bool) error {
 	pog.Infof("Deploying %s", filepath.Base(rel.Tarball.Path))
 	pog.Infof("∟ Hash: %s", rel.Hash)
 	pog.Infof("∟ Size: %s", humanize.Bytes(uint64(rel.Tarball.Size)))
@@ -46,6 +47,15 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, sc
 			return err
 		}
 
+		var sr *setupResult
+		if setup {
+			result, err := setupNode(n, c, d, s)
+			if err != nil {
+				return err
+			}
+			sr = &result
+		}
+
 		var environPushed bool
 		if environ != "" {
 			err = uploadEnvironFile(c, s, environ)
@@ -59,6 +69,7 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, sc
 		if err != nil {
 			return err
 		}
+		r.Setup = sr
 		r.EnvironPushed = environPushed
 
 		if scale && !r.Skipped {
@@ -79,7 +90,7 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, sc
 		cfg.Footer.Alignment.Global = tw.AlignLeft
 	})
 
-	hdata := []any{"", "Environ"}
+	hdata := []any{"", "Docker", "Environ"}
 	for _, k := range s.Spec.Application.ProgramKeys {
 		hdata = append(hdata, k)
 	}
@@ -90,11 +101,19 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, sc
 	scaledSum := map[string]scaleResult{}
 	for _, n := range s.Nodes {
 		r := results[n.Name]
+		dockerCell := ""
+		if r.Setup != nil {
+			if r.Setup.DockerInstalled {
+				dockerCell = "Installed"
+			} else {
+				dockerCell = "Already Installed"
+			}
+		}
 		envCell := ""
 		if r.EnvironPushed {
 			envCell = "Pushed"
 		}
-		rdata := []any{n.Name, envCell}
+		rdata := []any{n.Name, dockerCell, envCell}
 		if r.Skipped {
 			for range s.Spec.Application.ProgramKeys {
 				rdata = append(rdata, "Skipped")
@@ -134,7 +153,7 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, sc
 		table.Append(rdata...)
 	}
 
-	fdata := []any{"", ""}
+	fdata := []any{"", "", ""}
 	for _, k := range s.Spec.Application.ProgramKeys {
 		cell := ""
 		if rebuiltSum[k] > 0 {
