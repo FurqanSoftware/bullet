@@ -21,10 +21,11 @@ type deployResult struct {
 	EnvironPushed bool
 	Rebuilt       map[string]bool
 	Reloaded      map[string]int
+	Scaled        map[string]scaleResult
 }
 
 // Deploy uploads and deploys a release to all nodes in scope.
-func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string) error {
+func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, scale bool) error {
 	pog.Infof("Deploying %s", filepath.Base(rel.Tarball.Path))
 	pog.Infof("∟ Hash: %s", rel.Hash)
 	pog.Infof("∟ Size: %s", humanize.Bytes(uint64(rel.Tarball.Size)))
@@ -60,6 +61,15 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string) er
 		}
 		r.EnvironPushed = environPushed
 
+		if scale && !r.Skipped {
+			comp := &Composition{Sizes: map[string]int{}}
+			scaled, _, err := scaleNode(n, c, d, s, comp)
+			if err != nil {
+				return err
+			}
+			r.Scaled = scaled
+		}
+
 		results[n.Name] = r
 	}
 
@@ -77,6 +87,7 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string) er
 
 	rebuiltSum := map[string]int{}
 	reloadedSum := map[string]int{}
+	scaledSum := map[string]scaleResult{}
 	for _, n := range s.Nodes {
 		r := results[n.Name]
 		envCell := ""
@@ -102,6 +113,18 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string) er
 					}
 					cell += fmt.Sprintf("%d Reloaded", r.Reloaded[k])
 				}
+				if sr, ok := r.Scaled[k]; ok {
+					change := sr.Up - sr.Down
+					sum := scaledSum[k]
+					sum.Desired += sr.Desired
+					sum.Up += sr.Up
+					sum.Down += sr.Down
+					scaledSum[k] = sum
+					if cell != "" {
+						cell += ", "
+					}
+					cell += fmt.Sprintf("%d Scaled (%+d)", sr.Desired, change)
+				}
 				if cell == "" {
 					cell = "0"
 				}
@@ -122,6 +145,13 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string) er
 				cell += ", "
 			}
 			cell += fmt.Sprintf("%d Reloaded", reloadedSum[k])
+		}
+		if sum, ok := scaledSum[k]; ok {
+			change := sum.Up - sum.Down
+			if cell != "" {
+				cell += ", "
+			}
+			cell += fmt.Sprintf("%d Scaled (%+d)", sum.Desired, change)
 		}
 		if cell == "" {
 			cell = "0"
