@@ -26,10 +26,10 @@ func New(c *ssh.Client) distro.Distro {
 	}
 }
 
-func (u *Ubuntu) InstallDocker() error {
+func (u *Ubuntu) InstallDocker() (bool, error) {
 	version, err := u.Client.Output("docker version")
 	if err == nil && len(version) > 0 {
-		return nil
+		return false, nil
 	}
 
 	cmds := []string{
@@ -43,10 +43,10 @@ func (u *Ubuntu) InstallDocker() error {
 	for _, cmd := range cmds {
 		err := u.Client.Run(cmd, true)
 		if err != nil {
-			return err
+			return false, err
 		}
 	}
-	return nil
+	return true, nil
 }
 
 func (u *Ubuntu) MkdirAll(name string) error {

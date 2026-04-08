@@ -13,7 +13,7 @@ var ErrBadDistribution = errors.New("distro: unsupported distribution")
 
 // Distro abstracts OS-specific operations on a remote server.
 type Distro interface {
-	InstallDocker() error
+	InstallDocker() (bool, error)
 
 	MkdirAll(name string) error
 	Remove(name string) error
