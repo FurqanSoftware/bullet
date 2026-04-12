@@ -1,0 +1,47 @@
+version: '3'
+
+vars:
+  IMAGE_NAME: registry.furqansoftware.net/tools/bullet
+
+tasks:
+  install:
+    cmd: go install .
+
+  build:
+    cmd: go build -o bullet github.com/FurqanSoftware/bullet
+
+  build:alpine:
+    cmds:
+      - cd foundry && docker build -t bullet-foundry .
+      - >-
+        docker run
+        --rm -ti
+        -e GOCACHE=/go/src/github.com/FurqanSoftware/bullet/.go-build
+        -u $(id -u):$(id -g)
+        -v $(pwd):/go/src/github.com/FurqanSoftware/bullet
+        -w /go/src/github.com/FurqanSoftware/bullet
+        bullet-foundry
+        go build -buildvcs=false -o bullet github.com/FurqanSoftware/bullet
+
+  docker:image:build:
+    deps: [build:alpine]
+    requires:
+      vars: [VERSION]
+    cmd: docker build -t {{.IMAGE_NAME}}:{{.VERSION}} .
+
+  docker:image:push:
+    requires:
+      vars: [VERSION]
+    cmd: docker push {{.IMAGE_NAME}}:{{.VERSION}}
+
+  test:
+    cmd: go test -v ./...
+
+  lint:
+    cmd: staticcheck ./...
+
+  lint:tools:install:
+    cmd: go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
+
+  clean:
+    cmd: go clean -i ./...
