@@ -105,6 +105,7 @@ type Reload struct {
 // Unsafe holds flags for unsafe container options.
 type Unsafe struct {
 	NetworkHost bool
+	Ulimits     []string
 }
 
 // Cron holds the scheduled jobs for the application.

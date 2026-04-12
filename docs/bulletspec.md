@@ -171,11 +171,15 @@ If the Docker image was rebuilt during the deploy, the container is always resta
 ```yaml
 unsafe:
   networkhost: true
+  ulimits:
+    - nofile=65535:65535
+    - memlock=-1:-1
 ```
 
-| Field         | Type | Description                                         |
-|---------------|------|-----------------------------------------------------|
-| `networkhost` | bool | Run container with `--network=host`. Default false.  |
+| Field         | Type     | Description                                              |
+|---------------|----------|----------------------------------------------------------|
+| `networkhost` | bool     | Run container with `--network=host`. Default false.      |
+| `ulimits`     | []string | Set container ulimits via `--ulimit` (e.g. `nofile=65535:65535`). |
 
 ## Cron Jobs
 

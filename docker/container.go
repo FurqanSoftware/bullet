@@ -248,6 +248,9 @@ func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 	if prog.Unsafe.NetworkHost {
 		cmd = append(cmd, "--network=host")
 	}
+	for _, u := range prog.Unsafe.Ulimits {
+		cmd = append(cmd, "--ulimit", u)
+	}
 
 	cmd = append(
 		cmd,
@@ -313,6 +316,9 @@ func createAttachContainer(c *ssh.Client, app spec.Application, prog spec.Progra
 	}
 	if prog.Unsafe.NetworkHost {
 		cmd = append(cmd, "--network=host")
+	}
+	for _, u := range prog.Unsafe.Ulimits {
+		cmd = append(cmd, "--ulimit", u)
 	}
 
 	if prog.Container.ApplicationDir != nil {
