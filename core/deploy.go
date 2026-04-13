@@ -90,7 +90,13 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, se
 		cfg.Footer.Alignment.Global = tw.AlignLeft
 	})
 
-	hdata := []any{"", "Docker", "Environ"}
+	hdata := []any{""}
+	if setup {
+		hdata = append(hdata, "Docker")
+	}
+	if environ != "" {
+		hdata = append(hdata, "Environ")
+	}
 	for _, k := range s.Spec.Application.ProgramKeys {
 		hdata = append(hdata, k)
 	}
@@ -101,19 +107,25 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, se
 	scaledSum := map[string]scaleResult{}
 	for _, n := range s.Nodes {
 		r := results[n.Name]
-		dockerCell := ""
-		if r.Setup != nil {
-			if r.Setup.DockerInstalled {
-				dockerCell = "Installed"
-			} else {
-				dockerCell = "Already Installed"
+		rdata := []any{n.Name}
+		if setup {
+			dockerCell := ""
+			if r.Setup != nil {
+				if r.Setup.DockerInstalled {
+					dockerCell = "Installed"
+				} else {
+					dockerCell = "Already Installed"
+				}
 			}
+			rdata = append(rdata, dockerCell)
 		}
-		envCell := ""
-		if r.EnvironPushed {
-			envCell = "Pushed"
+		if environ != "" {
+			envCell := ""
+			if r.EnvironPushed {
+				envCell = "Pushed"
+			}
+			rdata = append(rdata, envCell)
 		}
-		rdata := []any{n.Name, dockerCell, envCell}
 		if r.Skipped {
 			for range s.Spec.Application.ProgramKeys {
 				rdata = append(rdata, "Skipped")
@@ -153,7 +165,13 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, se
 		table.Append(rdata...)
 	}
 
-	fdata := []any{"", "", ""}
+	fdata := []any{""}
+	if setup {
+		fdata = append(fdata, "")
+	}
+	if environ != "" {
+		fdata = append(fdata, "")
+	}
 	for _, k := range s.Spec.Application.ProgramKeys {
 		cell := ""
 		if rebuiltSum[k] > 0 {
