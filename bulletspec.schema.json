@@ -1,0 +1,299 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FurqanSoftware/bullet/bulletspec.schema.json",
+  "title": "Bulletspec",
+  "description": "Configuration file for the Bullet deployment tool.",
+  "type": "object",
+  "required": ["application"],
+  "additionalProperties": false,
+  "properties": {
+    "application": {
+      "type": "object",
+      "required": ["identifier"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name of the application."
+        },
+        "identifier": {
+          "type": "string",
+          "description": "Unique identifier. Used in file paths, container names, and image names."
+        },
+        "deploy": {
+          "$ref": "#/$defs/deploy"
+        },
+        "programs": {
+          "type": "object",
+          "description": "Named programs to run as containers.",
+          "additionalProperties": {
+            "$ref": "#/$defs/program"
+          }
+        },
+        "cron": {
+          "$ref": "#/$defs/cron"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "deploy": {
+      "type": "object",
+      "description": "Deployment behavior configuration.",
+      "additionalProperties": false,
+      "properties": {
+        "current": {
+          "type": "string",
+          "enum": ["symlink", "replace"],
+          "default": "symlink",
+          "description": "How releases are made current. \"symlink\" creates a symlink, \"replace\" copies contents."
+        }
+      }
+    },
+    "program": {
+      "type": "object",
+      "description": "A long-running service within the application.",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name of the program."
+        },
+        "command": {
+          "type": "string",
+          "description": "Command to run inside the container. Supports variable expansion."
+        },
+        "user": {
+          "type": "string",
+          "description": "User to run the container as."
+        },
+        "container": {
+          "$ref": "#/$defs/container"
+        },
+        "ports": {
+          "type": "array",
+          "description": "Port mappings in HOST:CONTAINER format. Host port is incremented per instance.",
+          "items": {
+            "type": "string",
+            "pattern": "^\\d+:\\d+$"
+          }
+        },
+        "volumes": {
+          "type": "array",
+          "description": "Volume mounts passed directly to Docker.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "healthcheck": {
+          "$ref": "#/$defs/program_healthcheck"
+        },
+        "scales": {
+          "type": "array",
+          "description": "Expression-based scaling rules.",
+          "items": {
+            "$ref": "#/$defs/scale"
+          }
+        },
+        "reload": {
+          "$ref": "#/$defs/reload"
+        },
+        "unsafe": {
+          "$ref": "#/$defs/unsafe"
+        }
+      }
+    },
+    "container": {
+      "type": "object",
+      "description": "Docker image or build configuration for a program.",
+      "additionalProperties": false,
+      "anyOf": [
+        { "required": ["image"] },
+        { "required": ["dockerfile"] }
+      ],
+      "properties": {
+        "image": {
+          "type": "string",
+          "description": "Base Docker image (e.g. node:20-alpine)."
+        },
+        "dockerfile": {
+          "type": "string",
+          "description": "Path to a Dockerfile. If set, the image is built from this file."
+        },
+        "entrypoint": {
+          "type": "string",
+          "description": "Custom entrypoint for the container."
+        },
+        "working_dir": {
+          "type": "string",
+          "description": "Working directory inside the container. Defaults to /<identifier>."
+        },
+        "application_dir": {
+          "type": "string",
+          "description": "Where the application directory is mounted inside the container. Defaults to /<identifier>."
+        }
+      }
+    },
+    "program_healthcheck": {
+      "type": "object",
+      "description": "Docker's built-in health check configuration.",
+      "required": ["command"],
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "type": "string",
+          "description": "Health check command to run inside the container."
+        },
+        "interval": {
+          "type": "string",
+          "description": "How often to run the check (e.g. 30s, 1m)."
+        },
+        "timeout": {
+          "type": "string",
+          "description": "Maximum time for a single check (e.g. 5s)."
+        },
+        "retries": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of consecutive failures needed to mark unhealthy."
+        },
+        "start_period": {
+          "type": "string",
+          "description": "Grace period after container start (e.g. 10s)."
+        }
+      }
+    },
+    "scale": {
+      "type": "object",
+      "description": "A conditional scaling rule.",
+      "required": ["n"],
+      "additionalProperties": false,
+      "properties": {
+        "if": {
+          "type": "string",
+          "description": "Boolean expression. If omitted, the rule always applies."
+        },
+        "n": {
+          "type": "string",
+          "description": "Expression that evaluates to the desired instance count."
+        }
+      }
+    },
+    "reload": {
+      "type": "object",
+      "description": "How containers are reloaded on deploy.",
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["signal", "command", "restart"],
+          "default": "restart",
+          "description": "Reload strategy."
+        },
+        "signal": {
+          "type": "string",
+          "description": "Signal to send when method is \"signal\" (e.g. SIGHUP)."
+        },
+        "command": {
+          "type": "string",
+          "description": "Command to exec in container when method is \"command\"."
+        },
+        "pre_command": {
+          "type": "string",
+          "description": "Command to exec in container before the reload action."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "method": { "const": "signal" } },
+            "required": ["method"]
+          },
+          "then": {
+            "required": ["signal"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "method": { "const": "command" } },
+            "required": ["method"]
+          },
+          "then": {
+            "required": ["command"]
+          }
+        }
+      ]
+    },
+    "unsafe": {
+      "type": "object",
+      "description": "Unsafe container options.",
+      "additionalProperties": false,
+      "properties": {
+        "network_host": {
+          "type": "boolean",
+          "default": false,
+          "description": "Run container with --network=host."
+        },
+        "ulimits": {
+          "type": "array",
+          "description": "Set container ulimits via --ulimit (e.g. nofile=65535:65535).",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "cron": {
+      "type": "object",
+      "description": "Scheduled jobs configuration.",
+      "additionalProperties": false,
+      "properties": {
+        "jobs": {
+          "type": "array",
+          "description": "List of cron jobs.",
+          "items": {
+            "$ref": "#/$defs/job"
+          }
+        }
+      }
+    },
+    "job": {
+      "type": "object",
+      "description": "A scheduled cron job.",
+      "required": ["key", "command", "schedule"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Unique identifier for the job."
+        },
+        "command": {
+          "type": "string",
+          "description": "Command to run in the container."
+        },
+        "schedule": {
+          "type": "string",
+          "description": "systemd OnCalendar expression (e.g. daily, hourly, *-*-* 02:00:00)."
+        },
+        "jitter": {
+          "type": "string",
+          "description": "Random delay added to the schedule (e.g. 30m)."
+        },
+        "healthcheck": {
+          "$ref": "#/$defs/job_healthcheck"
+        }
+      }
+    },
+    "job_healthcheck": {
+      "type": "object",
+      "description": "Health check pings for a cron job.",
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Base URL for health pings. Bullet calls {url}/start before the job and {url}/{exit_status} after."
+        }
+      }
+    }
+  }
+}
