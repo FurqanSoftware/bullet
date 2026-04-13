@@ -138,10 +138,10 @@ programs:
     reload:
       method: command
       command: nginx -s reload
-      precommand: nginx -t
+      pre_command: nginx -t
 ```
 
-The `precommand` runs before the reload action, useful for configuration validation. If the Docker image was rebuilt during the deploy, the container is always restarted regardless of the reload method.
+The `pre_command` runs before the reload action, useful for configuration validation. If the Docker image was rebuilt during the deploy, the container is always restarted regardless of the reload method.
 
 ## Directory Structure on the Server
 

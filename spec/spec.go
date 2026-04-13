@@ -28,6 +28,9 @@ func Parse(filename string, b []byte) (*Spec, error) {
 	}
 	sort.Strings(keys)
 	spec.Application.ProgramKeys = keys
+	if err := spec.Validate(); err != nil {
+		return nil, err
+	}
 	return &spec, nil
 }
 

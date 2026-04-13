@@ -85,17 +85,17 @@ Or with a custom Dockerfile:
 container:
   dockerfile: Dockerfile.web
   entrypoint: "/entrypoint.sh"
-  workingdir: /app
-  applicationdir: /app
+  working_dir: /app
+  application_dir: /app
 ```
 
-| Field            | Type   | Default            | Description                                                          |
-|------------------|--------|--------------------|----------------------------------------------------------------------|
-| `image`          | string |                    | Base Docker image (e.g. `node:20-alpine`).                           |
-| `dockerfile`     | string |                    | Path to a Dockerfile. If set, the image is built from this file.     |
-| `entrypoint`     | string |                    | Custom entrypoint for the container.                                 |
-| `workingdir`     | string | `/<identifier>`    | Working directory inside the container.                              |
-| `applicationdir` | string | `/<identifier>`    | Where the application directory is mounted inside the container.     |
+| Field             | Type   | Default            | Description                                                          |
+|-------------------|--------|--------------------|----------------------------------------------------------------------|
+| `image`           | string |                    | Base Docker image (e.g. `node:20-alpine`).                           |
+| `dockerfile`      | string |                    | Path to a Dockerfile. If set, the image is built from this file.     |
+| `entrypoint`      | string |                    | Custom entrypoint for the container.                                 |
+| `working_dir`     | string | `/<identifier>`    | Working directory inside the container.                              |
+| `application_dir` | string | `/<identifier>`    | Where the application directory is mounted inside the container.     |
 
 When `dockerfile` is specified, Bullet tracks the Dockerfile's SHA256 hash. The image is only rebuilt when the Dockerfile changes.
 
@@ -109,16 +109,16 @@ healthcheck:
   interval: 30s
   timeout: 5s
   retries: 3
-  startperiod: 10s
+  start_period: 10s
 ```
 
-| Field         | Type     | Description                                      |
-|---------------|----------|--------------------------------------------------|
-| `command`     | string   | Health check command to run inside the container. |
-| `interval`    | duration | How often to run the check.                      |
-| `timeout`     | duration | Maximum time for a single check.                 |
-| `retries`     | int      | Failures needed to mark unhealthy.               |
-| `startperiod` | duration | Grace period after container start.              |
+| Field          | Type     | Description                                      |
+|----------------|----------|--------------------------------------------------|
+| `command`      | string   | Health check command to run inside the container. |
+| `interval`     | duration | How often to run the check.                      |
+| `timeout`      | duration | Maximum time for a single check.                 |
+| `retries`      | int      | Failures needed to mark unhealthy.               |
+| `start_period` | duration | Grace period after container start.              |
 
 ### Scaling Rules
 
@@ -154,15 +154,15 @@ Controls how containers are updated during a deploy.
 reload:
   method: signal
   signal: SIGHUP
-  precommand: nginx -t
+  pre_command: nginx -t
 ```
 
-| Field        | Type   | Default     | Description                                                     |
-|--------------|--------|-------------|-----------------------------------------------------------------|
-| `method`     | string | `"restart"` | `"signal"`, `"command"`, or `"restart"`.                        |
-| `signal`     | string |             | Signal to send when method is `"signal"` (e.g. `SIGHUP`).      |
-| `command`    | string |             | Command to exec in container when method is `"command"`.        |
-| `precommand` | string |             | Command to exec in container before the reload action.          |
+| Field         | Type   | Default     | Description                                                     |
+|---------------|--------|-------------|-----------------------------------------------------------------|
+| `method`      | string | `"restart"` | `"signal"`, `"command"`, or `"restart"`.                        |
+| `signal`      | string |             | Signal to send when method is `"signal"` (e.g. `SIGHUP`).      |
+| `command`     | string |             | Command to exec in container when method is `"command"`.        |
+| `pre_command` | string |             | Command to exec in container before the reload action.          |
 
 If the Docker image was rebuilt during the deploy, the container is always restarted regardless of the reload method.
 
@@ -170,7 +170,7 @@ If the Docker image was rebuilt during the deploy, the container is always resta
 
 ```yaml
 unsafe:
-  networkhost: true
+  network_host: true
   ulimits:
     - nofile=65535:65535
     - memlock=-1:-1
@@ -178,7 +178,7 @@ unsafe:
 
 | Field         | Type     | Description                                              |
 |---------------|----------|----------------------------------------------------------|
-| `networkhost` | bool     | Run container with `--network=host`. Default false.      |
+| `network_host` | bool     | Run container with `--network=host`. Default false.      |
 | `ulimits`     | []string | Set container ulimits via `--ulimit` (e.g. `nofile=65535:65535`). |
 
 ## Cron Jobs
@@ -235,7 +235,7 @@ application:
         interval: 30s
         timeout: 5s
         retries: 3
-        startperiod: 10s
+        start_period: 10s
       scales:
         - if: 'hasTags("production")'
           n: 'hw.cores'
@@ -243,7 +243,7 @@ application:
       reload:
         method: signal
         signal: SIGHUP
-        precommand: ./server --check-config
+        pre_command: ./server --check-config
 
     worker:
       name: Background Worker

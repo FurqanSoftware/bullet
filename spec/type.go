@@ -11,7 +11,7 @@ type Application struct {
 	Deploy     Deploy
 
 	Programs    map[string]Program
-	ProgramKeys []string
+	ProgramKeys []string `yaml:"-"`
 
 	Cron Cron
 }
@@ -75,8 +75,8 @@ type Container struct {
 	Dockerfile     string
 	Image          string
 	Entrypoint     *string
-	WorkingDir     *string
-	ApplicationDir *string
+	WorkingDir     *string `yaml:"working_dir"`
+	ApplicationDir *string `yaml:"application_dir"`
 }
 
 // ProgramHealthcheck configures Docker's built-in health check for a program.
@@ -85,7 +85,7 @@ type ProgramHealthcheck struct {
 	Interval    time.Duration
 	Timeout     time.Duration
 	Retries     int
-	StartPeriod time.Duration
+	StartPeriod time.Duration `yaml:"start_period"`
 }
 
 // Scale defines a conditional scaling rule for a program.
@@ -99,12 +99,12 @@ type Reload struct {
 	Method     string
 	Signal     string
 	Command    string
-	PreCommand string
+	PreCommand string `yaml:"pre_command"`
 }
 
 // Unsafe holds flags for unsafe container options.
 type Unsafe struct {
-	NetworkHost bool
+	NetworkHost bool `yaml:"network_host"`
 	Ulimits     []string
 }
 
