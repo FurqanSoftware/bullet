@@ -123,6 +123,14 @@ bullet host:top                  # Show running processes on a server
 
 See the [docs/](docs/) directory for detailed documentation.
 
+## Editor Support
+
+Bullet ships a [JSON Schema](bulletspec.schema.json) for the `Bulletspec` file. Add this line at the top of your `Bulletspec` to enable validation and autocompletion in editors that support the YAML Language Server (Zed, VS Code, JetBrains, etc.):
+
+```yaml
+# yaml-language-server: $schema=./bulletspec.schema.json
+```
+
 ## Shell Completion
 
 Bullet supports autocompletion for bash, zsh, fish, and powershell. It completes command names, flag values (e.g. `-c` from `Bulletcfg.*` files), and arguments (e.g. program keys and cron job keys from `Bulletspec`).
