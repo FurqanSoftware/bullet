@@ -174,8 +174,8 @@
           "description": "Boolean expression. If omitted, the rule always applies."
         },
         "n": {
-          "type": "string",
-          "description": "Expression that evaluates to the desired instance count."
+          "type": ["string", "integer"],
+          "description": "Instance count as a number, or an expression that evaluates to the desired count."
         }
       }
     },
