@@ -12,11 +12,7 @@ var EnvironPushCmd = &cobra.Command{
 stored at /opt/<identifier>/env and is loaded by all containers and
 cron jobs via Docker's --env-file flag.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s, err := NewSelector().Nodes(currentScope)
-		if err != nil {
-			return err
-		}
-		return core.EnvironPush(s, currentConfiguration, args[0])
+		return core.EnvironPush(currentScope, currentConfiguration, args[0])
 	},
 }
 

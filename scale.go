@@ -19,12 +19,7 @@ scaling rules defined in the Bulletspec.`,
 		if err != nil {
 			return err
 		}
-
-		s, err := NewSelector().Nodes(currentScope)
-		if err != nil {
-			return err
-		}
-		return core.Scale(s, currentConfiguration, comp)
+		return core.Scale(currentScope, currentConfiguration, comp)
 	},
 }
 

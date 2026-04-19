@@ -12,6 +12,7 @@ import (
 
 var (
 	flagConfig string
+	flagSelect bool
 
 	currentScope         scope.Scope
 	currentConfiguration cfg.Configuration
@@ -55,6 +56,13 @@ var RootCmd = &cobra.Command{
 
 		currentScope = s
 		currentConfiguration = g
+
+		if flagSelect {
+			currentScope, err = NewSelector().Nodes(currentScope)
+			if err != nil {
+				return err
+			}
+		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -64,6 +72,7 @@ var RootCmd = &cobra.Command{
 
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&flagConfig, "config", "c", "", "Name of the configuration to apply")
+	RootCmd.PersistentFlags().BoolVarP(&flagSelect, "select", "s", false, "Prompt to select a subset of nodes before running")
 	RootCmd.RegisterFlagCompletionFunc("config", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		matches, _ := filepath.Glob("Bulletcfg.*")
 		names := make([]string, 0, len(matches))
