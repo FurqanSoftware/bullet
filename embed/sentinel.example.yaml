@@ -1,0 +1,16 @@
+# Bullet Sentinel configuration.
+#
+# Place at /etc/bullet/sentinel.yaml on the host. Fields not set here fall
+# back to the built-in defaults shown below. BULLET_SENTINEL_* env vars and
+# CLI flags override values from this file.
+
+# HTTP bind address for the /metrics endpoint. Default is localhost-only;
+# set to 0.0.0.0:9479 to allow remote scraping (put auth in front of it).
+addr: 127.0.0.1:9479
+
+# Minimum interval between docker/systemctl introspections. Multiple scrapes
+# within this window are served from a cached snapshot.
+scrape_interval: 15s
+
+# Path to the docker binary on the host.
+docker_path: /usr/bin/docker

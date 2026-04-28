@@ -39,6 +39,9 @@ type Distro interface {
 	CronDisable(app spec.Application, job spec.Job) error
 	CronStatus(app spec.Application, job spec.Job, tw *tabwriter.Writer) error
 
+	HostArch() (string, error)
+	InstallSentinel(binary []byte) error
+
 	Run(app spec.Application, prog spec.Program) error
 
 	Forward(app spec.Application, port string) error

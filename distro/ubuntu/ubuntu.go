@@ -14,6 +14,19 @@ import (
 	"github.com/FurqanSoftware/bullet/ssh"
 )
 
+const sentinelUnit = `[Unit]
+Description=Bullet Sentinel
+After=docker.service
+Wants=docker.service
+
+[Service]
+ExecStart=/usr/local/bin/bullet-sentinel
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target`
+
 // Ubuntu implements the Distro interface for Ubuntu servers.
 type Ubuntu struct {
 	Client *ssh.Client
@@ -354,6 +367,33 @@ func (u *Ubuntu) Top() error {
 
 func (u *Ubuntu) Shell() error {
 	return u.Client.RunPTY("/bin/bash", true)
+}
+
+func (u *Ubuntu) HostArch() (string, error) {
+	out, err := u.Client.Output("uname -m")
+	if err != nil {
+		return "", err
+	}
+	switch strings.TrimSpace(string(out)) {
+	case "x86_64":
+		return "amd64", nil
+	case "aarch64", "arm64":
+		return "arm64", nil
+	default:
+		return "", fmt.Errorf("unsupported architecture: %s", bytes.TrimSpace(out))
+	}
+}
+
+func (u *Ubuntu) InstallSentinel(binary []byte) error {
+	if err := u.Client.Push("/usr/local/bin/bullet-sentinel", 0755, int64(len(binary)), bytes.NewReader(binary), nil); err != nil {
+		return err
+	}
+
+	if err := u.Client.Push("/etc/systemd/system/bullet-sentinel.service", 0644, int64(len(sentinelUnit)), strings.NewReader(sentinelUnit), nil); err != nil {
+		return err
+	}
+
+	return u.Client.Run("systemctl daemon-reload && systemctl enable --now bullet-sentinel.service", false)
 }
 
 func (u *Ubuntu) Detect() (bool, error) {

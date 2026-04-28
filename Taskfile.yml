@@ -40,6 +40,11 @@ tasks:
   sentinel:test:
     cmd: go test ./sentinel/...
 
+  sentinel:embed:
+    cmds:
+      - GOOS=linux GOARCH=amd64 go build -o embed/bullet-sentinel-linux-amd64 ./sentinel
+      - GOOS=linux GOARCH=arm64 go build -o embed/bullet-sentinel-linux-arm64 ./sentinel
+
   test:
     cmd: go test -v ./...
 
