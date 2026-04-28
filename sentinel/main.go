@@ -9,32 +9,36 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.com/kelseyhightower/envconfig"
 )
 
 // version is set at build time via -ldflags "-X main.version=...".
 var version = "dev"
 
-type config struct {
-	Addr           string        `envconfig:"ADDR" default:"127.0.0.1:9479"`
-	ScrapeInterval time.Duration `envconfig:"SCRAPE_INTERVAL" default:"15s"`
-	DockerPath     string        `envconfig:"DOCKER_PATH" default:"/usr/bin/docker"`
-}
-
 func main() {
 	log.SetPrefix("bullet-sentinel: ")
 	log.SetFlags(log.LstdFlags | log.Lmsgprefix)
 
-	cfg := config{}
-	if err := envconfig.Process("BULLET_SENTINEL", &cfg); err != nil {
+	configPath := flag.String("config", "/etc/bullet/sentinel.yaml", "path to YAML config file")
+	addrFlag := flag.String("addr", "", "HTTP bind address (overrides config)")
+	scrapeFlag := flag.Duration("scrape-interval", 0, "minimum interval between host introspections (overrides config)")
+	dockerPathFlag := flag.String("docker-path", "", "path to the docker binary (overrides config)")
+	flag.Parse()
+
+	cfg, err := loadConfig(*configPath)
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	flag.StringVar(&cfg.Addr, "addr", cfg.Addr, "HTTP bind address")
-	flag.DurationVar(&cfg.ScrapeInterval, "scrape-interval", cfg.ScrapeInterval, "minimum interval between host introspections")
-	flag.StringVar(&cfg.DockerPath, "docker-path", cfg.DockerPath, "path to the docker binary")
-	flag.Parse()
+	flag.Visit(func(f *flag.Flag) {
+		switch f.Name {
+		case "addr":
+			cfg.Addr = *addrFlag
+		case "scrape-interval":
+			cfg.ScrapeInterval = *scrapeFlag
+		case "docker-path":
+			cfg.DockerPath = *dockerPathFlag
+		}
+	})
 
 	collector := &Collector{
 		DockerPath:     cfg.DockerPath,
