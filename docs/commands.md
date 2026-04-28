@@ -223,3 +223,15 @@ bullet -H 192.168.0.3 host:top
 ```
 
 Runs `top` interactively with full PTY support.
+
+## sentinel:install
+
+Install the Bullet Sentinel daemon on selected nodes.
+
+```sh
+bullet -H 192.168.0.3 sentinel:install
+```
+
+Pushes the embedded `bullet-sentinel` binary to `/usr/local/bin/`, writes the
+systemd unit, and enables and starts the service. See [Sentinel](sentinel.md)
+for the configuration file, exported metrics, and other operational details.
