@@ -45,6 +45,10 @@ func DefaultComposition(n scope.Node, spec *spec.Spec) (*Composition, error) {
 		Sizes: make(map[string]int, len(spec.Application.Programs)),
 	}
 	for key, prog := range spec.Application.Programs {
+		if len(prog.Scales) == 0 {
+			continue
+		}
+		comp.Sizes[key] = 0
 		for _, scale := range prog.Scales {
 			env := map[string]interface{}{
 				"hasTags": func(tags ...string) bool { return n.HasTags(tags) },
