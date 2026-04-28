@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 vars:
   IMAGE_NAME: registry.furqansoftware.net/tools/bullet
@@ -33,6 +33,12 @@ tasks:
     requires:
       vars: [VERSION]
     cmd: docker push {{.IMAGE_NAME}}:{{.VERSION}}
+
+  sentinel:build:
+    cmd: go build -o bullet-sentinel ./sentinel
+
+  sentinel:test:
+    cmd: go test ./sentinel/...
 
   test:
     cmd: go test -v ./...
