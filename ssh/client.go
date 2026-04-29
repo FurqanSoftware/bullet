@@ -227,12 +227,14 @@ func publicKeys(paths []string) func() ([]ssh.Signer, error) {
 		for _, path := range paths {
 			key, err := os.ReadFile(path)
 			if err != nil {
-				return nil, err
+				pog.Debugf("Skipping key %s: %v", path, err)
+				continue
 			}
 
 			signer, err := ssh.ParsePrivateKey(key)
 			if err != nil {
-				return nil, err
+				pog.Debugf("Skipping key %s: %v", path, err)
+				continue
 			}
 			signers = append(signers, signer)
 		}
