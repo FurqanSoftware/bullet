@@ -14,6 +14,7 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/mattn/go-tty"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 )
 
 // Client wraps an SSH connection with retry and timeout support.
@@ -238,6 +239,25 @@ func publicKeys(paths []string) func() ([]ssh.Signer, error) {
 			}
 			signers = append(signers, signer)
 		}
+		signers = append(signers, agentSigners()...)
 		return signers, nil
 	}
+}
+
+func agentSigners() []ssh.Signer {
+	sock := os.Getenv("SSH_AUTH_SOCK")
+	if sock == "" {
+		return nil
+	}
+	conn, err := net.Dial("unix", sock)
+	if err != nil {
+		pog.Debugf("Skipping SSH agent at %s: %v", sock, err)
+		return nil
+	}
+	signers, err := agent.NewClient(conn).Signers()
+	if err != nil {
+		pog.Debugf("Skipping SSH agent: %v", err)
+		return nil
+	}
+	return signers
 }
