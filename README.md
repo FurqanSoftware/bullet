@@ -107,7 +107,7 @@ bullet -H 192.168.0.3 scale web=2
 bullet deploy [tarball]          # Deploy a release (--setup, --environ, --scale, --skip-hooks)
 bullet setup                     # Prepare servers for deployment
 bullet status                    # Show container status across nodes
-bullet restart                   # Restart all application containers
+bullet restart [program[:instance] ...] # Restart application containers (all by default)
 bullet run [program]             # Run a one-off program container
 bullet hook:run [hook ...]       # Run post-deploy hooks
 bullet scale [program=count ...] # Scale program instances

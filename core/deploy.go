@@ -255,7 +255,7 @@ func deployNode(n scope.Node, c *ssh.Client, d distro.Distro, s scope.Scope, rel
 		pog.Info("Same as current hash. Skipping deploy.")
 		r.Skipped = true
 		if environChanged {
-			restarted, err := restartNode(d, s)
+			restarted, err := restartNode(d, s, nil)
 			if err != nil {
 				return r, err
 			}

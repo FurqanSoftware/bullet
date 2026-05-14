@@ -72,13 +72,25 @@ Outputs a table showing how many instances of each program are running and healt
 
 ## restart
 
-Restart all application containers on selected nodes.
+Restart application containers on selected nodes.
 
 ```sh
+# Restart everything
 bullet -H 192.168.0.3 restart
+
+# Restart all web instances
+bullet -H 192.168.0.3 restart web
+
+# Restart only web instance 2
+bullet -H 192.168.0.3 restart web:2
+
+# Mix programs and specific instances
+bullet -H 192.168.0.3 restart web:2 worker deferred:1 deferred:2
 ```
 
-Stops and recreates each running container. The environment file on the server is recorded as applied in `/opt/<identifier>/env.hash`.
+With no arguments, restarts every container of every program. Each argument filters which containers to restart: a bare program key (`web`) restarts every instance of that program; `key:N` restarts only instance N. Filters are additive.
+
+Stops and recreates each matching container. When every container is restarted, the environment file on the server is recorded as applied in `/opt/<identifier>/env.hash`.
 
 ## run
 

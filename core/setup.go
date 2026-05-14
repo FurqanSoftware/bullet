@@ -52,7 +52,7 @@ func Setup(s scope.Scope, g cfg.Configuration, environ string) error {
 			r.EnvironChanged = changed
 
 			if changed {
-				_, err = restartNode(d, s)
+				_, err = restartNode(d, s, nil)
 				if err != nil {
 					return err
 				}
