@@ -2,7 +2,9 @@ package ubuntu
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"strconv"
 	"strings"
@@ -385,8 +387,22 @@ func (u *Ubuntu) HostArch() (string, error) {
 }
 
 func (u *Ubuntu) InstallSentinel(binary []byte) error {
-	if err := u.Client.Push("/usr/local/bin/bullet-sentinel", 0755, int64(len(binary)), bytes.NewReader(binary), nil); err != nil {
-		return err
+	localSum := sha256.Sum256(binary)
+	localHex := hex.EncodeToString(localSum[:])
+
+	remoteHex := ""
+	out, err := u.Client.Output("sha256sum /usr/local/bin/bullet-sentinel 2>/dev/null | cut -d' ' -f1")
+	if err == nil {
+		remoteHex = strings.TrimSpace(string(out))
+	}
+
+	if remoteHex != localHex {
+		if err := u.Client.Run("systemctl stop bullet-sentinel.service 2>/dev/null || true", false); err != nil {
+			return err
+		}
+		if err := u.Client.Push("/usr/local/bin/bullet-sentinel", 0755, int64(len(binary)), bytes.NewReader(binary), nil); err != nil {
+			return err
+		}
 	}
 
 	if err := u.Client.Push("/etc/systemd/system/bullet-sentinel.service", 0644, int64(len(sentinelUnit)), strings.NewReader(sentinelUnit), nil); err != nil {
