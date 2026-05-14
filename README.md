@@ -119,6 +119,7 @@ bullet prune                     # Remove old releases
 bullet host:shell                # Open an interactive shell on a server
 bullet host:df                   # Show disk usage on a server
 bullet host:top                  # Show running processes on a server
+bullet host:htop                 # Show running processes on a server with htop
 ```
 
 See the [docs/](docs/) directory for detailed documentation.

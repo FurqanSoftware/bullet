@@ -48,6 +48,7 @@ type Distro interface {
 
 	Df(options DfOptions) error
 	Top() error
+	Htop() error
 
 	Shell() error
 

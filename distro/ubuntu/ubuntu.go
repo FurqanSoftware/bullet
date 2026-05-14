@@ -367,6 +367,10 @@ func (u *Ubuntu) Top() error {
 	return u.Client.RunPTY("top", false)
 }
 
+func (u *Ubuntu) Htop() error {
+	return u.Client.RunPTY("htop", false)
+}
+
 func (u *Ubuntu) Shell() error {
 	return u.Client.RunPTY("/bin/bash", true)
 }

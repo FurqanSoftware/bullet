@@ -224,6 +224,16 @@ bullet -H 192.168.0.3 host:top
 
 Runs `top` interactively with full PTY support.
 
+## host:htop
+
+Show running processes on a remote server using `htop`.
+
+```sh
+bullet -H 192.168.0.3 host:htop
+```
+
+Runs `htop` interactively with full PTY support. Requires `htop` to be installed on the host (`apt install htop`).
+
 ## sentinel:install
 
 Install the Bullet Sentinel daemon on selected nodes.

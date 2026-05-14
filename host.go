@@ -54,6 +54,20 @@ var HostTopCmd = &cobra.Command{
 	},
 }
 
+var HostHtopCmd = &cobra.Command{
+	Use:   "host:htop",
+	Short: "Show running processes on a server with htop",
+	Long: `Run htop interactively on the selected node. Requires htop to be
+installed on the host (apt install htop).`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		s, err := NewSelector().Node(currentScope)
+		if err != nil {
+			return err
+		}
+		return core.Htop(s, currentConfiguration)
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(HostShellCmd)
 
@@ -62,4 +76,5 @@ func init() {
 	RootCmd.AddCommand(HostDfCmd)
 
 	RootCmd.AddCommand(HostTopCmd)
+	RootCmd.AddCommand(HostHtopCmd)
 }
