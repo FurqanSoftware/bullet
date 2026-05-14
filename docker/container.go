@@ -238,7 +238,7 @@ func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 	if prog.Healthcheck != nil {
 		cmd = append(
 			cmd,
-			"--health-cmd", prog.Healthcheck.Command,
+			"--health-cmd", strconv.Quote(prog.Healthcheck.Command),
 			"--health-interval", prog.Healthcheck.Interval.String(),
 			"--health-timeout", prog.Healthcheck.Timeout.String(),
 			"--health-retries", strconv.Itoa(prog.Healthcheck.Retries),
