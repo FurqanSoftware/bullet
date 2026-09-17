@@ -18,13 +18,13 @@ lint:
     - staticcheck ./...
 
 build:
-  image: registry.furqansoftware.net/cardboard/golang:1.26.1-bullseye-0
+  image: registry.furqansoftware.net/cardboard/golang:1.27
   stage: build
   script:
     - go build ./...
 
 test:
-  image: registry.furqansoftware.net/cardboard/golang:1.26.1-bullseye-0
+  image: registry.furqansoftware.net/cardboard/golang:1.27
   stage: test
   needs:
     - build
