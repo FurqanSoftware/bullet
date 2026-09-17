@@ -181,7 +181,7 @@ func (u *Ubuntu) Signal(app spec.Application, prog spec.Program, no int, signal 
 	})
 }
 
-func (u *Ubuntu) Reload(app spec.Application, prog spec.Program, no int, rebuilt bool) error {
+func (u *Ubuntu) Reload(app spec.Application, prog spec.Program, no int, forceRestart bool) error {
 	if prog.Reload.PreCommand != "" {
 		err := docker.ExecuteContainer(u.Client, app, prog, no, prog.Reload.PreCommand, docker.ExecuteContainerOptions{
 			DockerPath: dockerPath,
@@ -192,7 +192,7 @@ func (u *Ubuntu) Reload(app spec.Application, prog spec.Program, no int, rebuilt
 	}
 
 	method := prog.Reload.Method
-	if rebuilt {
+	if forceRestart {
 		method = ""
 	}
 	switch method {

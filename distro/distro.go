@@ -33,7 +33,7 @@ type Distro interface {
 	Scale(app spec.Application, prog spec.Program, n int) (int, int, error)
 	Log(app spec.Application, prog spec.Program, no int) error
 	Signal(app spec.Application, prog spec.Program, no int, signal string) error
-	Reload(app spec.Application, prog spec.Program, no int, rebuilt bool) error
+	Reload(app spec.Application, prog spec.Program, no int, forceRestart bool) error
 
 	CronEnable(app spec.Application, job spec.Job) error
 	CronDisable(app spec.Application, job spec.Job) error

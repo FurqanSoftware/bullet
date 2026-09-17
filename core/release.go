@@ -29,7 +29,7 @@ func NewRelease(tarPath string) (*Release, error) {
 		return nil, err
 	}
 
-	s, err := sha256Tarball(tarPath)
+	s, err := sha256File(tarPath)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func NewRelease(tarPath string) (*Release, error) {
 	}, nil
 }
 
-func sha256Tarball(path string) (string, error) {
+func sha256File(path string) (string, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return "", err

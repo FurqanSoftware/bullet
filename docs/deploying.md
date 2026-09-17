@@ -105,6 +105,8 @@ bullet -H 192.168.0.3 environ:push env.production
 
 The file is stored at `/opt/<identifier>/env` and is automatically loaded by all containers and cron jobs.
 
+If the file has changed, running containers are restarted to pick up the new environment. This also applies to `deploy --environ` and `setup --environ`, even when the release itself is unchanged. Use `environ:push --no-restart` to upload a change without applying it yet.
+
 ## Custom Docker Images
 
 For applications that need a custom image, specify a Dockerfile:
@@ -155,6 +157,7 @@ After setup and deployment, the server has:
   current -> releases/1711699200-def456/   # Symlink to latest (or copy)
   current.hash            # SHA256 of current release
   env                     # Environment file
+  env.hash                # SHA256 of environment file applied to containers
 ```
 
 ## Container Details

@@ -24,36 +24,52 @@ func Restart(s scope.Scope, g cfg.Configuration) error {
 			return err
 		}
 
-		pog.SetStatus(pogText("Restarting containers"))
-		nrestart := map[string]int{}
-		nrestartsum := 0
-		for _, k := range s.Spec.Application.ProgramKeys {
-			p := s.Spec.Application.Programs[k]
-			statuses, err := d.Status(s.Spec.Application, p)
+		_, err = restartNode(d, s)
+		if err != nil {
+			return err
+		}
+
+		hash, err := hashRemoteEnviron(d, s)
+		if err == nil {
+			err = markEnvironApplied(d, s, hash)
 			if err != nil {
 				return err
 			}
-			for _, status := range statuses {
-				if status.No == 0 {
-					continue
-				}
-				pog.SetStatus(pogRestartingContainer(p, status.No))
-				err = d.Restart(s.Spec.Application, p, status.No)
-				if err != nil {
-					return err
-				}
-				nrestart[k]++
-				nrestartsum++
-			}
 		}
-		pog.Infof("Restarted %d container(s)", nrestartsum)
-		for _, k := range s.Spec.Application.ProgramKeys {
-			if nrestart[k] == 0 {
-				continue
-			}
-			pog.Infof("∟ %s: %d", k, nrestart[k])
-		}
-		pog.SetStatus(nil)
 	}
 	return nil
+}
+
+func restartNode(d distro.Distro, s scope.Scope) (map[string]int, error) {
+	pog.SetStatus(pogText("Restarting containers"))
+	nrestart := map[string]int{}
+	nrestartsum := 0
+	for _, k := range s.Spec.Application.ProgramKeys {
+		p := s.Spec.Application.Programs[k]
+		statuses, err := d.Status(s.Spec.Application, p)
+		if err != nil {
+			return nrestart, err
+		}
+		for _, status := range statuses {
+			if status.No == 0 {
+				continue
+			}
+			pog.SetStatus(pogRestartingContainer(p, status.No))
+			err = d.Restart(s.Spec.Application, p, status.No)
+			if err != nil {
+				return nrestart, err
+			}
+			nrestart[k]++
+			nrestartsum++
+		}
+	}
+	pog.Infof("Restarted %d container(s)", nrestartsum)
+	for _, k := range s.Spec.Application.ProgramKeys {
+		if nrestart[k] == 0 {
+			continue
+		}
+		pog.Infof("∟ %s: %d", k, nrestart[k])
+	}
+	pog.SetStatus(nil)
+	return nrestart, nil
 }

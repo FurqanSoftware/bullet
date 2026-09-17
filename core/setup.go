@@ -17,6 +17,7 @@ import (
 type setupResult struct {
 	DockerInstalled bool
 	EnvironPushed   bool
+	EnvironChanged  bool
 }
 
 // Setup prepares servers for deployment by installing Docker and creating the application directory.
@@ -43,11 +44,23 @@ func Setup(s scope.Scope, g cfg.Configuration, environ string) error {
 		}
 
 		if environ != "" {
-			err = uploadEnvironFile(c, s, environ)
+			changed, hash, err := pushEnviron(c, d, s, environ)
 			if err != nil {
 				return err
 			}
 			r.EnvironPushed = true
+			r.EnvironChanged = changed
+
+			if changed {
+				_, err = restartNode(d, s)
+				if err != nil {
+					return err
+				}
+				err = markEnvironApplied(d, s, hash)
+				if err != nil {
+					return err
+				}
+			}
 		}
 
 		results[n.Name] = r
@@ -68,8 +81,10 @@ func Setup(s scope.Scope, g cfg.Configuration, environ string) error {
 			docker = "Installed"
 		}
 		env := ""
-		if r.EnvironPushed {
+		if r.EnvironChanged {
 			env = "Pushed"
+		} else if r.EnvironPushed {
+			env = "Unchanged"
 		}
 		table.Append(n.Name, docker, env)
 	}

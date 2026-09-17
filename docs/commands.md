@@ -18,7 +18,7 @@ What it does:
 1. Installs Docker (skipped if already installed).
 2. Creates `/opt/<identifier>/releases/` directory.
 3. Creates an empty `/opt/<identifier>/env` file.
-4. Optionally uploads the environment file.
+4. Optionally uploads the environment file. If it has changed, running containers are restarted (see [environ:push](#environpush)).
 5. Prints a summary table showing what happened on each node.
 
 ## deploy
@@ -45,15 +45,15 @@ What it does:
 1. Computes the SHA256 hash of the tarball.
 2. For each selected node:
    - Optionally runs server setup (if `--setup` is set).
-   - Optionally uploads the environment file (if `--environ` is set).
-   - Checks if this release is already deployed (by comparing hashes). Skips if so.
+   - Optionally uploads the environment file (if `--environ` is set), unless it is unchanged.
+   - Checks if this release is already deployed (by comparing hashes). Skips if so. If the environment file has changed, running containers are still restarted.
    - Uploads the tarball to `/tmp/` on the server.
    - Extracts it to `/opt/<identifier>/releases/<timestamp>-<hash>/`.
    - Removes the temporary tarball.
    - Updates `/opt/<identifier>/current` (via symlink or copy, based on `deploy.current`).
-   - Writes the hash to `/opt/<identifier>/current.hash`.
    - Builds Docker images for programs that have a `dockerfile` defined.
-   - Reloads running containers using the configured [reload method](bulletspec.md#reload).
+   - Reloads running containers using the configured [reload method](bulletspec.md#reload). Containers are restarted instead if their image was rebuilt or the environment file has changed.
+   - Writes the hash to `/opt/<identifier>/current.hash`.
    - Prunes old releases, keeping the 5 most recent.
    - Optionally scales programs using the Bulletspec scaling rules (if `--scale` is set).
 3. Prints a summary table showing what happened on each node.
@@ -76,7 +76,7 @@ Restart all application containers on selected nodes.
 bullet -H 192.168.0.3 restart
 ```
 
-Stops and recreates each running container.
+Stops and recreates each running container. The environment file on the server is recorded as applied in `/opt/<identifier>/env.hash`.
 
 ## run
 
@@ -147,9 +147,18 @@ Upload an environment file to selected nodes.
 
 ```sh
 bullet -H 192.168.0.3 environ:push env.production
+bullet -H 192.168.0.3 environ:push env.production --no-restart
 ```
 
+| Flag           | Description                                              |
+|----------------|----------------------------------------------------------|
+| `--no-restart` | Upload the file without restarting running containers.   |
+
 The file is uploaded to `/opt/<identifier>/env` on the server. All containers and cron jobs use this file for environment variables via Docker's `--env-file` flag.
+
+Containers only read the environment file when they are created. So when the file has changed, all running containers are restarted to pick up the new environment. Cron jobs read it on every run and need no restart.
+
+Bullet stores the SHA256 hash of the environment file that containers were last restarted with in `/opt/<identifier>/env.hash`. If the local file matches it, nothing is uploaded or restarted. The hash is written only after all restarts succeed, so a failed push is retried on the next run. With `--no-restart`, the hash is not updated, so the change is applied by the next `environ:push`, `deploy --environ`, or `restart`.
 
 ## log
 

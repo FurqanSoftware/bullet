@@ -17,12 +17,14 @@ import (
 )
 
 type deployResult struct {
-	Setup         *setupResult
-	Skipped       bool
-	EnvironPushed bool
-	Rebuilt       map[string]bool
-	Reloaded      map[string]int
-	Scaled        map[string]scaleResult
+	Setup          *setupResult
+	Skipped        bool
+	EnvironPushed  bool
+	EnvironChanged bool
+	Rebuilt        map[string]bool
+	Reloaded       map[string]int
+	Restarted      map[string]int
+	Scaled         map[string]scaleResult
 }
 
 // Deploy uploads and deploys a release to all nodes in scope.
@@ -56,21 +58,30 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, se
 			sr = &result
 		}
 
-		var environPushed bool
+		var environPushed, environChanged bool
+		var environHash string
 		if environ != "" {
-			err = uploadEnvironFile(c, s, environ)
+			environChanged, environHash, err = pushEnviron(c, d, s, environ)
 			if err != nil {
 				return err
 			}
 			environPushed = true
 		}
 
-		r, err := deployNode(n, c, d, s, rel)
+		r, err := deployNode(n, c, d, s, rel, environChanged)
 		if err != nil {
 			return err
 		}
 		r.Setup = sr
 		r.EnvironPushed = environPushed
+		r.EnvironChanged = environChanged
+
+		if environChanged {
+			err = markEnvironApplied(d, s, environHash)
+			if err != nil {
+				return err
+			}
+		}
 
 		if scale && !r.Skipped {
 			comp := &Composition{Sizes: map[string]int{}}
@@ -104,6 +115,7 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, se
 
 	rebuiltSum := map[string]int{}
 	reloadedSum := map[string]int{}
+	restartedSum := map[string]int{}
 	scaledSum := map[string]scaleResult{}
 	for _, n := range s.Nodes {
 		r := results[n.Name]
@@ -121,14 +133,21 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, se
 		}
 		if environ != "" {
 			envCell := ""
-			if r.EnvironPushed {
+			if r.EnvironChanged {
 				envCell = "Pushed"
+			} else if r.EnvironPushed {
+				envCell = "Unchanged"
 			}
 			rdata = append(rdata, envCell)
 		}
 		if r.Skipped {
-			for range s.Spec.Application.ProgramKeys {
-				rdata = append(rdata, "Skipped")
+			for _, k := range s.Spec.Application.ProgramKeys {
+				if r.Restarted[k] > 0 {
+					restartedSum[k] += r.Restarted[k]
+					rdata = append(rdata, fmt.Sprintf("Skipped, %d Restarted", r.Restarted[k]))
+				} else {
+					rdata = append(rdata, "Skipped")
+				}
 			}
 		} else {
 			for _, k := range s.Spec.Application.ProgramKeys {
@@ -183,6 +202,12 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, se
 			}
 			cell += fmt.Sprintf("%d Reloaded", reloadedSum[k])
 		}
+		if restartedSum[k] > 0 {
+			if cell != "" {
+				cell += ", "
+			}
+			cell += fmt.Sprintf("%d Restarted", restartedSum[k])
+		}
 		if sum, ok := scaledSum[k]; ok {
 			change := sum.Up - sum.Down
 			if cell != "" {
@@ -201,16 +226,24 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, se
 	return table.Render()
 }
 
-func deployNode(n scope.Node, c *ssh.Client, d distro.Distro, s scope.Scope, rel *Release) (deployResult, error) {
+func deployNode(n scope.Node, c *ssh.Client, d distro.Distro, s scope.Scope, rel *Release, environChanged bool) (deployResult, error) {
 	r := deployResult{
-		Rebuilt:  map[string]bool{},
-		Reloaded: map[string]int{},
+		Rebuilt:   map[string]bool{},
+		Reloaded:  map[string]int{},
+		Restarted: map[string]int{},
 	}
 
 	curHash, _ := d.ReadFile(fmt.Sprintf("/opt/%s/current.hash", s.Spec.Application.Identifier))
 	if rel.Hash == string(curHash) {
 		pog.Info("Same as current hash. Skipping deploy.")
 		r.Skipped = true
+		if environChanged {
+			restarted, err := restartNode(d, s)
+			if err != nil {
+				return r, err
+			}
+			r.Restarted = restarted
+		}
 		return r, nil
 	}
 
@@ -247,11 +280,6 @@ func deployNode(n scope.Node, c *ssh.Client, d distro.Distro, s scope.Scope, rel
 	pog.Info("Updated current")
 	pog.SetStatus(nil)
 
-	err = d.WriteFile(fmt.Sprintf("/opt/%s/current.hash", s.Spec.Application.Identifier), []byte(rel.Hash))
-	if err != nil {
-		return r, err
-	}
-
 	pog.SetStatus(pogText("Building images"))
 	for _, p := range s.Spec.Application.Programs {
 		rebuilt, err := d.Build(s.Spec.Application, p)
@@ -284,7 +312,7 @@ func deployNode(n scope.Node, c *ssh.Client, d distro.Distro, s scope.Scope, rel
 				continue
 			}
 			pog.SetStatus(pogReloadingContainer(p, status.No))
-			err = d.Reload(s.Spec.Application, p, status.No, r.Rebuilt[k])
+			err = d.Reload(s.Spec.Application, p, status.No, r.Rebuilt[k] || environChanged)
 			if err != nil {
 				return r, err
 			}
@@ -300,6 +328,11 @@ func deployNode(n scope.Node, c *ssh.Client, d distro.Distro, s scope.Scope, rel
 		pog.Infof("∟ %s: %d", k, r.Reloaded[k])
 	}
 	pog.SetStatus(nil)
+
+	err = d.WriteFile(fmt.Sprintf("/opt/%s/current.hash", s.Spec.Application.Identifier), []byte(rel.Hash))
+	if err != nil {
+		return r, err
+	}
 
 	pog.SetStatus(pogText("Removing stale releases"))
 	err = d.Prune(fmt.Sprintf("/opt/%s/releases", s.Spec.Application.Identifier), 5)

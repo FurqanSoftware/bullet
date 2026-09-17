@@ -19,7 +19,8 @@ build Docker images, and reload running containers.
 
 Skips nodes where the same release (by SHA256 hash) is already deployed.
 Old releases are pruned automatically, keeping the 5 most recent.
-Optionally push an environment file before deploying with --environ.
+Optionally push an environment file before deploying with --environ. If the
+environment file has changed, running containers are restarted.
 Use --setup to run server setup (install Docker, create directories) before deploying.
 Use --scale to automatically scale programs using the Bulletspec rules after deploying.`,
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
