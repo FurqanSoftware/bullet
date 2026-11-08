@@ -51,6 +51,18 @@ func completeProgramKeysEquals(cmd *cobra.Command, args []string, toComplete str
 	return keys, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveNoSpace
 }
 
+func completeHookKeys(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	s, err := spec.ParseFile("Bulletspec")
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	}
+	keys := make([]string, 0, len(s.Application.Hooks.PostDeploy))
+	for _, h := range s.Application.Hooks.PostDeploy {
+		keys = append(keys, h.Key)
+	}
+	return keys, cobra.ShellCompDirectiveNoFileComp
+}
+
 func completeCronJobKeys(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	s, err := spec.ParseFile("Bulletspec")
 	if err != nil {

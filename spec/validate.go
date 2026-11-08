@@ -79,6 +79,32 @@ func (s *Spec) Validate() error {
 		}
 	}
 
+	hookKeys := map[string]bool{}
+	for i, hook := range s.Application.Hooks.PostDeploy {
+		prefix := fmt.Sprintf("application.hooks.post_deploy[%d]", i)
+
+		if hook.Key == "" {
+			errs = append(errs, fmt.Sprintf("%s.key is required", prefix))
+		} else if hookKeys[hook.Key] {
+			errs = append(errs, fmt.Sprintf("%s.key: duplicate key %q", prefix, hook.Key))
+		}
+		hookKeys[hook.Key] = true
+		if hook.Command == "" {
+			errs = append(errs, fmt.Sprintf("%s.command is required", prefix))
+		}
+		if _, ok := s.Application.Programs[hook.ProgramKey()]; !ok {
+			errs = append(errs, fmt.Sprintf("%s.program: unknown program %q", prefix, hook.ProgramKey()))
+		}
+		switch hook.Nodes {
+		case "", "first", "all":
+		default:
+			errs = append(errs, fmt.Sprintf("%s.nodes: unknown value %q (must be \"first\" or \"all\")", prefix, hook.Nodes))
+		}
+		if hook.Timeout < 0 {
+			errs = append(errs, fmt.Sprintf("%s.timeout must not be negative", prefix))
+		}
+	}
+
 	if len(errs) > 0 {
 		return fmt.Errorf("bulletspec validation failed:\n  %s", strings.Join(errs, "\n  "))
 	}

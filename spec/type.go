@@ -14,6 +14,8 @@ type Application struct {
 	ProgramKeys []string `yaml:"-"`
 
 	Cron Cron
+
+	Hooks Hooks
 }
 
 // ExpandVars expands template variables in all program commands.
@@ -24,6 +26,14 @@ func (a *Application) ExpandVars(vars Vars) error {
 			return err
 		}
 		a.Programs[k] = prog
+	}
+	for i, hook := range a.Hooks.PostDeploy {
+		var err error
+		hook.Command, err = vars.Expand(hook.Command)
+		if err != nil {
+			return err
+		}
+		a.Hooks.PostDeploy[i] = hook
 	}
 	return nil
 }
@@ -135,4 +145,41 @@ type Job struct {
 // JobHealthcheck configures health check pings for a cron job.
 type JobHealthcheck struct {
 	URL string
+}
+
+// Hooks holds commands that run in response to deployment events.
+type Hooks struct {
+	PostDeploy []Hook `yaml:"post_deploy"`
+}
+
+// PostDeployHook returns the post-deploy hook with the given key.
+func (h Hooks) PostDeployHook(k string) (Hook, bool) {
+	for _, hook := range h.PostDeploy {
+		if hook.Key == k {
+			return hook, true
+		}
+	}
+	return Hook{}, false
+}
+
+// Hook defines a one-off command run in a container during a deployment event.
+type Hook struct {
+	Key     string
+	Command string
+	Program string
+	Nodes   string
+	Timeout time.Duration
+}
+
+// ProgramKey returns the key of the program whose image the hook runs in.
+func (h Hook) ProgramKey() string {
+	if h.Program == "" {
+		return "shell"
+	}
+	return h.Program
+}
+
+// AllNodes reports whether the hook runs on every node rather than once.
+func (h Hook) AllNodes() bool {
+	return h.Nodes == "all"
 }

@@ -10,6 +10,7 @@ Bullet is a fast and flexible application deployment tool built by [Furqan Softw
 - **Tarball-based deploys**: Packages application code into tarballs, uploads them over SCP, and builds Docker images on the server.
 - **Program management**: Define multiple programs (e.g. web, worker) per application, each running in its own container.
 - **Scaling**: Scale programs up or down with expression-based rules that can factor in host tags and hardware.
+- **Deploy hooks**: Run one-off commands (e.g. migrations, index builds) automatically after a deploy.
 - **Cron jobs**: Manage scheduled tasks backed by systemd timers, with optional healthcheck pings.
 - **Zero-downtime reloads**: Reload containers via signal, command, or restart, with support for pre-reload hooks.
 - **Environment management**: Push environment files to servers.
@@ -103,11 +104,12 @@ bullet -H 192.168.0.3 scale web=2
 ### Commands
 
 ```sh
-bullet deploy [tarball]          # Deploy a release (--setup, --environ, --scale)
+bullet deploy [tarball]          # Deploy a release (--setup, --environ, --scale, --skip-hooks)
 bullet setup                     # Prepare servers for deployment
 bullet status                    # Show container status across nodes
 bullet restart                   # Restart all application containers
 bullet run [program]             # Run a one-off program container
+bullet hook:run [hook ...]       # Run post-deploy hooks
 bullet scale [program=count ...] # Scale program instances
 bullet log [program[:instance]]  # Tail container logs
 bullet cron:enable [job ...]     # Enable cron jobs

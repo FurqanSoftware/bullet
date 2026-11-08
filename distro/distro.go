@@ -43,6 +43,7 @@ type Distro interface {
 	InstallSentinel(binary []byte) error
 
 	Run(app spec.Application, prog spec.Program) error
+	RunHook(app spec.Application, prog spec.Program, hook spec.Hook) error
 
 	Forward(app spec.Application, port string) error
 

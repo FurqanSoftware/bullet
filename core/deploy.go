@@ -28,7 +28,7 @@ type deployResult struct {
 }
 
 // Deploy uploads and deploys a release to all nodes in scope.
-func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, setup bool, scale bool) error {
+func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, setup bool, scale bool, skipHooks bool) error {
 	pog.Infof("Deploying %s", filepath.Base(rel.Tarball.Path))
 	pog.Infof("∟ Hash: %s", rel.Hash)
 	pog.Infof("∟ Size: %s", humanize.Bytes(uint64(rel.Tarball.Size)))
@@ -223,7 +223,24 @@ func Deploy(s scope.Scope, g cfg.Configuration, rel *Release, environ string, se
 	table.Footer(fdata...)
 
 	fmt.Println()
-	return table.Render()
+	err := table.Render()
+	if err != nil {
+		return err
+	}
+
+	deployed := false
+	for _, n := range s.Nodes {
+		if !results[n.Name].Skipped {
+			deployed = true
+			break
+		}
+	}
+	if skipHooks || !deployed || len(s.Spec.Application.Hooks.PostDeploy) == 0 {
+		return nil
+	}
+
+	fmt.Println()
+	return runHooks(s, g, s.Spec.Application.Hooks.PostDeploy)
 }
 
 func deployNode(n scope.Node, c *ssh.Client, d distro.Distro, s scope.Scope, rel *Release, environChanged bool) (deployResult, error) {

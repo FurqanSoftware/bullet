@@ -32,6 +32,9 @@
         },
         "cron": {
           "$ref": "#/$defs/cron"
+        },
+        "hooks": {
+          "$ref": "#/$defs/hooks"
         }
       }
     }
@@ -281,6 +284,51 @@
         },
         "healthcheck": {
           "$ref": "#/$defs/job_healthcheck"
+        }
+      }
+    },
+    "hooks": {
+      "type": "object",
+      "description": "Commands run in one-off containers during deployment events.",
+      "additionalProperties": false,
+      "properties": {
+        "post_deploy": {
+          "type": "array",
+          "description": "Hooks run after all nodes are deployed.",
+          "items": {
+            "$ref": "#/$defs/hook"
+          }
+        }
+      }
+    },
+    "hook": {
+      "type": "object",
+      "description": "A one-off command run in a container during a deployment event.",
+      "required": ["key", "command"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Unique identifier for the hook."
+        },
+        "command": {
+          "type": "string",
+          "description": "Command to run in the container. Supports variable expansion."
+        },
+        "program": {
+          "type": "string",
+          "default": "shell",
+          "description": "Program whose image, environment, volumes, and container settings the hook uses."
+        },
+        "nodes": {
+          "type": "string",
+          "enum": ["first", "all"],
+          "default": "first",
+          "description": "\"first\" runs the hook once on the first selected node. \"all\" runs it on every selected node."
+        },
+        "timeout": {
+          "type": "string",
+          "description": "Maximum run time (e.g. 10m). The container is stopped and the hook fails if exceeded."
         }
       }
     },

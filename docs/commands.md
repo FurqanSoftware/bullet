@@ -39,6 +39,7 @@ The argument is a path to a tarball containing your application files.
 | `--environ` | Path to an environment file to push before deploying.              |
 | `--setup`   | Run server setup (install Docker, create directories) before deploying. |
 | `--scale`   | Auto scale programs using Bulletspec rules after deploying.        |
+| `--skip-hooks` | Do not run [post-deploy hooks](bulletspec.md#hooks).            |
 
 What it does:
 
@@ -57,6 +58,7 @@ What it does:
    - Prunes old releases, keeping the 5 most recent.
    - Optionally scales programs using the Bulletspec scaling rules (if `--scale` is set).
 3. Prints a summary table showing what happened on each node.
+4. Runs [post-deploy hooks](bulletspec.md#hooks), unless every node was skipped or `--skip-hooks` is set.
 
 ## status
 
@@ -87,6 +89,17 @@ bullet -H 192.168.0.3 run web
 ```
 
 The argument is a program key from the Bulletspec. The container is removed after it exits. This is useful for running management commands, debugging, or one-off tasks.
+
+## hook:run
+
+Run one or more post-deploy hooks without deploying.
+
+```sh
+bullet -H 192.168.0.3 hook:run makeindexes
+bullet -H 192.168.0.3 hook:run makeindexes purgecache
+```
+
+Each hook runs once on the first selected node, or on every selected node if its `nodes` field is `all`. Hooks run in the order given. If a hook fails, the remaining hooks are not run.
 
 ## scale
 

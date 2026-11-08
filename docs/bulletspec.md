@@ -1,6 +1,6 @@
 # Bulletspec Reference
 
-The `Bulletspec` file is a YAML file placed in the root of your project. It defines your application, its programs, cron jobs, and how they should be built, deployed, and run.
+The `Bulletspec` file is a YAML file placed in the root of your project. It defines your application, its programs, cron jobs, deploy hooks, and how they should be built, deployed, and run.
 
 ## Application
 
@@ -19,6 +19,7 @@ application:
 | `deploy`     | object | Deployment behavior. See [Deploy](#deploy).                                 |
 | `programs`   | map    | Named programs to run as containers. See [Programs](#programs).             |
 | `cron`       | object | Scheduled jobs. See [Cron Jobs](#cron-jobs).                                |
+| `hooks`      | object | Commands run during deployment events. See [Hooks](#hooks).                 |
 
 ## Deploy
 
@@ -195,6 +196,12 @@ application:
         jitter: 30m
         healthcheck:
           url: https://hc-ping.com/abc123
+
+  hooks:
+    post_deploy:
+      - key: migrate
+        command: ./migrate up
+        program: worker
 ```
 
 ### Job Fields
@@ -212,6 +219,39 @@ application:
 | Field | Type   | Description                                                                                            |
 |-------|--------|--------------------------------------------------------------------------------------------------------|
 | `url` | string | Base URL for health pings. Bullet calls `{url}/start` before the job and `{url}/{exit_status}` after. |
+
+## Hooks
+
+Hooks are one-off commands that Bullet runs in containers in response to deployment events. Currently the only event is `post_deploy`, which runs after every node has been deployed.
+
+```yaml
+application:
+  hooks:
+    post_deploy:
+      - key: makeindexes
+        command: ./clt db:makeindexes
+      - key: purgecache
+        command: ./clt cache:purge
+        program: web
+        nodes: all
+        timeout: 10m
+```
+
+### Hook Fields
+
+| Field     | Type     | Default | Description                                                                                       |
+|-----------|----------|---------|---------------------------------------------------------------------------------------------------|
+| `key`     | string   |         | Unique identifier for the hook. Used by `bullet hook:run`.                                        |
+| `command` | string   |         | Command to run in the container. Supports variable expansion.                                     |
+| `program` | string   | `shell` | Program whose image, environment, volumes, and container settings the hook uses.                  |
+| `nodes`   | string   | `first` | `first` runs the hook once, on the first selected node. `all` runs it on every selected node.     |
+| `timeout` | duration |         | Maximum run time (e.g. `10m`). If exceeded, the container is stopped and the hook fails.          |
+
+Hooks run in the order they are listed, after the deploy summary table is printed. Their output is streamed to your terminal. If a hook fails (non-zero exit status or timeout), the remaining hooks are not run and `bullet deploy` exits with an error. The deploy itself is not rolled back.
+
+Hooks do not run if every node skipped the deploy because the release was already current, or if `--skip-hooks` is passed. Use `bullet hook:run <key>` to run a hook manually.
+
+By default, hooks use the `shell` program, the same image cron jobs run in. Validation fails if the program a hook refers to is not defined.
 
 ## Full Example
 

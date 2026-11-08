@@ -6,9 +6,10 @@ import (
 )
 
 var (
-	flagDeployEnviron string
-	flagDeployScale   bool
-	flagDeploySetup   bool
+	flagDeployEnviron   string
+	flagDeployScale     bool
+	flagDeploySetup     bool
+	flagDeploySkipHooks bool
 )
 
 var DeployCmd = &cobra.Command{
@@ -22,7 +23,9 @@ Old releases are pruned automatically, keeping the 5 most recent.
 Optionally push an environment file before deploying with --environ. If the
 environment file has changed, running containers are restarted.
 Use --setup to run server setup (install Docker, create directories) before deploying.
-Use --scale to automatically scale programs using the Bulletspec rules after deploying.`,
+Use --scale to automatically scale programs using the Bulletspec rules after deploying.
+Post-deploy hooks defined in the Bulletspec run after all nodes are deployed,
+unless every node was skipped. Use --skip-hooks to not run them.`,
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return []string{"tar.gz"}, cobra.ShellCompDirectiveFilterFileExt
 	},
@@ -32,7 +35,7 @@ Use --scale to automatically scale programs using the Bulletspec rules after dep
 			return err
 		}
 
-		return core.Deploy(currentScope, currentConfiguration, rel, flagDeployEnviron, flagDeploySetup, flagDeployScale)
+		return core.Deploy(currentScope, currentConfiguration, rel, flagDeployEnviron, flagDeploySetup, flagDeployScale, flagDeploySkipHooks)
 	},
 }
 
@@ -40,5 +43,6 @@ func init() {
 	DeployCmd.Flags().StringVarP(&flagDeployEnviron, "environ", "", "", "if set, push file as environment")
 	DeployCmd.Flags().BoolVarP(&flagDeploySetup, "setup", "", false, "if set, run server setup before deploying")
 	DeployCmd.Flags().BoolVarP(&flagDeployScale, "scale", "", false, "if set, auto scale programs after deploying")
+	DeployCmd.Flags().BoolVarP(&flagDeploySkipHooks, "skip-hooks", "", false, "if set, do not run post-deploy hooks")
 	RootCmd.AddCommand(DeployCmd)
 }

@@ -247,6 +247,26 @@ Disable when no longer needed:
 bullet -H 192.168.0.3 cron:disable cleanup
 ```
 
+## Deploy Hooks
+
+Some deploys need a one-off command afterwards, such as building database indexes or running migrations. Define these as post-deploy hooks:
+
+```yaml
+application:
+  hooks:
+    post_deploy:
+      - key: makeindexes
+        command: ./clt db:makeindexes
+```
+
+After every node is deployed, Bullet runs each hook once, on the first selected node, in a one-off container using the `shell` program's image. Set `nodes: all` to run a hook on every node, and `program` to use a different program's image. See [Hooks](bulletspec.md#hooks) for all fields.
+
+Skip hooks for a deploy with `--skip-hooks`, or run a hook manually:
+
+```sh
+bullet -H 192.168.0.3 hook:run makeindexes
+```
+
 ## Monitoring
 
 Check container status across nodes:

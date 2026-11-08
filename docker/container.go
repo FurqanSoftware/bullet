@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/FurqanSoftware/bullet/ssh"
@@ -181,6 +182,53 @@ func RunContainer(c *ssh.Client, app spec.Application, prog spec.Program, option
 	return nil
 }
 
+// RunHookContainerOptions configures RunHookContainer.
+type RunHookContainerOptions struct {
+	DockerPath string
+}
+
+// RunHookContainer runs a hook command in a non-interactive one-off container
+// using the program's image, streaming its output. It returns an error if the
+// command exits with a non-zero status or exceeds the hook's timeout.
+func RunHookContainer(c *ssh.Client, app spec.Application, prog spec.Program, hook spec.Hook, options RunHookContainerOptions) error {
+	name := fmt.Sprintf("%s_hook_%s", app.Identifier, hook.Key)
+	image := fmt.Sprintf("%s_%s", app.Identifier, prog.Key)
+
+	err := deleteContainer(c, app, prog, options.DockerPath, name)
+	if err != nil {
+		return err
+	}
+
+	cmd := []string{options.DockerPath, "run", "--rm"}
+	cmd = append(cmd, oneOffArgs(app, prog, name)...)
+	cmd = append(
+		cmd,
+		`--entrypoint=""`,
+		image,
+		hook.Command,
+	)
+
+	if hook.Timeout <= 0 {
+		return c.Run(strings.Join(cmd, " "), true)
+	}
+
+	done := make(chan error, 1)
+	go func() {
+		done <- c.Run(strings.Join(cmd, " "), true)
+	}()
+	select {
+	case err := <-done:
+		return err
+	case <-time.After(hook.Timeout):
+		err := deleteContainer(c, app, prog, options.DockerPath, name)
+		if err != nil {
+			return err
+		}
+		<-done
+		return fmt.Errorf("timed out after %s", hook.Timeout)
+	}
+}
+
 // SignalContainerOptions configures SignalContainer.
 type SignalContainerOptions struct {
 	DockerPath string
@@ -294,12 +342,24 @@ func createContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 }
 
 func createAttachContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, image, name string) error {
+	cmd := []string{dockerPath, "run", "-ti"}
+	cmd = append(cmd, oneOffArgs(app, prog, name)...)
+	cmd = append(
+		cmd,
+		`--entrypoint=""`,
+		image,
+		prog.Command,
+	)
+
+	return c.RunPTY(strings.Join(cmd, " "), false)
+}
+
+// oneOffArgs returns the docker run arguments shared by one-off containers
+// (interactive runs and hooks).
+func oneOffArgs(app spec.Application, prog spec.Program, name string) []string {
 	appDir := fmt.Sprintf("/opt/%s", app.Identifier)
 
 	cmd := []string{
-		dockerPath,
-		"run",
-		"-ti",
 		"-e", strconv.Quote("BULLET_APPLICATION_NAME=" + app.Name),
 		"-e", strconv.Quote("BULLET_APPLICATION_ID=" + app.Identifier),
 		"-e", strconv.Quote("BULLET_PROGRAM_KEY=" + prog.Key),
@@ -335,14 +395,7 @@ func createAttachContainer(c *ssh.Client, app spec.Application, prog spec.Progra
 		cmd = append(cmd, "-w", "/"+app.Identifier)
 	}
 
-	cmd = append(
-		cmd,
-		`--entrypoint=""`,
-		image,
-		prog.Command,
-	)
-
-	return c.RunPTY(strings.Join(cmd, " "), false)
+	return cmd
 }
 
 func deleteContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, name string) error {

@@ -325,6 +325,12 @@ func (u *Ubuntu) Run(app spec.Application, prog spec.Program) error {
 	})
 }
 
+func (u *Ubuntu) RunHook(app spec.Application, prog spec.Program, hook spec.Hook) error {
+	return docker.RunHookContainer(u.Client, app, prog, hook, docker.RunHookContainerOptions{
+		DockerPath: dockerPath,
+	})
+}
+
 func (u *Ubuntu) Forward(app spec.Application, port string) error {
 	var (
 		local  int
