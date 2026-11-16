@@ -31,13 +31,14 @@ type Distro interface {
 	Restart(app spec.Application, prog spec.Program, no int) error
 	Status(app spec.Application, prog spec.Program) ([]Status, error)
 	Scale(app spec.Application, prog spec.Program, n int) (int, int, error)
-	Log(app spec.Application, prog spec.Program, no int) error
+	Log(app spec.Application, prog spec.Program, no int, options LogOptions) error
 	Signal(app spec.Application, prog spec.Program, no int, signal string) error
 	Reload(app spec.Application, prog spec.Program, no int, forceRestart bool) error
 
 	CronEnable(app spec.Application, job spec.Job) error
 	CronDisable(app spec.Application, job spec.Job) error
 	CronStatus(app spec.Application, job spec.Job, tw *tabwriter.Writer) error
+	CronLog(app spec.Application, jobs []spec.Job, options LogOptions) error
 
 	HostArch() (string, error)
 	InstallSentinel(binary []byte) error
@@ -62,6 +63,18 @@ type Status struct {
 	No      int
 	Up      bool
 	Healthy bool
+}
+
+// LogOptions configures the Log and CronLog commands.
+type LogOptions struct {
+	// Lines is the number of lines to show from the end of the log, or "all".
+	Lines string
+	// Since limits output to entries newer than a duration (e.g. "2h") or a timestamp.
+	Since string
+	// Follow streams new entries until interrupted.
+	Follow bool
+	// Timestamps prefixes each line with its timestamp.
+	Timestamps bool
 }
 
 // DfOptions configures the Df command.

@@ -37,8 +37,35 @@ whether each timer is active and when it will next trigger.`,
 	},
 }
 
+var CronLogCmd = &cobra.Command{
+	Use:   "cron:log [job ...]",
+	Short: "Tail cron job logs",
+	Long: `Stream the output of cron jobs from the systemd journal on the selected
+node. Shows the last 10 lines, then follows new output.
+
+Without arguments, shows logs of all cron jobs interleaved. When more than
+one job is shown, or with --timestamps, each line is prefixed with its
+timestamp and unit name.`,
+	ValidArgsFunction: completeCronJobKeys,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		options, err := logOptions()
+		if err != nil {
+			return err
+		}
+
+		s, err := NewSelector().Node(currentScope)
+		if err != nil {
+			return err
+		}
+		return core.CronLog(s, currentConfiguration, args, options)
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(CronEnableCmd)
 	RootCmd.AddCommand(CronDisableCmd)
 	RootCmd.AddCommand(CronStatusCmd)
+
+	addLogFlags(CronLogCmd)
+	RootCmd.AddCommand(CronLogCmd)
 }

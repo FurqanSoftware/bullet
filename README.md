@@ -115,6 +115,7 @@ bullet log [program[:instance]]  # Tail container logs
 bullet cron:enable [job ...]     # Enable cron jobs
 bullet cron:disable [job ...]    # Disable cron jobs
 bullet cron:status               # Show cron job status
+bullet cron:log [job ...]        # Tail cron job logs
 bullet environ:push [file]       # Push an environment file to servers
 bullet forward [local:]remote    # Forward a remote port locally
 bullet prune                     # Remove old releases

@@ -135,12 +135,16 @@ func ScaleContainer(c *ssh.Client, app spec.Application, prog spec.Program, n in
 // LogContainerOptions configures LogContainer.
 type LogContainerOptions struct {
 	DockerPath string
+	Lines      string
+	Since      string
+	Follow     bool
+	Timestamps bool
 }
 
 // LogContainer tails the logs of a container instance.
 func LogContainer(c *ssh.Client, app spec.Application, prog spec.Program, no int, options LogContainerOptions) error {
 	name := fmt.Sprintf("%s_%s_%d", app.Identifier, prog.Key, no)
-	return logContainer(c, app, prog, options.DockerPath, name, no)
+	return logContainer(c, options, name)
 }
 
 // RunContainerOptions configures RunContainer.
@@ -412,14 +416,21 @@ func deleteContainer(c *ssh.Client, app spec.Application, prog spec.Program, doc
 	return nil
 }
 
-func logContainer(c *ssh.Client, app spec.Application, prog spec.Program, dockerPath, name string, no int) error {
-	cmd := []string{
-		dockerPath,
-		"logs",
-		"--tail 10",
-		"--follow",
-		name,
+func logContainer(c *ssh.Client, options LogContainerOptions, name string) error {
+	cmd := []string{options.DockerPath, "logs"}
+	if options.Lines != "" {
+		cmd = append(cmd, "--tail", strconv.Quote(options.Lines))
 	}
+	if options.Since != "" {
+		cmd = append(cmd, "--since", strconv.Quote(options.Since))
+	}
+	if options.Follow {
+		cmd = append(cmd, "--follow")
+	}
+	if options.Timestamps {
+		cmd = append(cmd, "--timestamps")
+	}
+	cmd = append(cmd, name)
 	return c.Run(strings.Join(cmd, " "), true)
 }
 

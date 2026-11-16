@@ -9,6 +9,7 @@ import (
 	"github.com/FurqanSoftware/bullet/distro"
 	_ "github.com/FurqanSoftware/bullet/distro/ubuntu"
 	"github.com/FurqanSoftware/bullet/scope"
+	"github.com/FurqanSoftware/bullet/spec"
 	"github.com/FurqanSoftware/pog"
 )
 
@@ -104,4 +105,38 @@ func CronStatus(s scope.Scope, g cfg.Configuration, keys []string) error {
 		}
 	}
 	return nil
+}
+
+// CronLog prints the journal output of the specified cron jobs, or of all cron
+// jobs if keys is empty, on the first selected node.
+func CronLog(s scope.Scope, g cfg.Configuration, keys []string, options distro.LogOptions) error {
+	jobs := []spec.Job{}
+	if len(keys) == 0 {
+		jobs = s.Spec.Application.Cron.Jobs
+	}
+	for _, k := range keys {
+		j := s.Spec.Application.Cron.Job(k)
+		if j.Command == "" {
+			return fmt.Errorf("bad job key %q", k)
+		}
+		jobs = append(jobs, j)
+	}
+	if len(jobs) == 0 {
+		return fmt.Errorf("no cron jobs defined")
+	}
+
+	pog.SetStatus(pogConnecting(s.Nodes[0]))
+	c, err := sshDial(s.Nodes[0], g)
+	if err != nil {
+		return err
+	}
+	pog.Infof("Connected to %s", s.Nodes[0].Label())
+	pog.SetStatus(nil)
+
+	d, err := distro.New(c)
+	if err != nil {
+		return err
+	}
+
+	return d.CronLog(s.Spec.Application, jobs, options)
 }

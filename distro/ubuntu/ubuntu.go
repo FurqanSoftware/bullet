@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
+	"time"
 
 	"github.com/FurqanSoftware/bullet/distro"
 	"github.com/FurqanSoftware/bullet/docker"
@@ -169,9 +170,13 @@ func (u *Ubuntu) Scale(app spec.Application, prog spec.Program, n int) (int, int
 	})
 }
 
-func (u *Ubuntu) Log(app spec.Application, prog spec.Program, no int) error {
+func (u *Ubuntu) Log(app spec.Application, prog spec.Program, no int, options distro.LogOptions) error {
 	return docker.LogContainer(u.Client, app, prog, no, docker.LogContainerOptions{
 		DockerPath: dockerPath,
+		Lines:      options.Lines,
+		Since:      options.Since,
+		Follow:     options.Follow,
+		Timestamps: options.Timestamps,
 	})
 }
 
@@ -317,6 +322,32 @@ func (u *Ubuntu) CronStatus(app spec.Application, job spec.Job, tw *tabwriter.Wr
 	fmt.Fprint(tw, "\n")
 
 	return nil
+}
+
+func (u *Ubuntu) CronLog(app spec.Application, jobs []spec.Job, options distro.LogOptions) error {
+	cmd := []string{"journalctl", "--no-pager"}
+	for _, j := range jobs {
+		cmd = append(cmd, "-u", "bullet_"+app.Identifier+"_"+j.Key+".service")
+	}
+	if len(jobs) == 1 && !options.Timestamps {
+		cmd = append(cmd, "-o", "cat")
+	} else {
+		cmd = append(cmd, "-o", "short-iso")
+	}
+	if options.Lines != "" {
+		cmd = append(cmd, "-n", strconv.Quote(options.Lines))
+	}
+	if options.Since != "" {
+		since := options.Since
+		if d, err := time.ParseDuration(since); err == nil {
+			since = fmt.Sprintf("-%ds", int64(d.Seconds()))
+		}
+		cmd = append(cmd, "--since", strconv.Quote(since))
+	}
+	if options.Follow {
+		cmd = append(cmd, "--follow")
+	}
+	return u.Client.Run(strings.Join(cmd, " "), true)
 }
 
 func (u *Ubuntu) Run(app spec.Application, prog spec.Program) error {

@@ -11,7 +11,7 @@ import (
 )
 
 // Log tails the logs of a program's container instance.
-func Log(s scope.Scope, g cfg.Configuration, key string, no int) error {
+func Log(s scope.Scope, g cfg.Configuration, key string, no int, options distro.LogOptions) error {
 	pog.SetStatus(pogConnecting(s.Nodes[0]))
 	c, err := sshDial(s.Nodes[0], g)
 	if err != nil {
@@ -30,5 +30,5 @@ func Log(s scope.Scope, g cfg.Configuration, key string, no int) error {
 		return fmt.Errorf("unknown program key %q", key)
 	}
 
-	return d.Log(s.Spec.Application, prog, no)
+	return d.Log(s.Spec.Application, prog, no, options)
 }

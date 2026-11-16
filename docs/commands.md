@@ -154,6 +154,25 @@ bullet -H 192.168.0.3 cron:status
 
 Shows whether each job's timer is active or disabled, along with the next trigger time.
 
+## cron:log
+
+Tail cron job output from the systemd journal.
+
+```sh
+# Tail one job
+bullet -H 192.168.0.3 cron:log cleanup
+
+# Tail all jobs, interleaved
+bullet -H 192.168.0.3 cron:log
+
+# Print everything from the last day and exit
+bullet -H 192.168.0.3 cron:log cleanup --since 24h --lines all --no-follow
+```
+
+Each job runs as a systemd service, so its output (including health check pings) is kept in the journal. When more than one job is shown, or with `--timestamps`, each line is prefixed with its timestamp and unit name.
+
+Accepts the same flags as [`log`](#log).
+
 ## environ:push
 
 Upload an environment file to selected nodes.
@@ -186,6 +205,13 @@ bullet -H 192.168.0.3 log web:3
 ```
 
 Shows the last 10 lines, then streams new log output until interrupted.
+
+| Flag | Description |
+|------|-------------|
+| `-n`, `--lines` | Number of lines to show from the end, or `all` (default `10`) |
+| `-S`, `--since` | Only show entries newer than a duration (e.g. `2h`) or timestamp |
+| `-N`, `--no-follow` | Print logs and exit instead of following |
+| `-t`, `--timestamps` | Show timestamps |
 
 ## forward
 
